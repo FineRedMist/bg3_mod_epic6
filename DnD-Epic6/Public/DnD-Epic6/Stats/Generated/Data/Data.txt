@@ -1,0 +1,5 @@
+key "MaximumXPCap","400000"
+
+key "DialogInstanceFlagRange","10"
+
+key "Epic6FeatXP","10"

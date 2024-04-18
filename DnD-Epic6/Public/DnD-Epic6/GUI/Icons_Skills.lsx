@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<save>
+  <version major="4" minor="0" revision="0" build="49" />
+  <region id="IconUVList">
+    <node id="root">
+      <children>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Abilities" />
+          <attribute id="U1" type="float" value="0" />
+          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Ability_Charisma" />
+          <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.5" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Ability_Constitution" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Ability_Dexterity" />
+          <attribute id="U1" type="float" value="0.75" />
+          <attribute id="U2" type="float" value="1" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Ability_Intelligence" />
+          <attribute id="U1" type="float" value="0" />
+          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="V1" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.5" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Ability_Strength" />
+          <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.5" />
+          <attribute id="V1" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.5" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Ability_Wisdom" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="V1" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.5" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Compass" />
+          <attribute id="U1" type="float" value="0.75" />
+          <attribute id="U2" type="float" value="1" />
+          <attribute id="V1" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.5" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Compass2" />
+          <attribute id="U1" type="float" value="0" />
+          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="V1" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.75" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_D20" />
+          <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.5" />
+          <attribute id="V1" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.75" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Logo" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="V1" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.75" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Scrolls" />
+          <attribute id="U1" type="float" value="0.75" />
+          <attribute id="U2" type="float" value="1" />
+          <attribute id="V1" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.75" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Skills1" />
+          <attribute id="U1" type="float" value="0" />
+          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="V1" type="float" value="0.75" />
+          <attribute id="V2" type="float" value="1" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Skills2" />
+          <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.5" />
+          <attribute id="V1" type="float" value="0.75" />
+          <attribute id="V2" type="float" value="1" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Spectral" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="V1" type="float" value="0.75" />
+          <attribute id="V2" type="float" value="1" />
+        </node>
+      </children>
+    </node>
+  </region>
+  <region id="TextureAtlasInfo">
+    <node id="root">
+      <children>
+        <node id="TextureAtlasIconSize">
+          <attribute id="Height" type="int32" value="64" />
+          <attribute id="Width" type="int32" value="64" />
+        </node>
+        <node id="TextureAtlasPath">
+          <attribute id="Path" type="string" value="Assets/Textures/Icons/DnD_Epic6_Icons.DDS" />
+          <attribute id="UUID" type="FixedString" value="bf4e70eb-4842-41f3-aa1e-bc36053c5000" />
+        </node>
+        <node id="TextureAtlasTextureSize">
+          <attribute id="Height" type="int32" value="256" />
+          <attribute id="Width" type="int32" value="256" />
+        </node>
+      </children>
+    </node>
+  </region>
+</save>
