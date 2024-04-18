@@ -31,19 +31,23 @@ Tick then uses the current experience of the character, computes what the feat p
 The feats are defined as a boost, and spells are shouts.
 
 By creating the shout with the data entry:
+
 ```   data "SpellProperties" "ApplyStatus(E6_FEAT_Actor_SharedDev,-1,-1)"```
 
 It would keep the boost until the next long rest.
 
 However if the boost has the flags
+
 ```   data "StatusPropertyFlags" "IgnoreResting"```
 
 Then it would be on permanently.
 
 To get the feat to clear on respec, however, the boost has:
-data "StatusGroups" "SG_RemoveOnRespec"
+
+```   data "StatusGroups" "SG_RemoveOnRespec"```
 
 To indicate that a feat got used, the boost also has:
+
 ```   data "Boosts" "ActionResource(UsedFeatPoints,1,0)"```
 
 Which would on granting the feat, increase the UsedFeatPoints to indicate consumption of a feat.
