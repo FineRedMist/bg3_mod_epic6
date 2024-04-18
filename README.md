@@ -14,6 +14,8 @@ My initial idea was to see if I could trigger a variant of the level up UI to gr
 
 Instead, I came up with an idea to generate spells that would effectively grant feats.
 
+### Basic Functionality
+
 There is (flaky) logic that runs during Tick to examine the party members and determine if they have reached level 6. If so, it determines how much experience has been earned and calculates the number of feats to grant.
 
 For testing purposes, the module changes the required amount of experience for levels and feats to a very small number.
@@ -24,7 +26,9 @@ There are two action resources used to manage feats:
 
 Tick then uses the current experience of the character, computes what the feat points should be and then subtracts the used ones to determine whether there are any to grant. I would have preferred if there was an event to bind to when granted experience, but could not find one.
 
-The feats generated go into the boost text file, and the spells are shouts.
+### Granting Feats
+
+The feats are defined as a boost, and spells are shouts.
 
 By creating the shout with the data entry:
 data "SpellProperties" "ApplyStatus(E6_FEAT_Actor_SharedDev,-1,-1)"
@@ -41,6 +45,8 @@ data "StatusGroups" "SG_RemoveOnRespec"
 
 To indicate that a feat got used, the boost also has:
 data "Boosts" "ActionResource(UsedFeatPoints,1,0)"
+
+Which would on granting the feat, increase the UsedFeatPoints to indicate consumption of a feat.
 
 So the full combo is:
 new entry "E6_Shout_Actor_SharedDev"
@@ -64,6 +70,7 @@ data "Icon" "Action_Perform_Voice"
 data "SpellProperties" "ApplyStatus(E6_FEAT_Actor_SharedDev,-1,-1)"
 
 and 
+
 new entry "E6_FEAT_Actor_SharedDev"
 type "StatusData"
 data "StatusType" "BOOST"
@@ -76,11 +83,13 @@ data "Passives" "Actor"
 
 ## Dynamic Generation
 
-My initial attempt at implementing this was in lua (seen under the DnD-Epic6/Mods/DnD-Epic6/ScriptExtender/Lua/Dynamic folder). The problem was spells created entirely through lua using the script extender wouldn't enable targeting (https://github.com/Norbyte/bg3se/issues/339)
+My initial attempt at implementing this was in lua (seen under the DnD-Epic6/Mods/DnD-Epic6/ScriptExtender/Lua/Dynamic folder). The problem was spells created entirely through lua using the script extender wouldn't enable targeting (https://github.com/Norbyte/bg3se/issues/339). Unfortunately I had to shelve this method.
 
 ## Static Generation
 
-Static generation is quite a bit more messy. Dynamic generation can query what is loaded and how and just generate on the fly. However, static generation has no insight. It has to gather the feats from the game that are present, and then any other mods that provide feats, and do so in such a way that if a mod is present or absent, things just work. Particularly when mods replace the implementation of an existing mod.
+Static generation is quite a bit more messy. Dynamic generation can query what is loaded and how and just generate on the fly. However, static generation has no insight into which modules are loaded and what is in each module. It has to gather the feats from the game that are present, and then any other mods that provide feats, and do so in such a way that if a mod is present or absent, things just work. Particularly when mods replace the implementation of an existing mod.
+
+This required using the LSLib library to go through the game's pak files to extract information about modules, feats, feat descriptions, abilities, skills, spells, and data in the various stat files (which are used to find the passives that allow grabbing icon names for the 'feat' spells).
 
 So I created a separate C# tool (in a diferent repo) to generate the boosts and shouts. It also generates a json file the lua code reads to combine with the modules that are loaded to wire up the spells (as setting the ContainerSpells property of a spell and syncing works fine).
 
@@ -90,7 +99,7 @@ However, I hit an impasse when I first started working on abilities, which is ex
 
 To handle choosing two ability scores, the root spell for granting the feats links to the ASI spell which is a container with children for choosing Strength, Dexterity, etc. Each of those is a container for choosing the second ability score to increase which is the final spell for applying the boosts.
 
-Unfortunately, spell containers can only be one level, it isn't implemented in Baldur's Gate 3 as a multilevel system. So attempting to select a child container spell results in being kicked out as it can't render the next level for the next set of children.
+Unfortunately, spell containers can only be one level, it isn't implemented in Baldur's Gate 3 as a multilevel system (I don't know if this is a limitation of the UI, the spell system, or both). So attempting to select a child container spell results in being kicked out as it can't render the next level for the next set of children.
 
 ## Impasse
 
@@ -98,4 +107,4 @@ Without a way to select this way, I'm trying to figure out alternatives.
 
 Now that the Script Extender is adding some UI support, I may revisit that. It also might be possible to tweak the UI to allow multi-level spell selection.
 
-In the meantime, I post this work in progress for your perusal.
+In the meantime, I post this work in progress if others may find the ideas and structure useful.
