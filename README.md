@@ -31,12 +31,12 @@ Tick then uses the current experience of the character, computes what the feat p
 The feats are defined as a boost, and spells are shouts.
 
 By creating the shout with the data entry:
-data "SpellProperties" "ApplyStatus(E6_FEAT_Actor_SharedDev,-1,-1)"
+```   data "SpellProperties" "ApplyStatus(E6_FEAT_Actor_SharedDev,-1,-1)"```
 
 It would keep the boost until the next long rest.
 
 However if the boost has the flags
-data "StatusPropertyFlags" "IgnoreResting"
+```   data "StatusPropertyFlags" "IgnoreResting"```
 
 Then it would be on permanently.
 
@@ -44,11 +44,13 @@ To get the feat to clear on respec, however, the boost has:
 data "StatusGroups" "SG_RemoveOnRespec"
 
 To indicate that a feat got used, the boost also has:
-data "Boosts" "ActionResource(UsedFeatPoints,1,0)"
+```   data "Boosts" "ActionResource(UsedFeatPoints,1,0)"```
 
 Which would on granting the feat, increase the UsedFeatPoints to indicate consumption of a feat.
 
 So the full combo is:
+
+```
 new entry "E6_Shout_Actor_SharedDev"
 type "SpellData"
 data "SpellType" "Shout"
@@ -68,9 +70,11 @@ data "DisplayName" "h043b0a57ga233g4e36ga311g02054a355b31;1"
 data "Description" "h744a3cbcgdc82g4bddg9484g4c296893ae24;4"
 data "Icon" "Action_Perform_Voice"
 data "SpellProperties" "ApplyStatus(E6_FEAT_Actor_SharedDev,-1,-1)"
+```
 
 and 
 
+```
 new entry "E6_FEAT_Actor_SharedDev"
 type "StatusData"
 data "StatusType" "BOOST"
@@ -80,6 +84,7 @@ data "HideOverheadUI" "1"
 data "IsUnique" "1"
 data "Boosts" "ActionResource(UsedFeatPoints,1,0)"
 data "Passives" "Actor"
+```
 
 ## Dynamic Generation
 
