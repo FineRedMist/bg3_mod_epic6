@@ -92,7 +92,7 @@ data "Passives" "Actor"
 
 ## Dynamic Generation
 
-My initial attempt at implementing this was in lua (seen under the DnD-Epic6/Mods/DnD-Epic6/ScriptExtender/Lua/Dynamic folder). The problem was spells created entirely through lua using the script extender wouldn't enable targeting (https://github.com/Norbyte/bg3se/issues/339). Unfortunately I had to shelve this method.
+My initial attempt at implementing this was in lua (seen under the https://github.com/FineRedMist/bg3_mod_epic6/tree/main/DnD-Epic6/Mods/DnD-Epic6/ScriptExtender/Lua/Dynamic folder). The problem was spells created entirely through lua using the script extender wouldn't enable targeting (https://github.com/Norbyte/bg3se/issues/339). Unfortunately I had to shelve this method.
 
 ## Static Generation
 
