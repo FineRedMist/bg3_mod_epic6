@@ -1,4 +1,5 @@
-# bg3_mod_epic6
+# Baldur's Gate 3 D&amp;D Epic 6 Mod
+
 My current progress on creating the D&amp;D Epic 6 implementation for BG3
 
 The current implementation has hit an impasse. 
