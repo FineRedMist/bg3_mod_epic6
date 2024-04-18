@@ -111,6 +111,8 @@ To handle choosing two ability scores, the root spell for granting the feats lin
 
 Unfortunately, spell containers can only be one level, it isn't implemented in Baldur's Gate 3 as a multilevel system (I don't know if this is a limitation of the UI, the spell system, or both). So attempting to select a child container spell results in being kicked out as it can't render the next level for the next set of children.
 
+![Current Feat Panel](FeatPanel.png)
+
 ## Impasse
 
 Without a way to select this way, I'm trying to figure out alternatives.
