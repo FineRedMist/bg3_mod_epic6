@@ -101,7 +101,7 @@ Static generation is quite a bit more messy. Dynamic generation can query what i
 
 This required using the LSLib library to go through the game's pak files to extract information about modules, feats, feat descriptions, abilities, skills, spells, and data in the various stat files (which are used to find the passives that allow grabbing icon names for the 'feat' spells).
 
-So I created a separate C# tool (in a diferent repo) to generate the boosts and shouts. It also generates a json file the lua code reads to combine with the modules that are loaded to wire up the spells (as setting the ContainerSpells property of a spell and syncing works fine).
+So I created a [separate C# tool](https://github.com/FineRedMist/bg3_feat_generator_dotnet) to generate the boosts and shouts. It also generates a json file the lua code reads to combine with the modules that are loaded to wire up the spells (as setting the ContainerSpells property of a spell and syncing works fine).
 
 This was generally working fine with the initial implementation of feats without selectors (selectors allowing selecting say abilities to increase, skills to acquire, or spells to learn).
 
