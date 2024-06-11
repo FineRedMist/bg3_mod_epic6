@@ -24,19 +24,13 @@ local function E6_DebugSpells()
     --E6_DumpSpell("Projectile_ChromaticOrb_Acid")
 end
 
-local useDynamic = false
 
 Ext.Require("Dynamic/E6_FeatConverter.lua")
-Ext.Require("Static/E6_ConfigureFeats.lua")
 
 function DnDEpic6Init()
     Ext.Events.StatsLoaded:Subscribe(OnStatsLoaded_RedirectXPFiles)
 
-    if useDynamic then
-        E6_FeatConverterInit()
-    else
-        E6_ConfigureFeats()
-    end
+    E6_FeatConverterInit()
     --E6_DebugSpells()
 end
 
