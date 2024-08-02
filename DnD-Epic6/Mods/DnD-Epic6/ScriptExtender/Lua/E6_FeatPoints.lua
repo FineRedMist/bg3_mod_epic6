@@ -54,57 +54,7 @@ local function E6_AddFeatPointBoost(uuid, boostAmount)
     Osi.AddBoosts(uuid, cmd, "", uuid)
 end
 
--- Cleans up the feat points and extra feat count from the given user after letting the 
--- character update/replicate after respec (doing this right in the callback behaves oddly).
-local function E6_DeferredFeatCountCleanupFromRespec(entity)
-    local id = entity.Uuid.EntityUuid
-    Osi.RemoveSpell(id, EpicSpellContainerName, 0)
-end
-
-local function E6_DeferTickFor(entity, deferTickTracker, deferType, deferCallback, deferrenceCompleteCallback)
-    local id = entity.Uuid.EntityUuid
-    local deferCount = deferTickTracker[id]
-    if deferCount ~= nil then
-        deferCount = deferCount - 1
-        if deferCount == 0 then
-            deferTickTracker[id] = nil
-            if deferrenceCompleteCallback ~= nil then
-                deferrenceCompleteCallback(entity)
-            end
-        else
-            deferTickTracker[id] = deferCount
-            if deferCallback ~= nil then
-                deferCallback(entity)
-            end
-        end
-        --_P("DnD-Epic6: Deferring " .. deferType .. " tick update " .. tostring(deferCount) .. " more times for (level: " .. tostring(entity.EocLevel.Level) .. "): " .. id)
-        return true
-    end
-    return false
-end
-
-local deferTickUpdateRespec = {}
-
--- After a respec, the entity still has some old data about the level count and will erroneously grant 
--- feat points when it shouldn't. Defer a given number of ticks for the character that was respecced 
--- so that the values can be updated.
-local function E6_DeferTickRespec(entity)
-    return E6_DeferTickFor(entity, deferTickUpdateRespec, "respec", nil, E6_DeferredFeatCountCleanupFromRespec)
-end
-
-local deferTickUpdateLevelUp = {}
-
--- Send AddBoost commands that don't do anything through the system to hopefully clear out the hitch with them registering.
-local function E6_FlushBoostQueue(entity)
-    local id = entity.Uuid.EntityUuid
-    E6_AddFeatPointBoost(id, 0)
-end
-
--- When a levelup completes, we need to defer a tick to let the character process before updating.
-local function E6_DeferTickLevelUp(entity)
-    return E6_DeferTickFor(entity, deferTickUpdateLevelUp, "levelup", nil, nil)
-end
-
+-- Maps the entity id to an object that tracks the last known feat count and the granted feat count.
 local actionResourceTracker = {}
 
 -- Determines if the character can update their feat count, and if so, does so.
@@ -121,14 +71,6 @@ local function E6_UpdateEpic6FeatCount(ent)
         return
     end
 
-    if E6_DeferTickRespec(ent) then
-        return
-    end
-
-    if E6_DeferTickLevelUp(ent) then
-        return
-    end
-
     if not ent.Experience then
         return
     end
@@ -141,38 +83,45 @@ local function E6_UpdateEpic6FeatCount(ent)
     local totalFeatCount = 0
 
     -- If we have enough experience and our level is high enough, compute what our total feat count ought to be.
-    if ent.Experience.TotalExperience > E6_GetLevel6XP() and ent.EocLevel.Level >= 6 then
-        local xpToNextLevel = ent.Experience.CurrentLevelExperience
-        local epic6FeatXP = DE_GetEpicFeatXP()
-        totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
+    if ent.Experience.TotalExperience < E6_GetLevel6XP() or ent.EocLevel.Level < 6 then
+        return
     end
+
+    local xpToNextLevel = ent.Experience.CurrentLevelExperience
+    local epic6FeatXP = DE_GetEpicFeatXP()
+    totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
 
     local id = ent.Uuid.EntityUuid
     local usedFeatCount = Osi.GetActionResourceValuePersonal(id, "UsedFeatPoints", 0) or 0
     local currentFeatCount = E6_GetFeatPointBoostAmount(id)
+    local totalGrantedFeatCount = currentFeatCount + usedFeatCount
+    local deltaFeatCount = totalFeatCount - totalGrantedFeatCount
 
-    -- Track the changes in the resources. If we spot a resource change, add a delay of 10 ticks before
-    -- recomputing the delta to apply.
+    -- If we have caught up from the total feat count expected to the amount granted, we are done.
+    if deltaFeatCount == 0 then
+        actionResourceTracker[id] = nil
+        return
+    end
+
+    -- Track what we have last granted and wait until that is complete before granting more.
     if actionResourceTracker[id] == nil then
         actionResourceTracker[id] = {}
     end
     local lastStats = actionResourceTracker[id]
-    if lastStats.Current ~= currentFeatCount or lastStats.Used ~= usedFeatCount then
-        lastStats.Current = currentFeatCount
-        lastStats.Used = usedFeatCount
-        deferTickUpdateLevelUp[id] = 10
+
+    -- We are still waiting for any pending feat points to be granted.
+    if lastStats.Granted == totalGrantedFeatCount then
         return
     end
+    
+    -- We are caught up, grant the delta pending
+    lastStats.Granted = totalGrantedFeatCount
+    lastStats.Pending = deltaFeatCount
 
-    local deltaFeatCount = totalFeatCount - currentFeatCount - usedFeatCount
+    _P("DnD-Epic6: " .. charName .. ": TotalFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatCount: " .. tostring(currentFeatCount) .. ", DeltaFeatCount: " .. tostring(deltaFeatCount))
+    E6_AddFeatPointBoost(id, deltaFeatCount)
 
-    if deltaFeatCount ~= 0 then
-        _P("DnD-Epic6: " .. charName .. ": TotalFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatCount: " .. tostring(currentFeatCount) .. ", DeltaFeatCount: " .. tostring(deltaFeatCount))
-        E6_AddFeatPointBoost(id, deltaFeatCount)
-        deferTickUpdateLevelUp[id] = 10
-    end
-
-    if currentFeatCount + usedFeatCount == 0 and totalFeatCount > 0 then
+    if totalGrantedFeatCount == 0 and totalFeatCount > 0 then
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
     end
 end
@@ -288,9 +237,6 @@ end
 
 local function E6_OnLevelUpComplete(characterGuid)
     _P("DnD-Epic6: Level up completed with id: " .. characterGuid)
-    -- When a levelup completes, we need to defer a tick to let the character process before updating.
-    local id = GetHostCharacter()
-    deferTickUpdateLevelUp[id] = 10
 end
 
 local function E6_IsPlayerEntity(ent)
@@ -316,14 +262,14 @@ local function E6_OnRespecComplete(characterGuid)
     -- Then the Tick will handle updating the feat count so the player can select them again.
     local id = GetHostCharacter()
     local char = _C()
-    -- When entering levels, the various creatures in the level trigger the respec, resulting in 
-    -- deferTickUpdateRespec adding a lot of entries to the table without getting them removed.
-    -- Narrow the ones processed to those that have the IsPlayer flag.
+    -- When entering levels, the various creatures in the level trigger the respec, ignore them
+    -- by only focusing on those that have the IsPlayer flag.
     if not E6_IsPlayerEntity(char) then
         return
     end
     _P("DnD-Epic6: Respec completed with id: " .. characterGuid)
-    deferTickUpdateRespec[id] = 10
+    Osi.RemoveSpell(id, EpicSpellContainerName, 0)
+    actionResourceTracker[id] = nil
 end
 
 
