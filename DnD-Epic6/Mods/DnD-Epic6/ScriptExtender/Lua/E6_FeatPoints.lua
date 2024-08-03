@@ -201,11 +201,6 @@ local function E6_OnGameStateChanged(e)
     _P("DnD-Epic6: Server State change from " .. e.FromState.Label .. " to " .. e.ToState.Label)
 end
 
----@param characterGuid string
-local function E6_OnLevelUpComplete(characterGuid)
-    _P("DnD-Epic6: Level up completed with id: " .. characterGuid)
-end
-
 ---@param ent EntityHandle
 ---@return boolean
 local function E6_IsPlayerEntity(ent)
@@ -242,6 +237,10 @@ local function E6_OnRespecComplete(characterGuid)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
 end
 
+---@param characterGuid string
+local function E6_OnLevelUpComplete(characterGuid)
+    _P("DnD-Epic6: Level up completed with id: " .. characterGuid)
+end
 
 function E6_FeatPointInit()
     -- Tracks changes in the game state so we are only updating feats when
@@ -252,6 +251,6 @@ function E6_FeatPointInit()
     -- experience granted to perform the test to update the feat count.
     Ext.Events.Tick:Subscribe(E6_OnTick_UpdateEpic6FeatCount)
 
-    Ext.Osiris.RegisterListener("LeveledUp", 1, "after", E6_OnLevelUpComplete)
+    --Ext.Osiris.RegisterListener("LeveledUp", 1, "after", E6_OnLevelUpComplete)
     Ext.Osiris.RegisterListener("RespecCompleted", 1, "after", E6_OnRespecComplete)
 end
