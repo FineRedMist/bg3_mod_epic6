@@ -40,18 +40,8 @@ end
 Ext.Osiris.RegisterListener("TurnEnded", 1, "after", OnTurnEnded_GettingInfo)
 ]]
 
-local function E6_GetFeatPointBoostCommand(boostAmount)
-    return "ActionResource(FeatPoint," .. tostring(boostAmount) .. ",0)"
-end
-
 local function E6_GetFeatPointBoostAmount(uuid)
     return  Osi.GetActionResourceValuePersonal(uuid, "FeatPoint", 0)
-end
-
-local function E6_AddFeatPointBoost(uuid, boostAmount)
-    local cmd = E6_GetFeatPointBoostCommand(boostAmount)
-    _P("DnD-Epic6: running command: " .. cmd)
-    Osi.AddBoosts(uuid, cmd, "", uuid)
 end
 
 -- Maps the entity id to an object that tracks the last known feat count and the granted feat count.
@@ -128,21 +118,6 @@ local function E6_UpdateEpic6FeatCount(ent)
     end
 end
 
--- Given an array of character guids, get their corresponding entity and 
--- update the feat count.
-local function E6_UpdateEpic6FeatCountForAllById(chars)
-    for _,char in pairs(chars) do
-        if char ~= nil then
-            local ent = Ext.Entity.Get(char)
-            if ent == nil then
-                _P("DnD-Epic6: Character entity not found for uuid: " .. char)
-                return
-            end
-            E6_UpdateEpic6FeatCount(char)
-        end
-    end
-end
-
 -- Given an array of character entities, update their feat count
 local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
     for _,char in pairs(chars) do
@@ -207,25 +182,6 @@ local function E6_OnTick_UpdateEpic6FeatCount(tickParams)
     -- non-party members since you can't currently level them up without them being
     -- in your party.
     E6_UpdateEpic6FeatCountForAllByEntity(ent.PartyMember.Party.PartyView.Characters)
-
-    -- I was considering updating everyone, but that seems more expensive and
-    -- unnecessary, but I'll keep this as a reference just in case game behaviour
-    -- changes and it becomes useful again.
-    --[[ 
-    local otherChars = {
-        "S_Player_Karlach_2c76687d-93a2-477b-8b18-8a14b549304c"
-        , "S_Player_Minsc_0de603c5-42e2-4811-9dad-f652de080eba"
-        , "S_GOB_DrowCommander_25721313-0c15-4935-8176-9f134385451b" -- Minthara
-        , "S_GLO_Halsin_7628bc0e-52b8-42a7-856a-13a6fd413323"
-        , "S_Player_Jaheira_91b6b200-7d00-4d62-8dc9-99e8339dfa1a"
-        , "S_Player_Gale_ad9af97d-75da-406a-ae13-7071c563f604"
-        , "S_Player_Astarion_c7c13742-bacd-460a-8f65-f864fe41f255"
-        , "S_Player_Laezel_58a69333-40bf-8358-1d17-fff240d7fb12"
-        , "S_Player_Wyll_c774d764-4a17-48dc-b470-32ace9ce447d"
-        , "S_Player_ShadowHeart_3ed74f06-3c60-42dc-83f6-f034cb47c679"
-    }
-    E6_UpdateEpic6FeatCountForAllById(otherChars)
-    ]]
 end
 
 local function E6_OnGameStateChanged(e)
