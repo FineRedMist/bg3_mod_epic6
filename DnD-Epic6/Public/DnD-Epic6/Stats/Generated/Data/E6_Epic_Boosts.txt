@@ -1,0 +1,8 @@
+new entry "E6_FEAT_GRANTFEATPOINT"
+type "StatusData"
+data "StatusType" "BOOST"
+data "StatusPropertyFlags" "IgnoreResting;DisableCombatlog;ApplyToDead;DisableOverhead;ExcludeFromPortraitRendering;DisablePortraitIndicator"
+data "StatusGroups" "SG_RemoveOnRespec"
+data "HideOverheadUI" "1"
+data "IsUnique" "0"
+data "Boosts" "ActionResource(FeatPoint,1,0)"

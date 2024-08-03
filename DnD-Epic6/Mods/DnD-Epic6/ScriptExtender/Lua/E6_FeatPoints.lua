@@ -119,7 +119,9 @@ local function E6_UpdateEpic6FeatCount(ent)
     lastStats.Pending = deltaFeatCount
 
     _P("DnD-Epic6: " .. charName .. ": TotalFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatCount: " .. tostring(currentFeatCount) .. ", DeltaFeatCount: " .. tostring(deltaFeatCount))
-    E6_AddFeatPointBoost(id, deltaFeatCount)
+    for i = 1, deltaFeatCount do
+        Osi.ApplyStatus(id, "E6_FEAT_GRANTFEATPOINT", -1, -1, id)
+    end
 
     if totalGrantedFeatCount == 0 and totalFeatCount > 0 then
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
