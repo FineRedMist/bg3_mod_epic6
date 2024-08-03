@@ -9,7 +9,7 @@ end
 
 EpicSpellContainerName = "E6_Shout_EpicFeats" -- Also listed in E6_MakeFeatSpells.lua
 
-
+---@param name string
 local function E6_DumpSpell(name)
     _P("DnD-Epic6: Dumping spell properties from: " .. name)
     local spell = Ext.Stats.Get(name, -1, true, true)

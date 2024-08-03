@@ -1,10 +1,12 @@
 
 
+---@return number
 local function E6_GetLevel6XP()
     local extraData = Ext.Stats.GetStatsManager().ExtraData
     return extraData.Level1 + extraData.Level2 + extraData.Level3 + extraData.Level4 + extraData.Level5
 end
 
+---@return number
 local function DE_GetEpicFeatXP()
     return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
 end
@@ -39,7 +41,8 @@ end
 
 Ext.Osiris.RegisterListener("TurnEnded", 1, "after", OnTurnEnded_GettingInfo)
 ]]
-
+---@param uuid string
+---@return (string|number)?
 local function E6_GetFeatPointBoostAmount(uuid)
     return  Osi.GetActionResourceValuePersonal(uuid, "FeatPoint", 0)
 end
@@ -52,6 +55,7 @@ local actionResourceTracker = {}
 --  Their experience is at least level 6
 --  They have selected all 6 class levels
 --  They have enough experience to warrant feats.
+---@param ent EntityHandle
 local function E6_UpdateEpic6FeatCount(ent)
     if not ent.CharacterCreationStats then
         return
@@ -119,6 +123,7 @@ local function E6_UpdateEpic6FeatCount(ent)
 end
 
 -- Given an array of character entities, update their feat count
+---@param chars EntityHandle[]
 local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
     for _,char in pairs(chars) do
         if char ~= nil then
@@ -128,6 +133,8 @@ local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
 end
 
 -- Determines if we can safely update the feat counts for the party.
+-- Returns the main charater entity if we can.
+---@return EntityHandle?
 local function E6_CanUpdateEpic6FeatCounts()
     -- No character, no party to retrieve to update.
     if Osi.GetHostCharacter == nil then
@@ -184,6 +191,7 @@ local function E6_OnTick_UpdateEpic6FeatCount(tickParams)
     E6_UpdateEpic6FeatCountForAllByEntity(ent.PartyMember.Party.PartyView.Characters)
 end
 
+---@param e EclLuaGameStateChangedEvent
 local function E6_OnGameStateChanged(e)
     if e.FromState == Ext.Enums.ServerGameState.Running then
         E6_CanUpdate = false
@@ -193,10 +201,13 @@ local function E6_OnGameStateChanged(e)
     _P("DnD-Epic6: Server State change from " .. e.FromState.Label .. " to " .. e.ToState.Label)
 end
 
+---@param characterGuid string
 local function E6_OnLevelUpComplete(characterGuid)
     _P("DnD-Epic6: Level up completed with id: " .. characterGuid)
 end
 
+---@param ent EntityHandle
+---@return boolean
 local function E6_IsPlayerEntity(ent)
     if ent == nil then
         return false
@@ -215,19 +226,20 @@ local function E6_IsPlayerEntity(ent)
     return false
 end
 
+---@param characterGuid string
 local function E6_OnRespecComplete(characterGuid)
-    -- When a respec completes, we'll reset the number of feat points & the feat granter spell.
-    -- Then the Tick will handle updating the feat count so the player can select them again.
-    local id = GetHostCharacter()
-    local char = _C()
     -- When entering levels, the various creatures in the level trigger the respec, ignore them
     -- by only focusing on those that have the IsPlayer flag.
+    local char = _C()
     if not E6_IsPlayerEntity(char) then
         return
     end
+    -- When a respec completes, we'll remove the feat granter spell.
+    -- Then the Tick will handle updating the feat count so the player can select them again once
+    -- the respect is complete.
     _P("DnD-Epic6: Respec completed with id: " .. characterGuid)
-    Osi.RemoveSpell(id, EpicSpellContainerName, 0)
-    actionResourceTracker[id] = nil
+    Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
+    actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
 end
 
 

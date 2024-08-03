@@ -1,4 +1,5 @@
 
+---@param spell FixedString[]
 function E6_DumpSpellMembers(spell)
     local fields = { 
         "SpellType",
