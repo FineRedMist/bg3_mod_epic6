@@ -179,7 +179,7 @@ end
 function E6_GenerateDynamicFeats(featSet)
     local epicSpellContainer = Ext.Stats.Get(EpicSpellContainerName, -1, true, true)
     if epicSpellContainer == nil then
-        Ext.Utils.PrintError("Failed to get the " .. EpicSpellContainerName)
+        _E6Error("Failed to get the " .. EpicSpellContainerName)
         return
     end
 

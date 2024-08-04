@@ -76,7 +76,7 @@ local function E6_ParseGenericXmlNode(node)
         elseif type == "int32" or type == "int64" then
             result[id] = tonumber(value)
         else
-            Ext.Utils.PrintError("DnD-Epic6: Unexpected member type: " .. type)
+            _E6Error("DnD-Epic6: Unexpected member type: " .. type)
         end
     end
     return result
@@ -84,15 +84,15 @@ end
 
 local function E6_MergeNode(featSet, node, nodeTypeId, nodeIdField, featSetNodeName, inclusionFunction)
     if node._attr == nil then
-        _P("DnD-Epic6: E6_MergeNode(" .. nodeTypeId .. "): _attr was null")
+        _E6P("E6_MergeNode(" .. nodeTypeId .. "): _attr was null")
         return
     end
     if node._attr.id ~= nodeTypeId then
-        _P("DnD-Epic6: E6_MergeNode(" .. nodeTypeId .. "): _attr.id mismatched (" .. node._attr .. ")")
+        _E6P("E6_MergeNode(" .. nodeTypeId .. "): _attr.id mismatched (" .. node._attr .. ")")
         return
     end
     if node.attribute == nil then
-        _P("DnD-Epic6: E6_MergeNode: attribute was null")
+        _E6P("E6_MergeNode: attribute was null")
         return
     end
 
@@ -155,7 +155,7 @@ local function E6_ProcessFile(featSet, filePath, mergerFunction)
         return
     end
 
-    _P("DnD-Epic6: " .. filePath .. " has length: " .. tostring(#file))
+    _E6P(filePath .. " has length: " .. tostring(#file))
     local xml = E6_GetXml2Lua(file)
     if xml ~= nil then
         mergerFunction(featSet, xml)

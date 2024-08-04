@@ -213,7 +213,7 @@ function E6_DumpSpellMembers(spell)
             data[v] = spell[v]
         end)
         if not success then
-            Ext.Utils.PrintWarning("DnD-Epic6: Failed to retrieve the spell property: " .. v)
+            _E6Warn("Failed to retrieve the spell property: " .. v)
         end
     end
     _D(data)

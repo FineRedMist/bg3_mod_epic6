@@ -14,20 +14,20 @@ end
 --[[ Research
 function DumpData(name, field)
     if not pcall(function()
-        Ext.Utils.Print(name)
+        _E6P(name)
         _D(field)
     end) then
-        Ext.Utils.Print("Failed to print " .. name)
+        _E6P("Failed to print " .. name)
     end
 end
 
 function FindEpic6Stat()
-    _P("Experience to reach level 6: " .. E6_GetLevel6XP())
-    _P("Experience for each Epic feat: " .. DE_GetEpicFeatXP())
+    _E6P("Experience to reach level 6: " .. E6_GetLevel6XP())
+    _E6P("Experience for each Epic feat: " .. DE_GetEpicFeatXP())
 end
 
 function OnTurnEnded_GettingInfo(char)
-    _P("Server Turn Ended: " .. char)
+    _E6P("Server Turn Ended: " .. char)
     local ent = Ext.Entity.Get(char)
 
     FindEpic6Stat()
@@ -112,7 +112,7 @@ local function E6_UpdateEpic6FeatCount(ent)
     lastStats.Granted = totalGrantedFeatCount
     lastStats.Pending = deltaFeatCount
 
-    _P("DnD-Epic6: " .. charName .. ": TotalFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatCount: " .. tostring(currentFeatCount) .. ", DeltaFeatCount: " .. tostring(deltaFeatCount))
+    _E6P(charName .. ": TotalFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatCount: " .. tostring(currentFeatCount) .. ", DeltaFeatCount: " .. tostring(deltaFeatCount))
     for i = 1, deltaFeatCount do
         Osi.ApplyStatus(id, "E6_FEAT_GRANTFEATPOINT", -1, -1, id)
     end
@@ -147,7 +147,7 @@ local function E6_CanUpdateEpic6FeatCounts()
     end)
 
     if not success or char == nil then
-        --_P("DnD-Epic6: Skipping update--call result: " .. tostring(success) .. ", character: " .. tostring(char))
+        --_E6P("Skipping update--call result: " .. tostring(success) .. ", character: " .. tostring(char))
         return nil
     end
 
@@ -198,7 +198,7 @@ local function E6_OnGameStateChanged(e)
     elseif e.ToState == Ext.Enums.ServerGameState.Running then
         E6_CanUpdate = true
     end
-    _P("DnD-Epic6: Server State change from " .. e.FromState.Label .. " to " .. e.ToState.Label)
+    _E6P("Server State change from " .. e.FromState.Label .. " to " .. e.ToState.Label)
 end
 
 ---@param ent EntityHandle
@@ -232,14 +232,14 @@ local function E6_OnRespecComplete(characterGuid)
     -- When a respec completes, we'll remove the feat granter spell.
     -- Then the Tick will handle updating the feat count so the player can select them again once
     -- the respect is complete.
-    _P("DnD-Epic6: Respec completed with id: " .. characterGuid)
+    _E6P("Respec completed with id: " .. characterGuid)
     Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
 end
 
 ---@param characterGuid string
 local function E6_OnLevelUpComplete(characterGuid)
-    _P("DnD-Epic6: Level up completed with id: " .. characterGuid)
+    _E6P("Level up completed with id: " .. characterGuid)
 end
 
 function E6_FeatPointInit()
