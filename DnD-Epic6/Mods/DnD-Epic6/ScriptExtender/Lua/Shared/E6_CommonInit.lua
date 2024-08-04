@@ -1,4 +1,4 @@
-Ext.Require("E6_DumpSpell.lua")
+Ext.Require("Shared/E6_DumpSpell.lua")
 
 local function OnStatsLoaded_RedirectXPFiles()
     Ext.Utils.Print("DnD-Epic6: Overriding Level Files (Data.txt, XPData.txt)")
