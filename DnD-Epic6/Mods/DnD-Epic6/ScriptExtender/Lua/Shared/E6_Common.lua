@@ -1,3 +1,5 @@
+EpicSpellContainerName = "E6_Shout_EpicFeats"
+
 ---@param message string
 function _E6P(message)
     local hostType = "Client"
@@ -25,3 +27,41 @@ function _E6Error(message)
     Ext.Utils.PrintError("E6[" .. hostType .. "]: " .. message)
 end
 
+-- Thanks to Aahz for this function
+---comment
+---@param u integer
+---@return integer
+function PeerToUserID(u)
+    -- all this for userid+1 usually smh
+    return (u & 0xffff0000) | 0x0001
+end
+
+-- Return the party members currently following the player
+---@return table<integer,string>
+function GetPartyMembers()
+    local teamMembers = {}
+
+    local allPlayers = Osi.DB_Players:Get(nil)
+    for _, player in ipairs(allPlayers) do
+        if not string.match(player[1]:lower(), "%f[%A]dummy%f[%A]") then
+            teamMembers[#teamMembers + 1] = string.sub(player[1], -36)
+        end
+    end
+
+    return teamMembers
+end
+
+-- Returns the character that the user is controlling
+---@param userId integer
+---@return string?
+function GetUserCharacter(userId)
+    if not _C().PartyComposition then
+        return nil
+    end
+    for _, member in ipairs(_C().PartyComposition.Members) do
+        if member.UserId == userId then
+            return member.UserUUid
+        end
+    end
+    return nil
+end

@@ -11,8 +11,6 @@ local function OnStatsLoaded_RedirectXPFiles()
     Ext.IO.AddPathOverride("Public/SharedDev/Stats/Generated/Data/XPData.txt", "Public/DnD-Epic6/Stats/Generated/Data/XPData.txt")
 end
 
-EpicSpellContainerName = "E6_Shout_EpicFeats" -- Also listed in E6_MakeFeatSpells.lua
-
 ---@param name string
 local function E6_DumpSpell(name)
     _E6P("Dumping spell properties from: " .. name)
@@ -34,7 +32,7 @@ Ext.Require("Dynamic/E6_FeatConverter.lua")
 local function DnDEpic6Init()
     Ext.Events.StatsLoaded:Subscribe(OnStatsLoaded_RedirectXPFiles)
 
-    --E6_FeatConverterInit()
+    E6_FeatConverterInit()
     --E6_DebugSpells()
 end
 
