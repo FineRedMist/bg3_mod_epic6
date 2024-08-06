@@ -1,5 +1,6 @@
 Ext.Require("Shared/E6_Common.lua")
 Ext.Require("Shared/E6_DumpSpell.lua")
+Ext.Require("Dynamic/E6_FeatConverter.lua")
 Ext.Require("Shared/E6_NetChannels.lua")
 Ext.Require("Shared/E6_NetCommand.lua")
 Ext.Require("Shared/E6_CommandRegistry.lua")
@@ -26,11 +27,10 @@ local function E6_DebugSpells()
     --E6_DumpSpell("Projectile_ChromaticOrb_Acid")
 end
 
-
-Ext.Require("Dynamic/E6_FeatConverter.lua")
-
 local function DnDEpic6Init()
     Ext.Events.StatsLoaded:Subscribe(OnStatsLoaded_RedirectXPFiles)
+
+    Ext.Vars.RegisterUserVariable("E6_Feats", {})
 
     E6_FeatConverterInit()
     --E6_DebugSpells()

@@ -42,6 +42,8 @@ local function E6_IsFeatSupported(feat)
     return nil
 end
 
+local E6_FeatSet = nil
+
 ---@return table<string,table>
 function E6_ProcessFeats()
     -- Maps feat uuid to the properties, merging feat and featdescription lsx files.
@@ -49,13 +51,24 @@ function E6_ProcessFeats()
     -- First:
     --  featSet[uuid].Desc = <description>
     --  featSet[uuid].Spec = <specification>
+    --  featSet[uuid].PassiveName = "E6_FEAT_" .. feat.Name
+    --  featSet[uuid].DisplayName = <translated display name>
+    --  featSet[uuid].Description = <translated description>
+    
+    if E6_FeatSet ~= nil then
+        return E6_FeatSet
+    end
+
     local featSet = {}
+    E6_FeatSet = featSet
+
     local feats = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Feat)
     for _, featid in ipairs(feats) do
         local feat = Ext.StaticData.Get(featid, Ext.Enums.ExtResourceManagerType.Feat)
         local featRejectReason = E6_IsFeatSupported(feat)
         if featRejectReason == nil then
-            featSet[featid] = {Spec = feat}
+            featSet[featid] = {Spec = feat, PassiveName = "E6_FEAT_" .. feat.Name}
+
         else
             _E6P("Skipping unsupported feat " .. feat.Name .. ": " .. featRejectReason)
         end
@@ -65,8 +78,20 @@ function E6_ProcessFeats()
         local description = Ext.StaticData.Get(descriptionid, Ext.Enums.ExtResourceManagerType.FeatDescription)
         if featSet[description.FeatId] ~= nil then
             featSet[description.FeatId].Desc = description
-            --_D(featSet[description.FeatId])
+            featSet[description.FeatId].DisplayName = Ext.Loca.GetTranslatedString(description.DisplayName.Handle.Handle, description.DisplayName.Handle.Version)
+            featSet[description.FeatId].Description = Ext.Loca.GetTranslatedString(description.Description.Handle.Handle, description.Description.Handle.Version)
         end
+    end
+
+    -- Remove entries that are missing a Desc field.
+    local toRemove = {}
+    for k, v in pairs(featSet) do
+        if v.Desc == nil then
+            table.insert(toRemove, k)
+        end
+    end
+    for _, k in ipairs(toRemove) do
+        featSet[k] = nil
     end
 
     for _, featInfo in pairs(featSet) do

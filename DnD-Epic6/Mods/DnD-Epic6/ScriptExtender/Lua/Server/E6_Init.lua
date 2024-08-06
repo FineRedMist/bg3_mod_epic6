@@ -1,3 +1,4 @@
+Ext.Require("Server/E6_DumpCharacter.lua")
 Ext.Require("Server/E6_FeatPoints.lua")
 Ext.Require("Server/E6_SpellFeatHandler.lua")
 Ext.Require("Server/E6_NetServerHandlers.lua")

@@ -225,7 +225,7 @@ end
 local function E6_OnRespecComplete(characterGuid)
     -- When entering levels, the various creatures in the level trigger the respec, ignore them
     -- by only focusing on those that have the IsPlayer flag.
-    local char = _C()
+    local char = Ext.Entity.Get(characterGuid)
     if not E6_IsPlayerEntity(char) then
         return
     end
@@ -235,6 +235,7 @@ local function E6_OnRespecComplete(characterGuid)
     _E6P("Respec completed with id: " .. characterGuid)
     Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
+    char.Vars.E6_Feats = nil
 end
 
 ---@param characterGuid string

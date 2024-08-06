@@ -2,15 +2,9 @@ NetClientHandlers = {}
 
 function NetClientHandlers.ShowFeatSelectorUI(_, payload, peerId)
     _E6P("Showing feat selector UI: peer=" .. tostring(peerId) .. ", player id=" .. payload)
-    local userId = PeerToUserID(peerId)
-    local userCharacter = GetUserCharacter(userId)
-    local ent = Ext.Entity.Get(userCharacter)
-    if ent == nil then
-        _E6Error("Failed to get entity for player id: " .. payload)
-        return
-    end
-
-    E6_FeatSelectorUI(ent)
+    local message = Ext.Json.Parse(payload)
+    
+    E6_FeatSelectorUI(message)
     
     --if userCharacter then
     --    local MCMModVars = Ext.Vars.GetModVariables(ModuleUUID)

@@ -75,8 +75,7 @@ local function E6_GenerateEpicFeat(feat)
     end
 
     -- Create the passive granted by the spell.
-    local passiveName = "E6_FEAT_" .. string.upper(feat.Spec.Name)
-    E6_CreatePassive(feat, passiveName)
+    E6_CreatePassive(feat, feat.PassiveName)
 end
 
 function E6_GenerateDynamicFeats(featSet)
