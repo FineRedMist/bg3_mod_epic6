@@ -63,6 +63,7 @@ local function E6_CreatePassive(feat, passiveName)
             Passives = feat.Spec.PassivesAdded
         }
         E6_SetRaw(passive, props)
+        _E6P("Created feat passive: " .. passiveName)
         --_D(passive)
         passive:Sync()
     end

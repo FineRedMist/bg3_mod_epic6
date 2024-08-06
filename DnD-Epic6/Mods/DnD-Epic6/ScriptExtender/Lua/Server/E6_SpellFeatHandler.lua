@@ -45,9 +45,10 @@ end
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
-    _E6P(EpicSpellContainerName .. " was cast by " .. caster)
-
     local ent = Ext.Entity.Get(caster)
+    local charname = ent.CharacterCreationStats.Name
+    _E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
+
     local message = {
         PlayerId = caster,
         PlayerName = ent.CharacterCreationStats.Name,

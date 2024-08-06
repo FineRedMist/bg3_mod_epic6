@@ -45,7 +45,7 @@ end
 local E6_FeatSet = nil
 
 ---@return table<string,table>
-function E6_ProcessFeats()
+function E6_GatherFeats()
     -- Maps feat uuid to the properties, merging feat and featdescription lsx files.
     -- We go in mod order and overwrite any settings found.
     -- First:

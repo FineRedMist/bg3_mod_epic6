@@ -28,7 +28,7 @@ function E6_FeatSelectorUI(message)
 
     win.UserData = message
 
-    local allFeats = E6_ProcessFeats()
+    local allFeats = E6_GatherFeats()
 
     local featList = {}
     local featMap = {}

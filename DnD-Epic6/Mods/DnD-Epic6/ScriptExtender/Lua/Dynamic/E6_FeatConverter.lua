@@ -13,7 +13,7 @@ local function E6_DumpMods(e)
 end
 
 local function E6_OnStatsLoaded()
-    local featSet = E6_ProcessFeats()
+    local featSet = E6_GatherFeats()
     E6_GenerateDynamicFeats(featSet)
 end
 

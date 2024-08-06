@@ -47,6 +47,17 @@ local function E6_GetFeatPointBoostAmount(uuid)
     return  Osi.GetActionResourceValuePersonal(uuid, "FeatPoint", 0)
 end
 
+---Returns the number of feats selected for Epic 6 (does not include feats for actual levels)
+---@param entity EntityHandle
+---@return integer
+local function E6_GetUsedFeatCount(entity)
+    local e6Feats = entity.Vars.E6_Feats
+    if e6Feats == nil then
+        return 0
+    end
+    return #e6Feats
+end
+
 -- Maps the entity id to an object that tracks the last known feat count and the granted feat count.
 local actionResourceTracker = {}
 
@@ -61,15 +72,14 @@ local function E6_UpdateEpic6FeatCount(ent)
         return
     end
 
-    if not ent.CharacterCreationStats.Name then
+    local charName = ent.CharacterCreationStats.Name
+    if not charName then
         return
     end
 
     if not ent.Experience then
         return
     end
-
-    local charName = ent.CharacterCreationStats.Name
 
     -- CurrentLevelExperience is the experience from 6 to 7 we have accumulated. 
     -- The XP Data is constructed in such a way that the XP cap is reached before level 7
@@ -86,7 +96,7 @@ local function E6_UpdateEpic6FeatCount(ent)
     totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
 
     local id = ent.Uuid.EntityUuid
-    local usedFeatCount = Osi.GetActionResourceValuePersonal(id, "UsedFeatPoints", 0) or 0
+    local usedFeatCount = E6_GetUsedFeatCount(ent)
     local currentFeatCount = E6_GetFeatPointBoostAmount(id)
     local totalGrantedFeatCount = currentFeatCount + usedFeatCount
     local deltaFeatCount = totalFeatCount - totalGrantedFeatCount

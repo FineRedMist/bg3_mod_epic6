@@ -13,15 +13,6 @@
                     <attribute id="ReplenishType" type="FixedString" value="Never"/>
                     <attribute id="UUID" type="guid" value="76e6a2aa-0880-4daf-9fc2-e85bde62b7be"/>
                 </node>
-                <node id="ActionResourceDefinition">
-                    <attribute id="Description" type="TranslatedString" handle="h262bbb67gb8abg4d35g9822g854af550a474" version="1"/>
-                    <attribute id="DisplayName" type="TranslatedString" handle="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1"/>
-                    <attribute id="IsHidden" type="bool" value="true"/>
-                    <attribute id="MaxLevel" type="uint32" value="0"/>
-                    <attribute id="Name" type="FixedString" value="UsedFeatPoints"/>
-                    <attribute id="ReplenishType" type="FixedString" value="Never"/>
-                    <attribute id="UUID" type="guid" value="6d61b8a3-f9b9-4367-8aaf-1856b00db251"/>
-                </node>
             </children>
         </node>
     </region>
