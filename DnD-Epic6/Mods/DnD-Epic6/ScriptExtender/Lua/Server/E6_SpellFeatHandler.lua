@@ -2,7 +2,7 @@
 ---We need to gather feats that have already been selected for the entity so we can filter if necessary.
 ---@param entity EntityHandle
 ---@return table
-local function GatherFeats(entity)
+local function GatherPlayerFeats(entity)
     local feats = {}
     if entity == nil then
         return feats
@@ -52,7 +52,7 @@ local function OnEpic6FeatSelectorSpell(caster)
     local message = {
         PlayerId = caster,
         PlayerName = ent.CharacterCreationStats.Name,
-        PlayerFeats = GatherFeats(ent)
+        PlayerFeats = GatherPlayerFeats(ent)
     }
 
     --_E6P("Stats.Abilities[0] = " .. tostring(ent.Stats.Abilities[0]))

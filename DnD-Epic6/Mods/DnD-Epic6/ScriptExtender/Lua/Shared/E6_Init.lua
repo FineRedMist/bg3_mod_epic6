@@ -1,4 +1,5 @@
 Ext.Require("Shared/E6_Common.lua")
+Ext.Require("Shared/E6_Jsonify.lua")
 Ext.Require("Shared/E6_DumpSpell.lua")
 Ext.Require("Dynamic/E6_FeatConverter.lua")
 Ext.Require("Shared/E6_NetChannels.lua")

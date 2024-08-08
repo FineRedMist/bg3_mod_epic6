@@ -1,21 +1,4 @@
 
-
----@param visited table
----@param t table
----@return table
-local function E6_DumpTable(visited, t)
-    local s = {}
-    for k, v in pairs(t) do
-        s[k] = E6_ToJsonInternal(visited, v)
-    end
-    if #s == 0 then
-        for i, v in ipairs(t) do
-            s[i] = E6_ToJsonInternal(visited, v)
-        end
-    end
-    return s
-end
-
 local userdataMembers = {
 "A",
 "AC",
@@ -4482,104 +4465,149 @@ local userdataMembers = {
 "value"
 }
 
-local complextTypemap = nil
 
-local function E6_InitComplexTypeMap()
-    complextTypemap = {}
-    complextTypemap["userdata"] = userdataMembers
+List = {}
+function List.new()
+    return {first = 0, last = -1}
 end
 
----@param visited table
----@param char any
----@return table?
-function E6_DumpEntityHandle(visited, char)
-    if not complextTypemap then
-        E6_InitComplexTypeMap()
-    end
-
-    if visited[char] then
-        return { visited = true }
-    end
-    visited[char] = true
-
-    local members = complextTypemap[type(char)]
-
-    if not members then
-        _E6P("Unsupported complex type: " .. type(char))
-        return nil
-    end
-
-    local chardata = {}
-    for _, v in ipairs(members) do
-        pcall(function()
-            local value = char[v]
-            if value then
-                chardata[v] = E6_ToJsonInternal(visited, value)
-            end
-        end)
-    end
-    -- check for numeric indices.
-    local success = true
-    local hasvalue = true
-    local index = 1
-    while success and hasvalue do
-        hasvalue = false
-        success = pcall(function()
-            local value = char[index]
-            if value then
-                chardata[index] = E6_ToJsonInternal(visited, value)
-                hasvalue = true
-            end
-        end)
-        index = index + 1
-    end
-    return chardata
+function List.count(list)
+    return list.last - list.first + 1
 end
 
----comment
----@param raw any
----@return any
-local function E6_DumpRaw(visited, raw)
-    return raw
+function List.pushleft (list, value)
+    local first = list.first - 1
+    list.first = first
+    list[first] = value
 end
 
-local function E6_DumpFunction(visited, func)
-    return "<function>"
+function List.pushright (list, value)
+    local last = list.last + 1
+    list.last = last
+    list[last] = value
 end
 
-local typemap = nil
-
-local function E6_InitTypeMap()
-    typemap = {}
-    typemap["number"] = E6_DumpRaw
-    typemap["string"] = E6_DumpRaw
-    typemap["boolean"] = E6_DumpRaw
-    typemap["function"] = E6_DumpFunction
-    typemap["table"] = E6_DumpTable
-end
-
----@param visited table
----@param obj any
----@return any
-function E6_ToJsonInternal(visited, obj)
-    if not typemap then
-        E6_InitTypeMap()
+function List.popleft (list)
+    local first = list.first
+    if first > list.last then
+        error("list is empty")
     end
-    if obj then
-        local t = type(obj)
-        local f = typemap[t]
-        if f then
-            return f(visited, obj)
-        else
-            return E6_DumpEntityHandle(visited, obj)
-        end
+    local value = list[first]
+    list[first] = nil        -- to allow garbage collection
+    list.first = first + 1
+    return value
+end
+
+function List.popright (list)
+    local last = list.last
+    if list.first > last then
+        error("list is empty")
     end
-    return nil
+    local value = list[last]
+    list[last] = nil         -- to allow garbage collection
+    list.last = last - 1
+    return value
 end
 
 ---@param obj any
 ---@return any
 function E6_ToJson(obj)
+    if obj == nil then
+        return nil
+    end
+
     local visited = {}
-    return E6_ToJsonInternal(visited, obj)
+    local root = { target = obj, path = "", key = nil, container = nil }
+    local stack = List.new()
+    List.pushleft(stack, root)
+
+    while List.count(stack) > 0 do
+        local current = List.popright(stack)
+        local target = current.target
+        local path = current.path
+        local key = current.key
+        local container = current.container
+        local value = nil
+        local targetType = nil
+
+        local function UpdatePath()
+            if string.len(path) > 0 then
+                visited[target] = path
+            else
+                visited[target] = "/"
+            end
+        end
+        local function ProcessTable()
+            UpdatePath()
+            value = {}
+            for k, v in pairs(target) do
+                if v then
+                    List.pushleft(stack, { target = v, path = path .. "/" .. k, key = k, container = value })
+                end
+            end
+            for i, v in ipairs(target) do
+                List.pushleft(stack, { target = v, path = path .. "[" .. tostring(i) .. "]", key = i, container = value })
+            end
+        end
+        local function ProcessUserData()
+            UpdatePath()
+            value = {}
+            for _, memberKey in ipairs(userdataMembers) do
+                pcall(function()
+                    local v = target[memberKey]
+                    if v then
+                        List.pushleft(stack, { target = v, path = path .. "/" .. memberKey, key = memberKey, container = value })
+                    end
+                end)
+            end
+            local success = true
+            local hasvalue = true
+            local index = 1
+            while success and hasvalue do
+                hasvalue = false
+                success = pcall(function()
+                    local v = target[index]
+                    if v then
+                        List.pushleft(stack, { target = v, path = path .. "[" .. tostring(index) .. "]", key = index, container = value })
+                        hasvalue = true
+                    end
+                end)
+                index = index + 1
+            end
+        end
+
+        if target then
+           targetType = type(target)
+        end
+
+        local visitedPath = visited[target]
+        if not target then
+            _P("Value: nil")
+            value = nil
+        elseif targetType == "string" or targetType == "number" or targetType == "boolean" then
+            value = target
+            _P("Value: " .. tostring(value))
+        elseif targetType == "function" then
+            value = "<function>"
+            _P("Value: " .. value)
+        elseif visitedPath then
+            value = "Visited at: " .. visitedPath
+            _P("Value: " .. value)
+        elseif targetType == "table" then
+            ProcessTable()
+            _P("Value: <table>")
+        elseif targetType == "userdata" then
+            ProcessUserData()
+            _P("Value: <userdata>")
+        else
+            _E6Error("Unsupported type: " .. targetType)
+        end
+
+        if container then
+            container[key] = value
+        else
+            root.container = value
+        end
+    end
+    return root.container
 end

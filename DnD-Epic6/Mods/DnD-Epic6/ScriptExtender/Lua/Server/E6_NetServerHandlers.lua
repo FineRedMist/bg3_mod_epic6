@@ -22,6 +22,10 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     _E6P("ApplyStatus result for " .. message.Feat .. ": " .. tostring(result))
     result = Osi.ApplyStatus(message.PlayerId, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, message.PlayerId)
     _E6P("ApplyStatus result for E6_FEAT_CONSUMEFEATPOINT: " .. tostring(result))
+
+    local json = E6_ToJson(entity)
+    local str = Ext.Json.Stringify(json)
+    Ext.IO.SaveFile("E6_character.json", str)
 end
 
 return NetServerHandlers
