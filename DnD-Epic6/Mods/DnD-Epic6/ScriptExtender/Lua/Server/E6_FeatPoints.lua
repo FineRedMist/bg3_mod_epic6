@@ -242,10 +242,17 @@ local function E6_OnRespecComplete(characterGuid)
     -- When a respec completes, we'll remove the feat granter spell.
     -- Then the Tick will handle updating the feat count so the player can select them again once
     -- the respect is complete.
-    _E6P("Respec completed with id: " .. characterGuid)
     Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
-    char.Vars.E6_Feats = nil
+    if char.Vars.E6_Feats then
+        for _,feat in ipairs(char.Vars.E6_Feats) do
+            for _,passive in ipairs(feat.PassivesAdded) do
+                Osi.RemovePassive(characterGuid, passive)
+            end
+        end        
+        char.Vars.E6_Feats = nil
+    end
+    _E6P("Respec completed with id: " .. characterGuid)
 end
 
 ---@param characterGuid string

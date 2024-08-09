@@ -1,7 +1,7 @@
 Ext.Require("Shared/E6_Common.lua")
 Ext.Require("Shared/E6_Jsonify.lua")
 Ext.Require("Shared/E6_DumpSpell.lua")
-Ext.Require("Dynamic/E6_FeatConverter.lua")
+Ext.Require("Shared/E6_GatherFeats.lua")
 Ext.Require("Shared/E6_NetChannels.lua")
 Ext.Require("Shared/E6_NetCommand.lua")
 Ext.Require("Shared/E6_CommandRegistry.lua")
@@ -32,9 +32,6 @@ local function DnDEpic6Init()
     Ext.Events.StatsLoaded:Subscribe(OnStatsLoaded_RedirectXPFiles)
 
     Ext.Vars.RegisterUserVariable("E6_Feats", {})
-
-    E6_FeatConverterInit()
-    --E6_DebugSpells()
 end
 
 DnDEpic6Init()

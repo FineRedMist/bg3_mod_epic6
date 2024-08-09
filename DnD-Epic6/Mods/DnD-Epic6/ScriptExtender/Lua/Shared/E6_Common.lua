@@ -1,5 +1,20 @@
 EpicSpellContainerName = "E6_Shout_EpicFeats"
 
+---Splits a string based on the separator, which defaults to whitspace
+---@param inputstr string The string to split
+---@param separator any The separator to split the string with
+---@return table The list of tokens split by separator
+function SplitString(inputstr, separator)
+    if separator == nil then
+        separator = "%s"
+    end
+    local result = {}
+    for str in string.gmatch(inputstr, "([^"..separator.."]+)") do
+      table.insert(result, str)
+    end
+    return result
+  end
+
 ---@param message string
 function _E6P(message)
     local hostType = "Client"

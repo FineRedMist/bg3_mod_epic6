@@ -8,23 +8,19 @@ end
 
 ---@param message table
 function E6_FeatSelectorUI(message)
-    if win ~= nil and win.UserData ~= nil and win.UserData.PlayerId == message.PlayerId then
-        win.Visible = true
-        win.Open = true
-        win.SetFocus()
-        return
-    end
 
     CalculateLayout()
 
-    local featTitle = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8")
     if win == nil then
+        local featTitle = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8")
         win = Ext.IMGUI.NewWindow(featTitle)
         win.Closeable = true
         win.AlwaysAutoResize = true
-
-        win:SetFocus()
+    else
+        win.Visible = true
+        win.Open = true
     end
+    win:SetFocus()
 
     win.UserData = message
     local children = win.Children
@@ -37,7 +33,7 @@ function E6_FeatSelectorUI(message)
     local featList = {}
     local featMap = {}
     for featId, feat in pairs(allFeats) do
-        if feat.Spec.CanBeTakenMultipleTimes or message.PlayerFeats[featId] == nil then
+        if feat.CanBeTakenMultipleTimes or message.PlayerFeats[featId] == nil then
             local featName = feat.DisplayName
             featMap[featName] = feat
             table.insert(featList, featName)
@@ -56,8 +52,7 @@ function E6_FeatSelectorUI(message)
             _E6Error("Failed to find feat for name: " .. featName)
         else
             local featButton = win:AddButton(featName)
-            local passiveName = feat.PassiveName
-            local featId = feat.Desc.FeatId
+            local featId = feat.ID
             featButton.OnClick = function()
                 win.Visible = false
                 win.Open = false
@@ -66,8 +61,10 @@ function E6_FeatSelectorUI(message)
 
                 local payload = {
                     PlayerId = message.PlayerId,
-                    Feat = passiveName,
-                    FeatId = featId
+                    Feat = {
+                        FeatId = featId,
+                        PassivesAdded = feat.PassivesAdded
+                    }
                 }
                 local payloadStr = Ext.Json.Stringify(payload)
                 Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC, payloadStr)

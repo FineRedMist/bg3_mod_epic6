@@ -36,7 +36,7 @@ local function GatherPlayerFeats(entity)
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
-            AddFeat(feat)
+            AddFeat(feat.FeatId)
         end
     end
     return feats
