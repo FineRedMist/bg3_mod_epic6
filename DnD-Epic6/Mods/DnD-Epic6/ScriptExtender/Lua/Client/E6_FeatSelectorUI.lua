@@ -72,7 +72,6 @@ function E6_FeatSelectorUI(message)
     local children = win.Children
     for _, child in ipairs(children) do
         win:RemoveChild(child)
-        child:Destroy()
     end
 
     local allFeats = E6_GatherFeats()
