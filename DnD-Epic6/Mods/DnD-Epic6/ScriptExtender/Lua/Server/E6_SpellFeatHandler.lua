@@ -42,17 +42,53 @@ local function GatherPlayerFeats(entity)
     return feats
 end
 
+---Determines if the character meets the requirements for a feat.
+---@param feat table The feat to test for
+---@param entity EntityHandle The entity to test against
+---@return boolean True if the entity meets the requirements, false otherwise.
+local function MeetsFeatRequirements(feat, entity)
+    if not feat.HasRequirements then
+        return true
+    end
+    for _, req in ipairs(feat.HasRequirements) do
+        if not req(entity) then
+            return false
+        end
+    end
+    return true
+end
+
+---Gathers the feats that the player can select. It checks constraints server side as client doesn't
+---seem to have all the data to do so.
+---@param entity EntityHandle
+---@return table
+local function GatherSelectableFeatsForPlayer(entity, playerFeats)
+    local allFeats = E6_GatherFeats()
+
+    local featList = {}
+    for featId, feat in pairs(allFeats) do
+        if feat.CanBeTakenMultipleTimes or playerFeats[featId] == nil then
+            if MeetsFeatRequirements(feat, entity) then
+                table.insert(featList, featId)
+            end
+        end
+    end
+    return featList
+end
+
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
-    local charname = ent.CharacterCreationStats.Name
+    local charname = GetCharacterName(ent)
     _E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
 
+    local playerFeats = GatherPlayerFeats(ent)
     local message = {
         PlayerId = caster,
-        PlayerName = ent.CharacterCreationStats.Name,
-        PlayerFeats = GatherPlayerFeats(ent)
+        PlayerName = GetCharacterName(ent),
+        PlayerFeats = playerFeats,
+        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats)
     }
 
     --_E6P("Stats.Abilities[0] = " .. tostring(ent.Stats.Abilities[0]))

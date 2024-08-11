@@ -68,11 +68,7 @@ local actionResourceTracker = {}
 --  They have enough experience to warrant feats.
 ---@param ent EntityHandle
 local function E6_UpdateEpic6FeatCount(ent)
-    if not ent.CharacterCreationStats then
-        return
-    end
-
-    local charName = ent.CharacterCreationStats.Name
+    local charName = GetCharacterName(ent, true)
     if not charName then
         return
     end

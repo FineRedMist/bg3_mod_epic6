@@ -79,12 +79,11 @@ function E6_FeatSelectorUI(message)
 
     local featList = {}
     local featMap = {}
-    for featId, feat in pairs(allFeats) do
-        if feat.CanBeTakenMultipleTimes or message.PlayerFeats[featId] == nil then
-            local featName = feat.DisplayName
-            featMap[featName] = feat
-            table.insert(featList, featName)
-        end
+    for _,featId in ipairs(message.SelectableFeats) do
+        local feat = allFeats[featId]
+        local featName = feat.DisplayName
+        featMap[featName] = feat
+        table.insert(featList, featName)
     end
 
     message.FeatMap = featMap

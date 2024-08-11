@@ -15,6 +15,53 @@ function SplitString(inputstr, separator)
     return result
   end
 
+---Gets the complete set of terms matched by the expression.
+---@param str string The string to gather matches against
+---@param regex string The regular expression to gather matches for
+---@return table? The list of matched terms
+function GetFullMatch(str, regex)
+    _E6P("GetFullMatch: " .. str .. " <-> " .. regex)
+    local iterFn, state, other = str:gmatch(regex)
+    local current = table.pack(iterFn(state, other))
+    _E6P("GetFullMatch: " .. Ext.Json.Stringify(current))
+    if #current > 0 then
+        return current
+    else
+        return nil
+    end
+end
+
+---Retrieves the name for the character, either from the CharacterCreationStats or the Origin
+---@param entity EntityHandle -- The entity to retrieve the name for
+---@param[opt=false] returnNil boolean -- If true, return nil if the name is unknown, otherwise return <unknown>
+---@return string? -- The name of the character or <unknown>
+function GetCharacterName(entity, returnNil)
+    local defaultReturn = nil
+    if not returnNil then
+        defaultReturn = "<Unknown>"
+    end
+    if not entity then
+        return defaultReturn
+    end
+    local stats = entity.CharacterCreationStats
+    if not stats then
+        return defaultReturn
+    end
+    local statName = stats.Name
+    if statName and string.len(statName) > 0 then
+        return statName
+    end
+    local origin = entity.Origin
+    if not origin then
+        return defaultReturn
+    end
+    local originName = origin.Origin
+    if not originName or string.len(originName) == 0 then
+        return defaultReturn
+    end
+    return originName
+end
+
 ---@param message string
 function _E6P(message)
     local hostType = "Client"
