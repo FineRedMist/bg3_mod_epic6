@@ -4602,23 +4602,23 @@ function E6_ToJson(obj, skipProperties)
 
         local visitedPath = visited[target]
         if not target then
-            _P("Value: nil")
+            --_P("Value: nil")
             value = nil
         elseif targetType == "string" or targetType == "number" or targetType == "boolean" then
             value = target
-            _P("Value: " .. tostring(value))
+            --_P("Value: " .. tostring(value))
         elseif targetType == "function" then
             value = "<function>"
-            _P("Value: " .. value)
+            --_P("Value: " .. value)
         elseif visitedPath then
             value = "Visited at: " .. visitedPath
-            _P("Value: " .. value)
+            --_P("Value: " .. value)
         elseif targetType == "table" then
             ProcessTable()
-            _P("Value: <table>")
+            --_P("Value: <table>")
         elseif targetType == "userdata" then
             ProcessUserData()
-            _P("Value: <userdata>")
+            --_P("Value: <userdata>")
         else
             _E6Error("Unsupported type: " .. targetType)
         end

@@ -76,6 +76,54 @@ local function GatherSelectableFeatsForPlayer(entity, playerFeats)
     return featList
 end
 
+---comment
+---@param boosts any
+---@return table?
+local function GatherAbilityScoresFromBoosts(boosts)
+    if boosts == nil then
+        return nil
+    end
+
+    local scores = {}
+    for _,boost in ipairs(boosts) do
+        ---@type BoostInfoComponent?
+        local boostInfo = boost.BoostInfo
+        if boostInfo and boostInfo.Cause and (boostInfo.Cause.Type == "Character" or boostInfo.Cause.Type == "Progression" or boostInfo.Cause.Cause == "E6_Feat") then
+            ---@type AbilityBoostComponent?
+            local ability = boost.AbilityBoost
+            if ability and ability.Ability and ability.Ability.Label then
+                local abilityLabel = ability.Ability.Label
+                if not scores[abilityLabel] then
+                    scores[abilityLabel] = {Current = 0, Maximum = 20}
+                end
+                scores[abilityLabel].Current = scores[abilityLabel].Current + ability.Value
+                scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + ability.field_8
+            end
+        end
+    end
+    return scores
+end
+
+---Gathers the ability scores for the given character, without magical modifications
+---@param entity EntityHandle
+---@return table?
+local function GatherAbilityScores(entity)
+    local boostContainer = entity.BoostsContainer
+    if boostContainer == nil then
+        return nil
+    end
+    local boosts = boostContainer.Boosts
+    if boosts == nil then
+        return nil
+    end
+    for _i,boost in ipairs(boosts) do
+        if boost.Type and boost.Type.Label == "Ability" then
+            return GatherAbilityScoresFromBoosts(boost.Boosts)
+        end
+    end
+    return nil
+end
+
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
@@ -88,7 +136,8 @@ local function OnEpic6FeatSelectorSpell(caster)
         PlayerId = caster,
         PlayerName = GetCharacterName(ent),
         PlayerFeats = playerFeats,
-        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats)
+        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats),
+        Abilities = GatherAbilityScores(ent)
     }
 
     --_E6P("Stats.Abilities[0] = " .. tostring(ent.Stats.Abilities[0]))
@@ -101,15 +150,19 @@ local function OnEpic6FeatSelectorSpell(caster)
     --_E6P("Stats.Abilities[7] = " .. tostring(ent.Stats.Abilities[7]))
     --_E6P("type(Stats.Abilities) = " .. tostring(type(ent.Stats.Abilities)))
 
-    --local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
-    --local str = Ext.Json.Stringify(obj)
-    --Ext.IO.SaveFile("E6_character.json", str)
+    local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+    local str = Ext.Json.Stringify(obj)
+    Ext.IO.SaveFile("E6_character.json", str)
+    _E6P("Character saved!")
 
     --ent.BackgroundPassives?.field_18[].Passive uint32
     --ent.OriginPassives?.field_18[].Passive uint32
     --ent.PassiveContainer.Passives[] EntityHandle Uuid.Guid
-    
-    Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, Ext.Json.Stringify(message))
+
+    local str = Ext.Json.Stringify(message)
+    _E6P(str)
+
+    Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
 end
 
 function E6_SpellFeatHandlerInit()
