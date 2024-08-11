@@ -140,13 +140,11 @@ end
 ---@param abilityMatch table The matched requirement parameters from the requirement expression
 ---@return function That evaluates to true if the character meets the requirement, false otherwise.
 local function E6_MakeAbilityRequirement(feat, abilityMatch)
-    _E6P(Ext.Json.Stringify(E6_ToJson(abilityMatch)))
-    local ability = string.lower(abilityMatch[1])
+    local ability = abilityMatch[1]
     local value = tonumber(abilityMatch[2])
-    _E6P("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. ">= " .. tostring(value) .. "): found!")
     return function(entity)
         local name = GetCharacterName(entity)
-        _E6P("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. ">= " .. tostring(value) .. "): was not satisfied for: " .. name)
+        _E6P("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. " >= " .. tostring(value) .. "): was not satisfied for: " .. name)
         return false
     end
 end
@@ -156,12 +154,24 @@ end
 ---@param proficiencyMatch table The matched requirement parameters from the requirement expression
 ---@return function That evaluates to true if the character meets the requirement, false otherwise.
 local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
-    _E6P(Ext.Json.Stringify(E6_ToJson(proficiencyMatch)))
-    local proficiency = string.lower(proficiencyMatch[1])
-    _E6P("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): found!")
+    local proficiency = proficiencyMatch[1]
     return function(entity)
         local name = GetCharacterName(entity)
-        _E6P("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): was not satisfied for: " .. name)
+        local proficiencyComp = entity.Proficiency
+        if not proficiencyComp then
+            _E6Error("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): " .. name .. " is missing the Proficiency component")
+            return false
+        end
+        local proficiencyFlags = proficiencyComp.Flags
+        if proficiencyFlags == nil then
+            _E6Error("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): " .. name .. " is missing the Proficiency.Flags")
+            return false
+        end
+        for _,proficiencyFlag in ipairs(proficiencyFlags) do
+            if proficiencyFlag == proficiency then
+                return true
+            end
+        end
         return false
     end
 end
@@ -192,7 +202,6 @@ local function E6_ApplyFeatRequirements(feat, spec)
         return
     end
     local requirements = SplitString(spec.Requirements, ";")
-    _E6P("Feat Requirements: " .. feat.ShortName .. ": " .. spec.Requirements .. " -> " .. Ext.Json.Stringify(requirements))
     for _, req in ipairs(requirements) do
         if string.len(req) > 0 then
             local matched = false
