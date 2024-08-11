@@ -20,10 +20,8 @@ function SplitString(inputstr, separator)
 ---@param regex string The regular expression to gather matches for
 ---@return table? The list of matched terms
 function GetFullMatch(str, regex)
-    _E6P("GetFullMatch: " .. str .. " <-> " .. regex)
     local iterFn, state, other = str:gmatch(regex)
     local current = table.pack(iterFn(state, other))
-    _E6P("GetFullMatch: " .. Ext.Json.Stringify(current))
     if #current > 0 then
         return current
     else

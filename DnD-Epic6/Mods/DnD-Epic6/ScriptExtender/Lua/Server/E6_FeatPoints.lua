@@ -11,36 +11,6 @@ local function DE_GetEpicFeatXP()
     return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
 end
 
---[[ Research
-function DumpData(name, field)
-    if not pcall(function()
-        _E6P(name)
-        _D(field)
-    end) then
-        _E6P("Failed to print " .. name)
-    end
-end
-
-function FindEpic6Stat()
-    _E6P("Experience to reach level 6: " .. E6_GetLevel6XP())
-    _E6P("Experience for each Epic feat: " .. DE_GetEpicFeatXP())
-end
-
-function OnTurnEnded_GettingInfo(char)
-    _E6P("Server Turn Ended: " .. char)
-    local ent = Ext.Entity.Get(char)
-
-    FindEpic6Stat()
-
-    --DumpData("IsCharacter", ent.IsCharacter)
-    DumpData("Experience", ent.Experience)
-    DumpData("Classes", ent.Classes)
-    -- How to dump ent.Vars?
-    -- ent.Experience.CurrentLevelExperience has current level experience to divide by DE_GetEpicFeatXP() to determine feat count.
-end
-
-Ext.Osiris.RegisterListener("TurnEnded", 1, "after", OnTurnEnded_GettingInfo)
-]]
 ---@param uuid string
 ---@return (string|number)?
 local function E6_GetFeatPointBoostAmount(uuid)
@@ -204,7 +174,6 @@ local function E6_OnGameStateChanged(e)
     elseif e.ToState == Ext.Enums.ServerGameState.Running then
         E6_CanUpdate = true
     end
-    _E6P("Server State change from " .. e.FromState.Label .. " to " .. e.ToState.Label)
 end
 
 ---@param ent EntityHandle
@@ -248,12 +217,6 @@ local function E6_OnRespecComplete(characterGuid)
         end        
         char.Vars.E6_Feats = nil
     end
-    _E6P("Respec completed with id: " .. characterGuid)
-end
-
----@param characterGuid string
-local function E6_OnLevelUpComplete(characterGuid)
-    _E6P("Level up completed with id: " .. characterGuid)
 end
 
 function E6_FeatPointInit()
