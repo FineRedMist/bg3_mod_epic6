@@ -89,7 +89,7 @@ local function E6_ApplyRacialConstraints(feat)
     local featId = feat.ID
     if featRacialConstraints[featId] then
         local raceConstraint = featRacialConstraints[featId]
-        local raceRequirement = function(entity)
+        local raceRequirement = function(entity, abilityScores)
             local name = GetCharacterName(entity)
             if not entity.CharacterCreationStats then
                 _E6Error("Racial Constraints: " .. name .. " does not have CharacterCreationStats")
@@ -130,7 +130,7 @@ local function E6_MatchFailure(feat, matchResult)
     if matchResult then
         _E6Error("Failed to match the feat " .. feat.ShortName .. " requirement: " .. matchResult[1])
     end
-    return function(entity)
+    return function(entity, abilityScores)
         return false
     end
 end
@@ -142,9 +142,20 @@ end
 local function E6_MakeAbilityRequirement(feat, abilityMatch)
     local ability = abilityMatch[1]
     local value = tonumber(abilityMatch[2])
-    return function(entity)
+    return function(entity, abilityScores)
         local name = GetCharacterName(entity)
-        _E6P("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. " >= " .. tostring(value) .. "): was not satisfied for: " .. name)
+        if not abilityScores then
+            _E6Error("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. " >= " .. tostring(value) .. "): " .. name .. " is missing the ability scores")
+            return false
+        end
+        local abilityScore = abilityScores[ability]
+        if not abilityScore then
+            _E6Error("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. " >= " .. tostring(value) .. "): " .. name .. " is missing the ability score for " .. ability)
+            return false
+        end
+        if abilityScore.Current >= value then
+            return true
+        end
         return false
     end
 end

@@ -46,12 +46,12 @@ end
 ---@param feat table The feat to test for
 ---@param entity EntityHandle The entity to test against
 ---@return boolean True if the entity meets the requirements, false otherwise.
-local function MeetsFeatRequirements(feat, entity)
+local function MeetsFeatRequirements(feat, entity, abilityScores)
     if not feat.HasRequirements then
         return true
     end
     for _, req in ipairs(feat.HasRequirements) do
-        if not req(entity) then
+        if not req(entity, abilityScores) then
             return false
         end
     end
@@ -61,14 +61,16 @@ end
 ---Gathers the feats that the player can select. It checks constraints server side as client doesn't
 ---seem to have all the data to do so.
 ---@param entity EntityHandle
+---@param playerFeats table
+---@param abilityScores table?
 ---@return table
-local function GatherSelectableFeatsForPlayer(entity, playerFeats)
+local function GatherSelectableFeatsForPlayer(entity, playerFeats, abilityScores)
     local allFeats = E6_GatherFeats()
 
     local featList = {}
     for featId, feat in pairs(allFeats) do
         if feat.CanBeTakenMultipleTimes or playerFeats[featId] == nil then
-            if MeetsFeatRequirements(feat, entity) then
+            if MeetsFeatRequirements(feat, entity, abilityScores) then
                 table.insert(featList, featId)
             end
         end
@@ -76,9 +78,9 @@ local function GatherSelectableFeatsForPlayer(entity, playerFeats)
     return featList
 end
 
----comment
----@param boosts any
----@return table?
+---Gathers the ability scores from the ability boosts.
+---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
+---@return table? The ability scores and their maximums, or nil if it could not be determined.
 local function GatherAbilityScoresFromBoosts(boosts)
     if boosts == nil then
         return nil
@@ -132,12 +134,13 @@ local function OnEpic6FeatSelectorSpell(caster)
     _E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
 
     local playerFeats = GatherPlayerFeats(ent)
+    local abilityScores = GatherAbilityScores(ent)
     local message = {
         PlayerId = caster,
         PlayerName = GetCharacterName(ent),
         PlayerFeats = playerFeats,
-        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats),
-        Abilities = GatherAbilityScores(ent)
+        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, abilityScores),
+        Abilities = abilityScores -- we need their current scores and maximums to display UI
     }
 
     --_E6P("Stats.Abilities[0] = " .. tostring(ent.Stats.Abilities[0]))
@@ -150,10 +153,10 @@ local function OnEpic6FeatSelectorSpell(caster)
     --_E6P("Stats.Abilities[7] = " .. tostring(ent.Stats.Abilities[7]))
     --_E6P("type(Stats.Abilities) = " .. tostring(type(ent.Stats.Abilities)))
 
-    local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
-    local str = Ext.Json.Stringify(obj)
-    Ext.IO.SaveFile("E6_character.json", str)
-    _E6P("Character saved!")
+    --local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+    --local str = Ext.Json.Stringify(obj)
+    --Ext.IO.SaveFile("E6_character.json", str)
+    --_E6P("Character saved!")
 
     --ent.BackgroundPassives?.field_18[].Passive uint32
     --ent.OriginPassives?.field_18[].Passive uint32
