@@ -25,7 +25,7 @@ end
 local function MakeFeatButton(win, buttonWidth, playerId, feat)
     local featButton = win:AddButton(feat.DisplayName)
     featButton.UserData = feat
-    featButton.Size = {buttonWidth-30, 40}
+    featButton.Size = {buttonWidth-30, 48}
     featButton:SetStyle("ButtonTextAlign", 0.5, 0.5)
     featButton.OnClick = function()
         win.Visible = false
