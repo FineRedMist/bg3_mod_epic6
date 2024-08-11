@@ -101,7 +101,7 @@ local function OnEpic6FeatSelectorSpell(caster)
     --_E6P("Stats.Abilities[7] = " .. tostring(ent.Stats.Abilities[7]))
     --_E6P("type(Stats.Abilities) = " .. tostring(type(ent.Stats.Abilities)))
 
-    --local obj = E6_ToJson(ent)
+    --local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
     --local str = Ext.Json.Stringify(obj)
     --Ext.IO.SaveFile("E6_character.json", str)
 

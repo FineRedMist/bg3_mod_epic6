@@ -4509,9 +4509,21 @@ function List.popright (list)
     return value
 end
 
+local function ShouldSkipProperty(skipProperties, property)
+    if skipProperties == nil then
+        return false
+    end
+    for _, skipProperty in ipairs(skipProperties) do
+        if skipProperty == property then
+            return true
+        end
+    end
+    return false
+end
+
 ---@param obj any
 ---@return any
-function E6_ToJson(obj)
+function E6_ToJson(obj, skipProperties)
     if obj == nil then
         return nil
     end
@@ -4542,7 +4554,11 @@ function E6_ToJson(obj)
             value = {}
             for k, v in pairs(target) do
                 if v then
-                    List.pushleft(stack, { target = v, path = path .. "/" .. k, key = k, container = value })
+                    if ShouldSkipProperty(skipProperties, k) then
+                        value[k] = "<skipped>"
+                    else
+                        List.pushleft(stack, { target = v, path = path .. "/" .. k, key = k, container = value })
+                    end
                 end
             end
             for i, v in ipairs(target) do
@@ -4556,7 +4572,11 @@ function E6_ToJson(obj)
                 pcall(function()
                     local v = target[memberKey]
                     if v then
-                        List.pushleft(stack, { target = v, path = path .. "/" .. memberKey, key = memberKey, container = value })
+                        if ShouldSkipProperty(skipProperties, memberKey) then
+                            value[memberKey] = "<skipped>"
+                        else
+                            List.pushleft(stack, { target = v, path = path .. "/" .. memberKey, key = memberKey, container = value })
+                        end
                     end
                 end)
             end
