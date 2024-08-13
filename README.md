@@ -33,6 +33,27 @@ Respec is captured and the feats granted through this mechanism are removed (bas
 
 The feat information is parsed for the various abilities and options it grants, and those are applied to the character. Unlike the attempts to use spells and boosts which would automatically reset on respec, this method does not. I explicitly track the feats granted this way to be able to remove them on respec.
 
+## Useful Resources
+
+### Userdata to Json
+
+I've written a helpful function for digging through information about the player character or other userdata structures (as that is a limitation for Ext.Json.Stringify--it cannot process userdata). The code is in https://github.com/FineRedMist/bg3_mod_epic6/blob/imgui/DnD-Epic6/Mods/DnD-Epic6/ScriptExtender/Lua/Shared/E6_Jsonify.lua and the function, E6_ToJson (slightly misnamed), uses breadth first search to generate the json. It has a second argument for the list of properties to skip recursing into to avoid dumping, say, other party members you aren't interested in, or the inventory of the character as it isn't something you are interested in.
+
+This is accomplished (with some chagrin) by gathering all the @field entries in the ExtIdeHelpers and testing all of them against each userdata encountered.
+
+Furthermore, the visited objects are tracked, and encountering the same object again will instead list the location where that entry can be found, such as:
+
+	"SelectionType" : "Visited at: /AddedSpells/Spells[1]/LearningStrategy",
+
+For example: 
+
+    local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+    local str = Ext.Json.Stringify(obj)
+    Ext.IO.SaveFile("E6_character.json", str)
+    _P("Character saved!")
+    
+An example of a character exported this way is at: https://github.com/FineRedMist/bg3_mod_epic6/blob/imgui/References/E6_character.json
+
 ## Previous Attempts
 
 These are the previous attempts that did not work.
