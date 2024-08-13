@@ -13,9 +13,7 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     table.insert(e6Feats, message.Feat)
     entity.Vars.E6_Feats = e6Feats
 
-    for _,passive in ipairs(message.Feat.PassivesAdded) do
-        Osi.AddPassive(message.PlayerId, passive)
-    end
+    E6_ApplyFeat(message.PlayerId, message.Feat)
     Osi.ApplyStatus(message.PlayerId, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, message.PlayerId)
 end
 

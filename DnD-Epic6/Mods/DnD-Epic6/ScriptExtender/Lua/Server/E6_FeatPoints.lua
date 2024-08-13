@@ -210,11 +210,7 @@ local function E6_OnRespecComplete(characterGuid)
     Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
     if char.Vars.E6_Feats then
-        for _,feat in ipairs(char.Vars.E6_Feats) do
-            for _,passive in ipairs(feat.PassivesAdded) do
-                Osi.RemovePassive(characterGuid, passive)
-            end
-        end        
+        E6_RemoveFeats(characterGuid, char.Vars.E6_Feats)
         char.Vars.E6_Feats = nil
     end
 end
