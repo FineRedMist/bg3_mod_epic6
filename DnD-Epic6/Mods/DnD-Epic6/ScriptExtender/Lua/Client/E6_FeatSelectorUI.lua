@@ -36,8 +36,12 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     childWin.Size = {windowDimensions[1], windowDimensions[2] - 150}
     childWin.PositionOffset = {0, 0}
     childWin.NoTitleBar = true
-    local description = childWin:AddText(feat.Description)
-    description.ItemWidth = windowDimensions[1] - 100
+    local description = childWin:AddText(TidyDescription(feat.Description))
+    description.ItemWidth = windowDimensions[1] - 30
+    pcall(function()
+        -- This isn't in the standard bg3se yet. I have a PR for it at: https://github.com/Norbyte/bg3se/pull/431
+        description.TextWrapPos = windowDimensions[1] - 30
+    end)
     local select = featDetailUI:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
    
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
@@ -98,6 +102,12 @@ function E6_FeatSelectorUI(message)
         featUI.NoCollapse = true
         featUI:SetSize(windowDimensions)
         featUI:SetPos({800, 100})
+        featUI.OnClose = function()
+            if featDetailUI then
+                featDetailUI.Visible = false
+                featDetailUI.Open = false
+            end
+        end
     else
         featUI.Visible = true
         featUI.Open = true
