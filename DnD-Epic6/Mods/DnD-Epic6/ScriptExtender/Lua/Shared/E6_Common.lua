@@ -29,6 +29,22 @@ function GetFullMatch(str, regex)
     end
 end
 
+---Strips the xml tags from the given string.
+---@param str string
+---@return string
+function StripXmlTags(str)
+    return string.gsub(str, "<[^>]+>", "")
+end
+
+---Strips xml comments and restores spaces after periods.
+---@param str string
+---@return string
+function TidyDescription(str)
+    str = StripXmlTags(str)
+    str = string.gsub(str, "%.([^0-9 ])", ". %1")
+    return str
+end
+
 ---Retrieves the name for the character, either from the CharacterCreationStats or the Origin
 ---@param entity EntityHandle -- The entity to retrieve the name for
 ---@param[opt=false] returnNil boolean -- If true, return nil if the name is unknown, otherwise return <unknown>
