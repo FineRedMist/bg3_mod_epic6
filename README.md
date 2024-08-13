@@ -7,7 +7,7 @@ D&amp;D Epic 6 limits level progressing to 6th level (where power between caster
 
 ## Outline of Basic Method
 
-Imgui is now available in the script extender and I'm revisiting this. 
+Imgui is now available in the script extender and I'm revisiting this. (Note: I have a pending pull request for word wrapping for the script extender at: https://github.com/Norbyte/bg3se/pull/431.)
 
 I'm now gathering information about each of the feats dynamically at runtime and processing each. This is resulting in more parsing than desired, but this seems to be working so far. I can bring up a couple of windows showing available feat options and selecting one will show the description and the option to select the feat.
 
