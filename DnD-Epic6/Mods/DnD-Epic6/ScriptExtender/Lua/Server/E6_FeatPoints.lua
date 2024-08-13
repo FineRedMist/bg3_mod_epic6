@@ -113,10 +113,10 @@ end
 ---@return EntityHandle?
 local function E6_CanUpdateEpic6FeatCounts()
     -- No character, no party to retrieve to update.
-    if Osi.GetHostCharacter == nil then
+    if not Osi or not Osi.GetHostCharacter then
         return nil
     end
-    -- _D(_C().Uuid.EntityUuid)
+
     -- Ensure we can safely get the character, too (some game states outside of running it doesn't work for)
     local success, char = pcall(function()
         return Osi.GetHostCharacter()
