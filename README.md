@@ -27,6 +27,8 @@ Tick then uses the current experience of the character, computes what the feat p
 
 Respec is captured and the feats granted through this mechanism are removed (based on the information in the Vars.E6_Feats variable).
 
+![WIP: Imgui Based Feat Panel](Readme_Assets/Imgui_Sample.png)
+
 ### Granting Feats
 
 The feat information is parsed for the various abilities and options it grants, and those are applied to the character. Unlike the attempts to use spells and boosts which would automatically reset on respec, this method does not. I explicitly track the feats granted this way to be able to remove them on respec.
@@ -55,4 +57,4 @@ To handle choosing two ability scores, the root spell for granting the feats lin
 
 Unfortunately, spell containers can only be one level, it isn't implemented in Baldur's Gate 3 as a multilevel system (I don't know if this is a limitation of the UI, the spell system, or both). So attempting to select a child container spell results in being kicked out as it can't render the next level for the next set of children.
 
-![Current Feat Panel](FeatPanel.png)
+![Deprecated Spell Based Feat Panel](Readme_Assets/FeatPanel.png)
