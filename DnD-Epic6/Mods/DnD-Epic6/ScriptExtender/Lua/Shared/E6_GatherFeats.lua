@@ -70,6 +70,7 @@ featRacialConstraints["e65b2814-fc8e-4290-821b-4e243f64982b"] = {races.Halfling}
 featRacialConstraints["6c59e67a-76f9-4c9b-af59-dbe6bb2048f7"] = {races.Halfling} -- SecondChance
 featRacialConstraints["e0457947-44b7-4316-b700-d1a69a10ced7"] = {races.Tiefling} -- FlamesOfPhlegethos
 featRacialConstraints["168923b1-75a0-46dd-b6a8-bf44736e3ec8"] = {races.Tiefling} -- InfernalConstitution
+featRacialConstraints["5a726c22-5bc8-442f-b161-7f1b338879ff"] = {races.HalfElf} -- EverybodysFriend
 
 
 ---Adds a requirement for the feat.
