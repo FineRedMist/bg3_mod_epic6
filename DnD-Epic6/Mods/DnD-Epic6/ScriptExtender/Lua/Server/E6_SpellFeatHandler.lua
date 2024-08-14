@@ -13,7 +13,7 @@ local function GatherPlayerFeats(entity)
     end
     local function AddFeat(feat)
         if feat ~= nil and feat ~= "00000000-0000-0000-0000-000000000000" then
-            _E6P("Adding feat: " .. feat)
+            --_E6P("Adding feat: " .. feat)
             local curCount = feats[feat]
             if curCount == nil then
                 curCount = 1
