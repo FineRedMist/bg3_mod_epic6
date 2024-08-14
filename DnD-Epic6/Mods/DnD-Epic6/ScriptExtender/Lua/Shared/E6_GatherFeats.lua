@@ -314,7 +314,7 @@ local function E6_ApplyFeatOverrides(feat, spec)
     if featOverrideAllowMultiple[featId] then
         feat.CanBeTakenMultipleTimes = true
     end
-    if Ext.IsServer() then
+    if Ext.IsServer() then -- we don't need these on the client
         E6_ApplyFeatAbilityConstraints(feat)
         E6_ApplyFeatRequirements(feat, spec)
         E6_ApplyRacialConstraints(feat)
