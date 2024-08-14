@@ -7,7 +7,46 @@ local function CalculateLayout()
     _E6P("Client UI Layout value: " .. tostring(Ext.ClientUI.GetStateMachine().State.Layout))
 end
 
+---Creates a table that facilitates centering an object through brute force.
+---@param parent ExtuiTreeParent The container to add the table to
+---@param uniqueName string A unique name for the table and columns.
+---@param tableWidth number The width the table should be.
+local function CreateCenteredControlCell(parent, uniqueName, tableWidth)
+    local columnCount = 11
+    local halfColumnCount = (columnCount - 1) / 2
+    local table = parent:AddTable(uniqueName, columnCount)
+    table.ItemWidth = tableWidth
+    for i = 1, halfColumnCount do
+        table:AddColumn(uniqueName .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthStretch)
+    end
+    table:AddColumn(uniqueName .. "_center", Ext.Enums.GuiTableColumnFlags.WidthFixed)
+    for i = halfColumnCount + 2, columnCount do
+        table:AddColumn(uniqueName .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthStretch)
+    end
+    local row = table:AddRow()
+    for i = 1, halfColumnCount do
+        row:AddCell()
+    end
+    local centerCell = row:AddCell()
+    for i = halfColumnCount + 2, columnCount do
+        row:AddCell()
+    end
+    return centerCell
+end
+
 ---comment
+---@param cell ExtuiTableCell
+---@param feat table
+local function AddPassivesToCell(cell, feat)
+    for _,passive in ipairs(feat.PassivesAdded) do
+        local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
+        _E6P("Stat icon name for " .. feat.ShortName .. ": " .. passiveStat.Icon)
+        local icon = cell:AddIcon(passiveStat.Icon)
+        icon.SameLine = true
+    end
+end
+
+---The details panel for the feat.
 ---@param feat table The feat to create the window for.
 ---@param playerInfo table The player id for the feat.
 local function ShowFeatDetailSelectUI(feat, playerInfo)
@@ -33,17 +72,34 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     end
 
     local childWin = featDetailUI:AddChildWindow("Selection")
-    childWin.Size = {windowDimensions[1], windowDimensions[2] - 150}
+    childWin.Size = {windowDimensions[1] - 30, windowDimensions[2] - 130}
     childWin.PositionOffset = {0, 0}
     childWin.NoTitleBar = true
     local description = childWin:AddText(TidyDescription(feat.Description))
-    description.ItemWidth = windowDimensions[1] - 30
+    description.ItemWidth = windowDimensions[1] - 60
     pcall(function()
         -- This isn't in the standard bg3se yet. I have a PR for it at: https://github.com/Norbyte/bg3se/pull/431
-        description.TextWrapPos = windowDimensions[1] - 30
+        description.TextWrapPos = windowDimensions[1] - 60
     end)
-    local select = featDetailUI:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
-   
+    if #feat.PassivesAdded > 0 then
+        childWin:AddSpacing()
+        childWin:AddSeparator()
+        childWin:AddSpacing()
+        local passivesTitle = nil
+        if #feat.PassivesAdded > 1 then
+            passivesTitle = Ext.Loca.GetTranslatedString("h74d1322ag4c4dg42eag9272g066b84d0d374")
+        else
+            passivesTitle = Ext.Loca.GetTranslatedString("h099ebd82g6ea7g43b7gbf0fg69e32653f322")
+        end
+        local passiveTitleCell = CreateCenteredControlCell(childWin, "PassiveTitle", windowDimensions[1] - 60)
+        passiveTitleCell:AddText(passivesTitle)
+        local passivesCell = CreateCenteredControlCell(childWin, "Passives", windowDimensions[1] - 60)
+        AddPassivesToCell(passivesCell, feat)
+    end
+
+    local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
+    local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
+
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
     -- Doesn't work :(
     select.OnActivate = function()
