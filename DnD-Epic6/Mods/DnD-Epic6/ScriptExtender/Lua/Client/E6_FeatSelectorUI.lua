@@ -7,6 +7,41 @@ local function CalculateLayout()
     _E6P("Client UI Layout value: " .. tostring(Ext.ClientUI.GetStateMachine().State.Layout))
 end
 
+---Adds a tooltip to the target with the given text.
+---@param target ExtuiStyledRenderable
+---@param text string The text of the tooltip
+local function AddTooltip(target, text)
+    local tooltip = target:Tooltip()
+    tooltip.IDContext = target.IDContext .. "_TOOLTIP"
+    tooltip:AddText(text)
+end
+
+---Adds a tooltip to the target with a title and text.
+---@param target ExtuiStyledRenderable
+---@param title string The title of the tooltip
+---@param text string The text of the tooltip
+local function AddTooltipTitled(target, title, text)
+    AddTooltip(target, title .. "\n\n" .. text)
+end
+
+---Adds a tooltip to the target with the given text.
+---@param target ExtuiStyledRenderable
+---@param textId string The id of the text in the localization system to lookup.
+local function AddLocaTooltip(target, textId)
+    local text = Ext.Loca.GetTranslatedString(textId)
+    AddTooltip(target, TidyDescription(text))
+end
+
+---Adds a tooltip to the target with a title and text.
+---@param target ExtuiStyledRenderable
+---@param titleId string The title of the tooltip
+---@param textId string The text of the tooltip
+local function AddLocaTooltipTitled(target, titleId, textId)
+    local title = Ext.Loca.GetTranslatedString(titleId)
+    local text = Ext.Loca.GetTranslatedString(textId)
+    AddTooltipTitled(target, TidyDescription(title), TidyDescription(text))
+end
+
 ---Creates a table that facilitates centering an object through brute force.
 ---@param parent ExtuiTreeParent The container to add the table to
 ---@param uniqueName string A unique name for the table and columns.
@@ -42,6 +77,7 @@ local function AddPassivesToCell(cell, feat)
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
         _E6P("Stat icon name for " .. feat.ShortName .. ": " .. passiveStat.Icon)
         local icon = cell:AddIcon(passiveStat.Icon)
+        AddLocaTooltipTitled(icon, passiveStat.DisplayName, passiveStat.Description)
         icon.SameLine = true
     end
 end
@@ -138,6 +174,7 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
     local featButton = win:AddButton(feat.DisplayName)
     featButton.Size = {buttonWidth-30, 48}
     featButton:SetStyle("ButtonTextAlign", 0.5, 0.5)
+    AddTooltip(featButton, TidyDescription(feat.Description))
     featButton.OnClick = function()
         ShowFeatDetailSelectUI(feat, playerInfo)
     end
