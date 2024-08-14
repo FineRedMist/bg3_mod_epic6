@@ -29,19 +29,18 @@ function GetFullMatch(str, regex)
     end
 end
 
----Strips the xml tags from the given string.
----@param str string
----@return string
-function StripXmlTags(str)
-    return string.gsub(str, "<[^>]+>", "")
-end
-
 ---Strips xml comments and restores spaces after periods.
 ---@param str string
 ---@return string
 function TidyDescription(str)
-    str = StripXmlTags(str)
-    str = string.gsub(str, "%.([^0-9 ])", ". %1")
+    if false then
+        for match in string.gmatch(str, "<[^>]+>") do
+            _E6P("Found Xml Tag: " .. match)
+        end
+    end
+    str = string.gsub(str, "<br>", "\n")
+    str = string.gsub(str, "<[^>]+>", " ")
+    str = string.gsub(str, "  ", " ")
     return str
 end
 
