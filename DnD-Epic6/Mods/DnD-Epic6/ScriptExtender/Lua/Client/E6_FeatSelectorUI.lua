@@ -73,12 +73,17 @@ end
 ---@param cell ExtuiTableCell
 ---@param feat table
 local function AddPassivesToCell(cell, feat)
+    local avoidDupes = {}
     for _,passive in ipairs(feat.PassivesAdded) do
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
-        _E6P("Stat icon name for " .. feat.ShortName .. ": " .. passiveStat.Icon)
-        local icon = cell:AddIcon(passiveStat.Icon)
-        AddLocaTooltipTitled(icon, passiveStat.DisplayName, passiveStat.Description)
-        icon.SameLine = true
+        local key = passiveStat.DisplayName .. "|" .. passiveStat.Description .. "|" .. passiveStat.Icon
+        if not avoidDupes[key] then
+            _E6P("Stat icon name for " .. feat.ShortName .. ": " .. passiveStat.Icon)
+            local icon = cell:AddIcon(passiveStat.Icon)
+            AddLocaTooltipTitled(icon, passiveStat.DisplayName, passiveStat.Description)
+            icon.SameLine = true
+            avoidDupes[key] = true
+        end
     end
 end
 
