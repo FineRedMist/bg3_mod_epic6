@@ -12,7 +12,7 @@ end
 ---@param uniqueName string A unique name for the table and columns.
 ---@param tableWidth number The width the table should be.
 local function CreateCenteredControlCell(parent, uniqueName, tableWidth)
-    local columnCount = 11
+    local columnCount = 3
     local halfColumnCount = (columnCount - 1) / 2
     local table = parent:AddTable(uniqueName, columnCount)
     table.ItemWidth = tableWidth
