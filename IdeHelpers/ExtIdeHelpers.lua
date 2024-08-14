@@ -6353,6 +6353,7 @@ Osi = {}
 --- @field Font FixedString
 --- @field IDContext string
 --- @field ItemWidth number?
+--- @field TextWrapPos number?
 --- @field Label string
 --- @field OnActivate RegistryEntry
 --- @field OnDeactivate RegistryEntry
@@ -6530,6 +6531,8 @@ Osi = {}
 --- @field NoScrollWithMouse boolean
 --- @field NoScrollbar boolean
 --- @field NoTitleBar boolean
+--- @field HasFocus boolean -- read-only
+--- @field OnFocusChanged RegistryEntry
 --- @field OnClose RegistryEntry
 --- @field Open boolean
 --- @field UnsavedDocument boolean
