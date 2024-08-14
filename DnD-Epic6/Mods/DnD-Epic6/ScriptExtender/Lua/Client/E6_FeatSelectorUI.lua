@@ -1,10 +1,31 @@
 
 ---@type ExtuiWindow?
 local featUI = nil
+---@type ExtuiWindow?
 local featDetailUI = nil
+---@type number
+local uiHasFocusCount = 0
 
 local function CalculateLayout()
     _E6P("Client UI Layout value: " .. tostring(Ext.ClientUI.GetStateMachine().State.Layout))
+end
+
+---Checks if both windows have lost focus. If so, closes them.
+local function OnFocusChanged(_, _)
+    if featUI and featUI.HasFocus then
+        return
+    end
+    if featDetailUI and featDetailUI.HasFocus then
+        return
+    end
+    if featUI then
+        featUI.Visible = false
+        featUI.Open = false
+    end
+    if featDetailUI then
+        featDetailUI.Visible = false
+        featDetailUI.Open = false
+    end
 end
 
 ---Adds a tooltip to the target with the given text.
@@ -13,7 +34,9 @@ end
 local function AddTooltip(target, text)
     local tooltip = target:Tooltip()
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
-    tooltip:AddText(text)
+    local textControl = tooltip:AddText(text)
+    textControl.ItemWidth = 400
+    textControl.TextWrapPos = 400
 end
 
 ---Adds a tooltip to the target with a title and text.
@@ -78,8 +101,7 @@ local function AddPassivesToCell(cell, feat)
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
         local key = passiveStat.DisplayName .. "|" .. passiveStat.Description .. "|" .. passiveStat.Icon
         if not avoidDupes[key] then
-            _E6P("Stat icon name for " .. feat.ShortName .. ": " .. passiveStat.Icon)
-            local icon = cell:AddIcon(passiveStat.Icon)
+            local icon = cell:AddImage(passiveStat.Icon)
             AddLocaTooltipTitled(icon, passiveStat.DisplayName, passiveStat.Description)
             icon.SameLine = true
             avoidDupes[key] = true
@@ -99,6 +121,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         featDetailUI.NoMove = true
         featDetailUI.NoResize = true
         featDetailUI.NoCollapse = true
+        featDetailUI.OnFocusChanged = OnFocusChanged
         featDetailUI:SetSize(windowDimensions)
         featDetailUI:SetPos({1400, 100})
     end
@@ -198,6 +221,7 @@ function E6_FeatSelectorUI(message)
         featUI.NoMove = true
         featUI.NoResize = true
         featUI.NoCollapse = true
+        featUI.OnFocusChanged = OnFocusChanged
         featUI:SetSize(windowDimensions)
         featUI:SetPos({800, 100})
         featUI.OnClose = function()
