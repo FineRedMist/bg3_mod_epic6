@@ -103,7 +103,7 @@ local function E6_ApplyRacialConstraints(feat)
             end
             for raceName,raceId in ipairs(raceConstraint) do
                 if race == raceId then
-                    _E6P("Racial Constraints: " .. name .. " has the race " .. raceName .. " matching the constraint for: " .. feat.ShortName)
+                    --_E6P("Racial Constraints: " .. name .. " has the race " .. raceName .. " matching the constraint for: " .. feat.ShortName)
                     return true
                 end
             end
@@ -111,12 +111,12 @@ local function E6_ApplyRacialConstraints(feat)
             if subRace then
                 for raceName,raceId in ipairs(raceConstraint) do
                     if subRace == raceId then
-                        _E6P("Racial Constraints: " .. name .. " has the subrace " .. raceName .. " matching the constraint for: " .. feat.ShortName)
+                        --_E6P("Racial Constraints: " .. name .. " has the subrace " .. raceName .. " matching the constraint for: " .. feat.ShortName)
                         return true
                     end
                 end
             end
-            _E6P("Racial Constraints: " .. name .. " with race " .. race .. " and subrace " .. tostring(subRace) .. " does not match the constraint for: " .. feat.ShortName)
+            --_E6Warn("Racial Constraints: " .. name .. " with race " .. race .. " and subrace " .. tostring(subRace) .. " does not match the constraint for: " .. feat.ShortName)
             return false
         end
         E6_AddFeatRequirement(feat, raceRequirement)
@@ -234,6 +234,78 @@ local function E6_ApplyFeatRequirements(feat, spec)
     end
 end
 
+---Gathers any ability modifiers from the passive ability boosts.
+---Note: This will be used for both feats and for passives listed in the passive list for selection. 
+---@param passiveName string Name of the passive to gather the ability modifiers from. 
+---@return table<string,number> A mapping of ability name to delta value.
+local function GatherPassiveAbilityModifiers(passiveName)
+    local result = {}
+    local passive = Ext.Stats.Get(passiveName, -1, true, true)
+    if passive and passive.Boosts then
+        local boosts = SplitString(passive.Boosts, ";")
+        for _,boost in ipairs(boosts) do
+            local parts = GetFullMatch(boost, "%s*Ability%s*%(%s*(%a+)%s*,%s*(%d+),?%s*%d*%s*%)%s*")
+            if parts then
+                local ability = parts[1]
+                local delta = tonumber(parts[2])
+                if not result[ability] then
+                    result[ability] = delta
+                else
+                    result[ability] = result[ability] + delta
+                end
+            end
+        end
+    end
+    return result
+end
+
+---Merges the ability boosts from the passive into the general ability boost table.
+---@param abilityBoosts table<string,number>
+---@param passiveBoosts table<string,number>
+local function MergeAbilityBoosts(abilityBoosts, passiveBoosts)
+    for ability,delta in pairs(passiveBoosts) do
+        if not abilityBoosts[ability] then
+            abilityBoosts[ability] = delta
+        else
+            abilityBoosts[ability] = abilityBoosts[ability] + delta
+        end
+    end
+end
+
+---Determines whether taking the feat will raise the player's abilities above the maximum
+---@param feat table The feat to test against
+local function E6_ApplyFeatAbilityConstraints(feat)
+    local abilityBoosts = {}
+    for _,passiveName in ipairs(feat.PassivesAdded) do
+        local passiveBoosts = GatherPassiveAbilityModifiers(passiveName)
+        MergeAbilityBoosts(abilityBoosts, passiveBoosts)
+    end
+    if next(abilityBoosts) ~= nil then
+        local function validateAbilityBoosts(entity, abilityScores)
+            for ability,delta in pairs(abilityBoosts) do
+                local name = GetCharacterName(entity)
+                if not abilityScores then
+                    _E6Error("Ability Constraints: " .. name .. " is missing the ability scores")
+                    return false
+                end
+                local abilityScore = abilityScores[ability]
+                if not abilityScore then
+                    _E6Error("Ability Constraints: " .. name .. " is missing the ability score for " .. ability)
+                    return false
+                end
+                if abilityScore.Current + delta > abilityScore.Maximum then
+                    _E6Warn("Ability constraint failed for " .. feat.ShortName .. ": " .. ability .. " is " .. abilityScore.Current .. " + " .. delta .. " > " .. abilityScore.Maximum)
+                    return false
+                end
+                --_E6P("Ability constraint passed for " .. feat.ShortName .. ": " .. ability .. " is " .. abilityScore.Current .. " + " .. delta .. " <= " .. abilityScore.Maximum)
+            end
+            return true
+        end
+
+        E6_AddFeatRequirement(feat, validateAbilityBoosts)
+    end
+end
+
 ---Applies overrides to feats to allow or constrain feats further.
 ---@param feat table The feat entry to update
 ---@param spec table The specification table for the feat from Feats.lsx
@@ -242,8 +314,11 @@ local function E6_ApplyFeatOverrides(feat, spec)
     if featOverrideAllowMultiple[featId] then
         feat.CanBeTakenMultipleTimes = true
     end
-    E6_ApplyFeatRequirements(feat, spec)
-    E6_ApplyRacialConstraints(feat)
+    if Ext.IsServer() then
+        E6_ApplyFeatAbilityConstraints(feat)
+        E6_ApplyFeatRequirements(feat, spec)
+        E6_ApplyRacialConstraints(feat)
+    end
     -- Do I want to add feat constraints (like for the giant feats)?
 end
 
@@ -297,7 +372,7 @@ function E6_GatherFeats()
         if featRejectReason == nil then
             featSet[featid] = {Spec = feat}
         else
-            _E6P("Skipping unsupported feat " .. feat.Name .. ": " .. featRejectReason)
+            _E6Warn("Skipping unsupported feat " .. feat.Name .. ": " .. featRejectReason)
         end
     end
     local featDescriptions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.FeatDescription)
@@ -321,9 +396,9 @@ function E6_GatherFeats()
         featSet[k] = nil
     end
 
-    for _, featInfo in pairs(featSet) do
-        _E6P("Allowing feat: " .. featInfo.ShortName)
-    end
+    --for _, featInfo in pairs(featSet) do
+    --    _E6P("Allowing feat: " .. featInfo.ShortName)
+    --end
 
     return featSet
 end
