@@ -29,6 +29,17 @@ function GetFullMatch(str, regex)
     end
 end
 
+---Substitutes substrings in str with the values in parameters, which maps the keys to the values.
+---@param str string The string to substitute values in.
+---@param parameters table<string,any> The parameters to substitute in the string. Keys exclude the curly braces.
+---@return string The string with the parameters substituted.
+function SubstituteParameters(str, parameters)
+    for key, value in pairs(parameters) do
+        str = string.gsub(str, "{" .. key .. "}", tostring(value))
+    end
+    return str
+end
+
 ---Strips xml comments and restores spaces after periods.
 ---@param str string
 ---@return string

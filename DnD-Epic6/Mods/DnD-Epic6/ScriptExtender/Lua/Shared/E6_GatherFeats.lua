@@ -7,10 +7,6 @@ local function E6_IsFeatSupported(feat)
     if feat.AddSpells ~= nil and #feat.AddSpells > 0 then
         return "the feat adds spells"
     end
-    -- We don't support abilities yet
-    if feat.SelectAbilities ~= nil and #feat.SelectAbilities > 0 then
-        return "the feat selects abilities"
-    end
     -- We don't support ability bonuses yet
     if feat.SelectAbilityBonus ~= nil and #feat.SelectAbilityBonus > 0 then
         return "the feat selects ability bonuses"
@@ -125,7 +121,7 @@ end
 
 ---Indicates a match failure
 ---@param feat table The feat entry for the ability requirement
----@param matchResult table The expression that failed to match
+---@param matchResult? table The expression that failed to match
 ---@return function That evaluates to false, always.
 local function E6_MatchFailure(feat, matchResult)
     if matchResult then
@@ -133,6 +129,46 @@ local function E6_MatchFailure(feat, matchResult)
     end
     return function(entity, abilityScores)
         return false
+    end
+end
+
+---Generates the function to test the character for meeting the ability requirement for selecting abilities. In particular, if the player has
+---maxed out their abilities for all the selectable abilities, then prevent the feat from being selectable.
+---@param feat table The feat entry for the ability requirement
+local function E6_ApplySelectAbilityRequirement(feat)
+    if #feat.SelectAbilities == 0 then
+        return
+    end
+    for _, ability in ipairs(feat.SelectAbilities) do
+        local abilityList = Ext.StaticData.Get(ability.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
+        if not abilityList then
+            _E6Error("Failed to retrieve the ability list for feat " .. feat.ShortName .. " from source " .. ability.SourceId)
+            E6_AddFeatRequirement(feat, E6_MatchFailure(feat, nil))
+            return
+        end
+        _P(Ext.Json.Stringify(E6_ToJson(abilityList)))
+        local abilityNames = {}
+        for _,abilityName in ipairs(abilityList.Spells) do -- TODO: Spells will likely be fixed in the future
+            table.insert(abilityNames, abilityName)
+        end
+        local abilityRequirement = function(entity, abilityScores)
+            -- determine the total number of assignable points across the listed abilities. If the count is less than granted,
+            -- return false.
+            local availablePointRoom = 0
+            for _,abilityName in ipairs(abilityNames) do -- TODO: Spells will likely be fixed in the future
+                local abilityScore = abilityScores[abilityName]
+                if not abilityScore then
+                    _E6Error("Select Ability Constraint(" .. feat.ShortName .. "): " .. GetCharacterName(entity) .. " is missing the ability score for " .. abilityName)
+                    return false
+                end
+                availablePointRoom = availablePointRoom + abilityScore.Maximum - abilityScore.Current
+            end
+            if availablePointRoom < ability.Count then
+                return false
+            end
+            return true
+        end
+        E6_AddFeatRequirement(feat, abilityRequirement)
     end
 end
 
@@ -316,6 +352,7 @@ local function E6_ApplyFeatOverrides(feat, spec)
     end
     if Ext.IsServer() then -- we don't need these on the client
         E6_ApplyFeatAbilityConstraints(feat)
+        E6_ApplySelectAbilityRequirement(feat)
         E6_ApplyFeatRequirements(feat, spec)
         E6_ApplyRacialConstraints(feat)
     end
@@ -339,6 +376,20 @@ local function E6_MakeFeatInfo(featId, spec, desc)
         feat.PassivesAdded = SplitString(spec.PassivesAdded, ";")
     else
         feat.PassivesAdded = {}
+    end
+    if #spec.SelectAbilities > 0 then
+        local abilities = {}
+        for _,ability in ipairs(spec.SelectAbilities) do
+            local abilityRemap = {}
+            abilityRemap.Count = ability.Arg2
+            abilityRemap.Max = ability.Arg3
+            abilityRemap.Source = ability.Arg4
+            abilityRemap.SourceId = ability.UUID
+            table.insert(abilities, abilityRemap)
+        end
+        feat.SelectAbilities = abilities
+    else
+        feat.SelectAbilities = {}
     end
     E6_ApplyFeatOverrides(feat, spec)
     return feat

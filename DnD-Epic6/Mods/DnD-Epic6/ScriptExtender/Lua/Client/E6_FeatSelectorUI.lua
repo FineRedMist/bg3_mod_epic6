@@ -28,69 +28,6 @@ local function OnFocusChanged(_, _)
     end
 end
 
----Adds a tooltip to the target with the given text.
----@param target ExtuiStyledRenderable
----@param text string The text of the tooltip
-local function AddTooltip(target, text)
-    local tooltip = target:Tooltip()
-    tooltip.IDContext = target.IDContext .. "_TOOLTIP"
-    local textControl = tooltip:AddText(text)
-    textControl.ItemWidth = 400
-    textControl.TextWrapPos = 400
-end
-
----Adds a tooltip to the target with a title and text.
----@param target ExtuiStyledRenderable
----@param title string The title of the tooltip
----@param text string The text of the tooltip
-local function AddTooltipTitled(target, title, text)
-    AddTooltip(target, title .. "\n\n" .. text)
-end
-
----Adds a tooltip to the target with the given text.
----@param target ExtuiStyledRenderable
----@param textId string The id of the text in the localization system to lookup.
-local function AddLocaTooltip(target, textId)
-    local text = Ext.Loca.GetTranslatedString(textId)
-    AddTooltip(target, TidyDescription(text))
-end
-
----Adds a tooltip to the target with a title and text.
----@param target ExtuiStyledRenderable
----@param titleId string The title of the tooltip
----@param textId string The text of the tooltip
-local function AddLocaTooltipTitled(target, titleId, textId)
-    local title = Ext.Loca.GetTranslatedString(titleId)
-    local text = Ext.Loca.GetTranslatedString(textId)
-    AddTooltipTitled(target, TidyDescription(title), TidyDescription(text))
-end
-
----Creates a table that facilitates centering an object through brute force.
----@param parent ExtuiTreeParent The container to add the table to
----@param uniqueName string A unique name for the table and columns.
----@param tableWidth number The width the table should be.
-local function CreateCenteredControlCell(parent, uniqueName, tableWidth)
-    local columnCount = 3
-    local halfColumnCount = (columnCount - 1) / 2
-    local table = parent:AddTable(uniqueName, columnCount)
-    table.ItemWidth = tableWidth
-    for i = 1, halfColumnCount do
-        table:AddColumn(uniqueName .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthStretch)
-    end
-    table:AddColumn(uniqueName .. "_center", Ext.Enums.GuiTableColumnFlags.WidthFixed)
-    for i = halfColumnCount + 2, columnCount do
-        table:AddColumn(uniqueName .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthStretch)
-    end
-    local row = table:AddRow()
-    for i = 1, halfColumnCount do
-        row:AddCell()
-    end
-    local centerCell = row:AddCell()
-    for i = halfColumnCount + 2, columnCount do
-        row:AddCell()
-    end
-    return centerCell
-end
 
 ---comment
 ---@param cell ExtuiTableCell
@@ -108,6 +45,130 @@ local function AddPassivesToCell(cell, feat)
         end
     end
 end
+
+---Adds the passives to the feat details, if present.
+---@param parent ExtuiTreeParent
+---@param feat table
+local function AddPassivesToFeatDetailsUI(parent, feat)
+    if #feat.PassivesAdded > 0 then
+        parent:AddSpacing()
+        parent:AddSeparator()
+        parent:AddSpacing()
+        local passivesTitle = nil
+        if #feat.PassivesAdded > 1 then
+            passivesTitle = "h74d1322ag4c4dg42eag9272g066b84d0d374"
+        else
+            passivesTitle = "h099ebd82g6ea7g43b7gbf0fg69e32653f322"
+        end
+        AddLocaTitle(parent, passivesTitle)
+        local passivesCell = CreateCenteredControlCell(parent, "Passives", parent.Size[1] - 60)
+        AddPassivesToCell(passivesCell, feat)
+    end
+end
+
+local abilityTitleId = { 
+    Strength="h1579d774gdbcdg4a97gb3fage409138d104d",
+    Dexterity="h8d7356d7g4c37g41e4gb8a2gef3459e12b97",
+    Constitution="h20676a9ag9216g47dbgba3ag82bd734cfd53",
+    Intelligence="ha1a41e74g2804g4a70g9a85g6235163d41da",
+    Wisdom="h2e9f1067g2dceg4640g8816gc6394e9f0303",
+    Charisma="ha2fc9b3dg3305g404eg9256gf25a06d0b2aa"
+}
+
+---Creates a control for manipulating the ability scores
+---@param parent ExtuiTreeParent
+---@param id string
+---@param sharedResource SharedResource
+---@param abilityName string
+---@param abilityInfo table
+---@param maxPoints number
+---@return table?
+local function AddAbilityControl(parent, id, sharedResource, abilityName, abilityInfo, maxPoints)
+    if abilityInfo.Current >= abilityInfo.Maximum then
+        return nil
+    end
+
+    local state = { Ability = abilityName, Initial = abilityInfo.Current, Current = abilityInfo.Current, Maximum = abilityInfo.Maximum }
+
+    local win = parent:AddChildWindow(abilityName .. id .. "_Window")
+    win.Size = {100, 300}
+    win.SameLine = true
+    AddLocaTitle(win, abilityTitleId[abilityName])
+
+    local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", win.Size[1] - 40)
+    local addButton = addButtonCell:AddImageButton("", "ico_plus_h")
+
+    local currentScoreCell = CreateCenteredControlCell(win, abilityName .. id .. "_Current", win.Size[1] - 40)
+    local currentScore = currentScoreCell:AddText(tostring(state.Current))
+
+    local minButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_-", win.Size[1] - 40)
+    local minButton = minButtonCell:AddImageButton("", "ico_min_h")
+
+    local updateButtons = function()
+        addButton.Enabled = sharedResource.count > 0 and state.Current < state.Maximum and state.Current - state.Initial < maxPoints
+        minButton.Enabled = state.Current > state.Initial and sharedResource.count < sharedResource.capacity
+    end
+
+    addButton.OnClick = function()
+        if sharedResource:AcquireResource() then
+            state.Current = state.Current + 1
+            currentScore.Label = tostring(state.Current)
+        end
+        updateButtons()
+    end
+
+    minButton.OnClick = function()
+        if sharedResource:ReleaseResource() then
+            state.Current = state.Current - 1
+            currentScore.Label = tostring(state.Current)
+        end
+        updateButtons()
+    end
+
+    sharedResource:add(function(hasResources, resourcesAtCapacity)
+        updateButtons()
+    end)
+
+    return state
+end
+
+---Adds the ability selector to the feat details, if ability selection is present.
+---@param parent ExtuiTreeParent The parent container to add the ability selector to.
+---@param feat table The feat with the ability selector to process.
+---@param playerInfo table Information about the player (in particular, ability scores).
+---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
+local function AddAbilitySelectorToFeatDetailsUI(parent, feat, playerInfo)
+    local resources = {}
+    for _,abilityListSelector in ipairs(feat.SelectAbilities) do
+        local abilityList = Ext.StaticData.Get(abilityListSelector.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
+        if abilityList then
+            parent:AddSpacing()
+            parent:AddSeparator()
+            parent:AddSpacing()
+            AddLocaTitle(parent, "he77d62c5g322fg4878g8c39g043108d4581c")
+            local pointCount = SharedResource:new(abilityListSelector.Count)
+            table.insert(resources, pointCount)
+            local pointText = AddLocaTitle(parent, "h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
+
+            pointCount:add(function(_, _)
+                local text = Ext.Loca.GetTranslatedString("h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
+                text = SubstituteParameters(text, { Count = pointCount.count, Max = abilityListSelector.Count })
+                pointText.Label = text
+            end)
+            local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.SourceId, parent.Size[1] - 60)
+            
+            for _,abilityEnum in ipairs(abilityList.Spells) do -- TODO: Will likely get renamed in the future
+                local abilityName = abilityEnum.Label
+                local abilityInfo = playerInfo.Abilities[abilityName]
+                AddAbilityControl(abilitiesCell, abilityListSelector.SourceId, pointCount, abilityName, abilityInfo, abilityListSelector.Max)
+            end
+
+            pointCount:trigger()
+        end
+    end
+    return resources
+end
+
 
 ---The details panel for the feat.
 ---@param feat table The feat to create the window for.
@@ -145,21 +206,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         -- This isn't in the standard bg3se yet. I have a PR for it at: https://github.com/Norbyte/bg3se/pull/431
         description.TextWrapPos = windowDimensions[1] - 60
     end)
-    if #feat.PassivesAdded > 0 then
-        childWin:AddSpacing()
-        childWin:AddSeparator()
-        childWin:AddSpacing()
-        local passivesTitle = nil
-        if #feat.PassivesAdded > 1 then
-            passivesTitle = Ext.Loca.GetTranslatedString("h74d1322ag4c4dg42eag9272g066b84d0d374")
-        else
-            passivesTitle = Ext.Loca.GetTranslatedString("h099ebd82g6ea7g43b7gbf0fg69e32653f322")
-        end
-        local passiveTitleCell = CreateCenteredControlCell(childWin, "PassiveTitle", windowDimensions[1] - 60)
-        passiveTitleCell:AddText(passivesTitle)
-        local passivesCell = CreateCenteredControlCell(childWin, "Passives", windowDimensions[1] - 60)
-        AddPassivesToCell(passivesCell, feat)
-    end
+
+    AddPassivesToFeatDetailsUI(childWin, feat)
+    AddAbilitySelectorToFeatDetailsUI(childWin, feat, playerInfo)
 
     local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
     local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))

@@ -99,7 +99,7 @@ local function GatherAbilityScoresFromBoosts(boosts)
                     scores[abilityLabel] = {Current = 0, Maximum = 20}
                 end
                 scores[abilityLabel].Current = scores[abilityLabel].Current + ability.Value
-                scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + ability.field_8
+                scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + ability.field_8 -- TODO: This field will likely get renamed in the future
             end
         end
     end
@@ -158,8 +158,8 @@ local function OnEpic6FeatSelectorSpell(caster)
     --Ext.IO.SaveFile("E6_character.json", str)
     --_E6P("Character saved!")
 
-    --ent.BackgroundPassives?.field_18[].Passive uint32
-    --ent.OriginPassives?.field_18[].Passive uint32
+    --ent.BackgroundPassives?.field_18[].Passive uint32  -- TODO: This field will likely get renamed in the future
+    --ent.OriginPassives?.field_18[].Passive uint32  -- TODO: This field will likely get renamed in the future
     --ent.PassiveContainer.Passives[] EntityHandle Uuid.Guid
 
     local str = Ext.Json.Stringify(message)

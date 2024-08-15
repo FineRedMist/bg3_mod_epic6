@@ -6358,6 +6358,7 @@ Osi = {}
 --- @field OnActivate RegistryEntry
 --- @field OnDeactivate RegistryEntry
 --- @field PositionOffset vec2?
+--- @field Enabled boolean
 --- @field SameLine boolean
 --- @field Visible boolean
 --- @field SetColor fun(self:ExtuiStyledRenderable, a1:GuiColor, a2:vec4)
