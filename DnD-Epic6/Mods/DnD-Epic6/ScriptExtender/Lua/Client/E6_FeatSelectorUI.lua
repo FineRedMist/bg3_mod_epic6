@@ -98,13 +98,7 @@ local function AddPassivesToFeatDetailsUI(parent, feat, extraPassives)
         parent:AddSpacing()
         parent:AddSeparator()
         parent:AddSpacing()
-        local passivesTitle = nil
-        if #feat.PassivesAdded > 1 then
-            passivesTitle = "h74d1322ag4c4dg42eag9272g066b84d0d374"
-        else
-            passivesTitle = "h099ebd82g6ea7g43b7gbf0fg69e32653f322"
-        end
-        AddLocaTitle(parent, passivesTitle)
+        AddLocaTitle(parent, "hffc72a17g6934g42f8ga935g447764ee6f43")
         local passivesCell = CreateCenteredControlCell(parent, "Passives", parent.Size[1] - 60)
         AddPassivesToCell(passivesCell, feat, extraPassives)
     end
@@ -126,7 +120,7 @@ local function AddAbilityControl(parent, id, sharedResource, abilityName, abilit
     local state = { Ability = abilityName, Initial = abilityInfo.Current, Current = abilityInfo.Current, Maximum = abilityInfo.Maximum }
 
     local win = parent:AddChildWindow(abilityName .. id .. "_Window")
-    win.Size = {100, 300}
+    win.Size = {100, 180}
     win.SameLine = true
     local passiveInfo = abilityPassives[abilityName]
     AddLocaTooltipTitled(win, passiveInfo.DisplayName, passiveInfo.Description)
