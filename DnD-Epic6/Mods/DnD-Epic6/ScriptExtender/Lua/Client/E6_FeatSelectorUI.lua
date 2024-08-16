@@ -4,7 +4,10 @@ local featUI = nil
 ---@type ExtuiWindow?
 local featDetailUI = nil
 ---@type number
-local uiHasFocusCount = 0
+local uiPendingCount = 0
+---The number of ticks to wait before checking the UI focus.
+---@type number
+local uiPendingTickCount = 2
 
 local function CalculateLayout()
     _E6P("Client UI Layout value: " .. tostring(Ext.ClientUI.GetStateMachine().State.Layout))
@@ -42,25 +45,6 @@ local abilityPassives = {
         Description = "h441085efge3a5g4004gba8dgf2378e8986c8",
         Icon = "E6_Ability_Charisma" }
 }
-
----Checks if both windows have lost focus. If so, closes them.
-local function OnFocusChanged(_, _)
-    if featUI and featUI.HasFocus then
-        return
-    end
-    if featDetailUI and featDetailUI.HasFocus then
-        return
-    end
-    if featUI then
-        featUI.Visible = false
-        featUI.Open = false
-    end
-    if featDetailUI then
-        featDetailUI.Visible = false
-        featDetailUI.Open = false
-    end
-end
-
 
 ---Adds the list of passives to the cell.
 ---@param cell ExtuiTableCell
@@ -106,18 +90,14 @@ end
 
 ---Creates a control for manipulating the ability scores
 ---@param parent ExtuiTreeParent
----@param id string
 ---@param sharedResource SharedResource
----@param abilityName string
----@param abilityInfo table
----@param maxPoints number
+---@param pointInfo table
+---@param state table
 ---@return table?
-local function AddAbilityControl(parent, id, sharedResource, abilityName, abilityInfo, maxPoints)
-    if abilityInfo.Current >= abilityInfo.Maximum then
-        return nil
-    end
-
-    local state = { Ability = abilityName, Initial = abilityInfo.Current, Current = abilityInfo.Current, Maximum = abilityInfo.Maximum }
+local function AddAbilityControl(parent, sharedResource, pointInfo, state)
+    local abilityName = state.Name
+    local id = pointInfo.ID
+    local maxPoints = pointInfo.Max
 
     local win = parent:AddChildWindow(abilityName .. id .. "_Window")
     win.Size = {100, 180}
@@ -156,51 +136,77 @@ local function AddAbilityControl(parent, id, sharedResource, abilityName, abilit
         updateButtons()
     end
 
-    sharedResource:add(function(hasResources, resourcesAtCapacity)
+    sharedResource:add(function(_, _)
         updateButtons()
     end)
-
-    return state
 end
 
 ---Adds the ability selector to the feat details, if ability selection is present.
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
----@param feat table The feat with the ability selector to process.
----@param playerInfo table Information about the player (in particular, ability scores).
----@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
+---@param abilityInfo table The ability information to render
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
-local function AddAbilitySelectorToFeatDetailsUI(parent, feat, playerInfo, extraPassives)
+local function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo)
     local resources = {}
-    for _,abilityListSelector in ipairs(feat.SelectAbilities) do
-        local abilityList = Ext.StaticData.Get(abilityListSelector.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
-        if abilityList then
-            parent:AddSpacing()
-            parent:AddSeparator()
-            parent:AddSpacing()
+    for _,abilityListSelector in ipairs(abilityInfo) do
+        parent:AddSpacing()
+        parent:AddSeparator()
+        parent:AddSpacing()
 
-            local pointCount = SharedResource:new(abilityListSelector.Count)
-            table.insert(resources, pointCount)
-            local pointText = AddLocaTitle(parent, "h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
+        local pointCount = SharedResource:new(abilityListSelector.PointCount)
+        table.insert(resources, pointCount)
+        local pointText = AddLocaTitle(parent, "h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
 
-            pointCount:add(function(_, _)
-                local text = Ext.Loca.GetTranslatedString("h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
-                text = SubstituteParameters(text, { Count = pointCount.count, Max = abilityListSelector.Count })
-                pointText.Label = text
-            end)
-            local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.SourceId, parent.Size[1] - 60)
-            
-            for _,abilityEnum in ipairs(abilityList.Spells) do -- TODO: Will likely get renamed in the future
-                local abilityName = abilityEnum.Label
-                local abilityInfo = playerInfo.Abilities[abilityName]
-                AddAbilityControl(abilitiesCell, abilityListSelector.SourceId, pointCount, abilityName, abilityInfo, abilityListSelector.Max)
-            end
+        pointCount:add(function(_, _)
+            local text = Ext.Loca.GetTranslatedString("h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
+            text = SubstituteParameters(text, { Count = pointCount.count, Max = abilityListSelector.PointCount })
+            pointText.Label = text
+        end)
+        local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.ID, parent.Size[1] - 60)
 
-            pointCount:trigger()
+        for _,ability in ipairs(abilityListSelector.State) do -- TODO: Will likely get renamed in the future
+            AddAbilityControl(abilitiesCell, pointCount, abilityListSelector, ability)
         end
+
+        pointCount:trigger()
     end
     return resources
 end
 
+---Gather the abilities and map any single attribute increases to extraPassives
+---@param feat table
+---@param playerInfo table
+---@param extraPassives table
+local function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
+    local results = {}
+    for _,abilityListSelector in ipairs(feat.SelectAbilities) do
+        local abilityList = Ext.StaticData.Get(abilityListSelector.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
+        if abilityList then
+            local pointCount = abilityListSelector.Count
+            local result = { ID = abilityListSelector.SourceId, PointCount = pointCount, Max = abilityListSelector.Max, State = {} }
+            table.insert(results, result)
+
+            for _,abilityEnum in ipairs(abilityList.Spells) do -- TODO: Will likely get renamed in the future
+                local abilityName = abilityEnum.Label
+                local abilityInfo = playerInfo.Abilities[abilityName]
+                if abilityInfo.Current < abilityInfo.Maximum then
+                    table.insert(result.State, { Name = abilityName, Initial = abilityInfo.Current, Current = abilityInfo.Current, Maximum = abilityInfo.Maximum }) -- The ability name is repeated for UI purposes.
+                end
+            end
+
+            -- We shouldn't encounter zero, we prefiltered on the server to remove them.
+            if #result.State == 1 then
+                local abilityName = next(result.State)
+                table.insert(extraPassives, {
+                    DisplayName = abilityPassives[abilityName].DisplayName,
+                    Description = abilityPassives[abilityName].Description,
+                    Icon = abilityPassives[abilityName].Icon,
+                    Boost = "Ability(" .. abilityName .. "," .. tostring(pointCount) .. ")",
+                })
+            end
+        end
+    end
+    return results
+end
 
 ---The details panel for the feat.
 ---@param feat table The feat to create the window for.
@@ -214,7 +220,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         featDetailUI.NoMove = true
         featDetailUI.NoResize = true
         featDetailUI.NoCollapse = true
-        featDetailUI.OnFocusChanged = OnFocusChanged
         featDetailUI:SetSize(windowDimensions)
         featDetailUI:SetPos({1400, 100})
     end
@@ -222,6 +227,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     featDetailUI.Visible = true
     featDetailUI.Open = true
     featDetailUI:SetFocus()
+    uiPendingCount = uiPendingTickCount
 
     local children = featDetailUI.Children
     for _, child in ipairs(children) do
@@ -240,8 +246,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     end)
 
     local extraPassives = {}
-    AddAbilitySelectorToFeatDetailsUI(childWin, feat, playerInfo, extraPassives)
+    local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddPassivesToFeatDetailsUI(childWin, feat, extraPassives)
+    local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo)
 
     local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
     local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
@@ -262,16 +269,33 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         featDetailUI.Visible = false
         featDetailUI.Open = false
 
+        -- Gather the selected abilities and any boosts from passives
+        local boosts = {}
+        for _, passive in ipairs(extraPassives) do
+            table.insert(boosts, passive.Boost)
+        end
+        for _, abilitySelector in ipairs(abilityInfo) do
+            for _, ability in ipairs(abilitySelector.State) do
+                if ability.Current > ability.Initial then
+                    local boost = "Ability(" .. ability.Name .. "," .. tostring(ability.Current - ability.Initial) .. ")"
+                    table.insert(boosts, boost)
+                end
+            end
+        end
+
         local payload = {
             PlayerId = playerInfo.ID,
             Feat = {
                 FeatId = feat.ID,
-                PassivesAdded = feat.PassivesAdded
+                PassivesAdded = feat.PassivesAdded,
+                Boosts = boosts
             }
         }
         local payloadStr = Ext.Json.Stringify(payload)
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC, payloadStr)
     end
+
+    ConfigureEnableOnAllResourcesAllocated(select, sharedResources)
 end
 
 ---Creates a button in the feat selection window for the feat.
@@ -291,6 +315,7 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
     return featButton
 end
 
+---Shows the Feat Selector UI
 ---@param message table
 function E6_FeatSelectorUI(message)
     local windowDimensions = {500, 1450}
@@ -303,7 +328,6 @@ function E6_FeatSelectorUI(message)
         featUI.NoMove = true
         featUI.NoResize = true
         featUI.NoCollapse = true
-        featUI.OnFocusChanged = OnFocusChanged
         featUI:SetSize(windowDimensions)
         featUI:SetPos({800, 100})
         featUI.OnClose = function()
@@ -312,11 +336,12 @@ function E6_FeatSelectorUI(message)
                 featDetailUI.Open = false
             end
         end
-    else
-        featUI.Visible = true
-        featUI.Open = true
     end
+
+    featUI.Visible = true
+    featUI.Open = true
     featUI:SetFocus()
+    uiPendingCount = uiPendingTickCount
 
     local children = featUI.Children
     for _, child in ipairs(children) do
@@ -351,3 +376,60 @@ function E6_FeatSelectorUI(message)
 
 end
 
+---Checks the feat windows to determine if they have lost focus, in which case, close them.
+local function E6_CheckUIFocus(tickParams)
+    if true then
+        return -- skipping it all for now
+    end
+
+    -- There is a tick timing event between creating the window, and drawing the window with focus.
+    if uiPendingCount > 0 then
+        uiPendingCount = uiPendingCount - 1
+        return
+    end
+
+    local isOpen = false
+    local queue = Dequeue:new()
+    if featUI then
+        queue:pushright(featUI)
+        isOpen = featUI.Open
+    end
+    if featDetailUI then
+        queue:pushright(featDetailUI)
+        isOpen = isOpen or featDetailUI.Open
+    end
+    if not isOpen then
+        return
+    end
+
+    while queue:count() > 0 do
+        local ui = queue:popleft()
+        if ui then
+            if ui.Focus then
+                return
+            end
+            pcall(function ()
+                if ui.Children then
+                    for _,child in ipairs(ui.Children) do
+                        if child then
+                            queue:pushright(child)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+
+    if featUI then
+        featUI.Visible = false
+        featUI.Open = false
+    end
+    if featDetailUI then
+        featDetailUI.Visible = false
+        featDetailUI.Open = false
+    end
+end
+
+---Checking every tick seems less than optimal, but checking focus is proving a little 
+---more involved to operate reliably by callbacks.
+Ext.Events.Tick:Subscribe(E6_CheckUIFocus)

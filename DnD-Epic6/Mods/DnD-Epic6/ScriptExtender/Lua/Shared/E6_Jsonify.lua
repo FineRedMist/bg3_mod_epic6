@@ -4465,50 +4465,6 @@ local userdataMembers = {
 "value"
 }
 
-
-List = {}
-function List.new()
-    return {first = 0, last = -1}
-end
-
-function List.count(list)
-    return list.last - list.first + 1
-end
-
-function List.pushleft (list, value)
-    local first = list.first - 1
-    list.first = first
-    list[first] = value
-end
-
-function List.pushright (list, value)
-    local last = list.last + 1
-    list.last = last
-    list[last] = value
-end
-
-function List.popleft (list)
-    local first = list.first
-    if first > list.last then
-        error("list is empty")
-    end
-    local value = list[first]
-    list[first] = nil        -- to allow garbage collection
-    list.first = first + 1
-    return value
-end
-
-function List.popright (list)
-    local last = list.last
-    if list.first > last then
-        error("list is empty")
-    end
-    local value = list[last]
-    list[last] = nil         -- to allow garbage collection
-    list.last = last - 1
-    return value
-end
-
 local function ShouldSkipProperty(skipProperties, property)
     if skipProperties == nil then
         return false
@@ -4530,11 +4486,11 @@ function E6_ToJson(obj, skipProperties)
 
     local visited = {}
     local root = { target = obj, path = "", key = nil, container = nil }
-    local stack = List.new()
-    List.pushleft(stack, root)
+    local stack = Dequeue:new()
+    stack:pushleft(root)
 
-    while List.count(stack) > 0 do
-        local current = List.popright(stack)
+    while stack:count() > 0 do
+        local current = stack:popright()
         local target = current.target
         local path = current.path
         local key = current.key
@@ -4557,12 +4513,12 @@ function E6_ToJson(obj, skipProperties)
                     if ShouldSkipProperty(skipProperties, k) then
                         value[k] = "<skipped>"
                     else
-                        List.pushleft(stack, { target = v, path = path .. "/" .. k, key = k, container = value })
+                        stack:pushleft({ target = v, path = path .. "/" .. k, key = k, container = value })
                     end
                 end
             end
             for i, v in ipairs(target) do
-                List.pushleft(stack, { target = v, path = path .. "[" .. tostring(i) .. "]", key = i, container = value })
+                stack:pushleft({ target = v, path = path .. "[" .. tostring(i) .. "]", key = i, container = value })
             end
         end
         local function ProcessUserData()
@@ -4575,7 +4531,7 @@ function E6_ToJson(obj, skipProperties)
                         if ShouldSkipProperty(skipProperties, memberKey) then
                             value[memberKey] = "<skipped>"
                         else
-                            List.pushleft(stack, { target = v, path = path .. "/" .. memberKey, key = memberKey, container = value })
+                            stack:pushleft({ target = v, path = path .. "/" .. memberKey, key = memberKey, container = value })
                         end
                     end
                 end)
@@ -4588,7 +4544,7 @@ function E6_ToJson(obj, skipProperties)
                 success = pcall(function()
                     local v = target[index]
                     if v then
-                        List.pushleft(stack, { target = v, path = path .. "[" .. tostring(index) .. "]", key = index, container = value })
+                        stack:pushleft({ target = v, path = path .. "[" .. tostring(index) .. "]", key = index, container = value })
                         hasvalue = true
                     end
                 end)

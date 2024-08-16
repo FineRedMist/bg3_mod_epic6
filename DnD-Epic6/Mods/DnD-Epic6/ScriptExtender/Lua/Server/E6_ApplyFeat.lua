@@ -3,10 +3,16 @@
 ---@param entityId string The UUID identity of the character.
 ---@param feat table The feat block as stored in Vars.E6_Feats.
 function E6_ApplyFeat(entityId, feat)
-    for _,passive in ipairs(feat.PassivesAdded) do
-        Osi.AddPassive(entityId, passive)
+    if feat.PassivesAdded then
+        for _,passive in ipairs(feat.PassivesAdded) do
+            Osi.AddPassive(entityId, passive)
+        end
     end
-    Osi.ApplyStatus(entityId, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, entityId)
+    if feat.Boosts then
+        for _,boost in ipairs(feat.Boosts) do
+            Osi.AddBoosts(entityId,boost,"E6_Feat",entityId)
+        end
+    end
 end
 
 ---Applies the feats to the entity, does not add them to Vars.E6_Feats.
@@ -22,8 +28,16 @@ end
 ---@param entityId string The UUID identity of the character.
 ---@param feat table The feat block as stored in Vars.E6_Feats.
 function E6_RemoveFeat(entityId, feat)
-    for _,passive in ipairs(feat.PassivesAdded) do
-        Osi.RemovePassive(entityId, passive)
+    if feat.PassivesAdded then
+        for _,passive in ipairs(feat.PassivesAdded) do
+            Osi.RemovePassive(entityId, passive)
+        end
+    end
+    if feat.Boosts then
+        for _,boost in ipairs(feat.Boosts) do
+            _E6P("Removing boost from " .. entityId .. ": " .. boost)
+            Osi.RemoveBoosts(entityId,boost,1,"E6_Feat",entityId)
+        end
     end
 end
 

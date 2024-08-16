@@ -163,7 +163,7 @@ local function OnEpic6FeatSelectorSpell(caster)
     --ent.PassiveContainer.Passives[] EntityHandle Uuid.Guid
 
     local str = Ext.Json.Stringify(message)
-    _E6P(str)
+    --_E6P(str)
 
     Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
 end

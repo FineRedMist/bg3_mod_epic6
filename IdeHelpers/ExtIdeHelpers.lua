@@ -6353,7 +6353,6 @@ Osi = {}
 --- @field Font FixedString
 --- @field IDContext string
 --- @field ItemWidth number?
---- @field TextWrapPos number?
 --- @field Label string
 --- @field OnActivate RegistryEntry
 --- @field OnDeactivate RegistryEntry
@@ -6361,6 +6360,7 @@ Osi = {}
 --- @field Enabled boolean
 --- @field SameLine boolean
 --- @field Visible boolean
+--- @field Focus boolean -- Read only property whether a control has focus
 --- @field SetColor fun(self:ExtuiStyledRenderable, a1:GuiColor, a2:vec4)
 --- @field SetStyle fun(self:ExtuiStyledRenderable, a1:GuiStyleVar, a2:number, a3:number?)
 --- @field Tooltip fun(self:ExtuiStyledRenderable):ExtuiTooltip

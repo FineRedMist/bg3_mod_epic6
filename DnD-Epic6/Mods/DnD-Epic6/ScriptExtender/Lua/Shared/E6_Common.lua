@@ -52,7 +52,7 @@ function TidyDescription(str)
     str = string.gsub(str, "<br>", "\n")
     str = string.gsub(str, "<[^>]+>", " ")
     str = string.gsub(str, "  ", " ")
-    str = string.gsub(str, " (%p)", "%1")
+    str = string.gsub(str, " ([,.])", "%1")
     str = string.gsub(str, "’", "'")
     return str
 end

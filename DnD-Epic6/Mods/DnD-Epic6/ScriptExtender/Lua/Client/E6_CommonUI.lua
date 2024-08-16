@@ -5,8 +5,8 @@ function AddTooltip(target, text)
     local tooltip = target:Tooltip()
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
     local textControl = tooltip:AddText(text)
-    textControl.ItemWidth = 400
-    textControl.TextWrapPos = 400
+    textControl.ItemWidth = 500
+    textControl.TextWrapPos = 500
 end
 
 ---Adds a tooltip to the target with a title and text.
@@ -70,4 +70,30 @@ function AddLocaTitle(parent, titleId)
     local title = Ext.Loca.GetTranslatedString(titleId)
     local centeredCell = CreateCenteredControlCell(parent, titleId .. "_Title", parent.Size[1] - 60)
     return centeredCell:AddText(title)
+end
+
+---Enables the control when all resources are allocated, disables when any are not.
+---@param control ExtuiStyledRenderable
+---@param sharedResources SharedResource[]
+local function EnableOnAllResourcesAllocated(control, sharedResources)
+    for _, resource in pairs(sharedResources) do
+        if resource.count > 0 then
+            control.Enabled = false
+            return
+        end
+    end
+    control.Enabled = true;
+end
+
+---Configures the control to enable the control when all resources are allocated and disable when any are not.
+---@param control ExtuiStyledRenderable
+---@param sharedResources SharedResource[]
+function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
+    for _, resource in pairs(sharedResources) do
+        resource:add(function(_, _)
+            EnableOnAllResourcesAllocated(control, sharedResources)
+        end)
+    end
+    -- Call it at the outset to set the initial state.
+    EnableOnAllResourcesAllocated(control, sharedResources)
 end
