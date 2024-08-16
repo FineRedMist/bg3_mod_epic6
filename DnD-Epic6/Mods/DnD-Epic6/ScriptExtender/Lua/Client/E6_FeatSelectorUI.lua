@@ -195,13 +195,15 @@ local function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
 
             -- We shouldn't encounter zero, we prefiltered on the server to remove them.
             if #result.State == 1 then
-                local abilityName = next(result.State)
+                local ability = result.State[1]
+                local abilityName = ability.Name
                 table.insert(extraPassives, {
                     DisplayName = abilityPassives[abilityName].DisplayName,
                     Description = abilityPassives[abilityName].Description,
                     Icon = abilityPassives[abilityName].Icon,
                     Boost = "Ability(" .. abilityName .. "," .. tostring(pointCount) .. ")",
                 })
+                table.remove(results, #results) -- Remove the entry so it doesn't show up in the selector
             end
         end
     end
