@@ -10,6 +10,39 @@ local function CalculateLayout()
     _E6P("Client UI Layout value: " .. tostring(Ext.ClientUI.GetStateMachine().State.Layout))
 end
 
+local abilityPassives = {
+    Strength = {
+        ShortName = "h1579d774gdbcdg4a97gb3fage409138d104d",
+        DisplayName = "h6c83537fg6358g41e0g8a18g32cc8316ced2_1",
+        Description = "haaf3959ag320eg4f68ga9c9gc143d7f64a8c",
+        Icon = "E6_Ability_Strength" },
+    Dexterity = {
+        ShortName = "h8d7356d7g4c37g41e4gb8a2gef3459e12b97",
+        DisplayName = "h6c83537fg6358g41e0g8a18g32cc8316ced2_2",
+        Description = "hbf128ebdgdfffg4ea9gbf4bg1659ccefd287",
+        Icon = "E6_Ability_Dexterity" },
+    Constitution = {
+        ShortName = "h20676a9ag9216g47dbgba3ag82bd734cfd53",
+        DisplayName = "h6c83537fg6358g41e0g8a18g32cc8316ced2_3",
+        Description = "h7a02f64dg4593g408fgbf93gb0dbabc182c9",
+        Icon = "E6_Ability_Constitution" },
+    Intelligence = {
+        ShortName = "ha1a41e74g2804g4a70g9a85g6235163d41da",
+        DisplayName = "h6c83537fg6358g41e0g8a18g32cc8316ced2_4",
+        Description = "h411a732ag4b4cg4094g9a5egd325fecf4645",
+        Icon = "E6_Ability_Intelligence" },
+    Wisdom = {
+        ShortName = "h2e9f1067g2dceg4640g8816gc6394e9f0303",
+        DisplayName = "h6c83537fg6358g41e0g8a18g32cc8316ced2_5",
+        Description = "h35233e68gf68ag461cgac5fgc15806be3dc7",
+        Icon = "E6_Ability_Wisdom" },
+    Charisma = {
+        ShortName = "ha2fc9b3dg3305g404eg9256gf25a06d0b2aa",
+        DisplayName = "h6c83537fg6358g41e0g8a18g32cc8316ced2_6",
+        Description = "h441085efge3a5g4004gba8dgf2378e8986c8",
+        Icon = "E6_Ability_Charisma" }
+}
+
 ---Checks if both windows have lost focus. If so, closes them.
 local function OnFocusChanged(_, _)
     if featUI and featUI.HasFocus then
@@ -29,10 +62,11 @@ local function OnFocusChanged(_, _)
 end
 
 
----comment
+---Adds the list of passives to the cell.
 ---@param cell ExtuiTableCell
 ---@param feat table
-local function AddPassivesToCell(cell, feat)
+---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
+local function AddPassivesToCell(cell, feat, extraPassives)
     local avoidDupes = {}
     for _,passive in ipairs(feat.PassivesAdded) do
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
@@ -44,12 +78,22 @@ local function AddPassivesToCell(cell, feat)
             avoidDupes[key] = true
         end
     end
+    for _,passive in ipairs(extraPassives) do
+        local key = passive.DisplayName .. "|" .. passive.Description .. "|" .. passive.Icon
+        if not avoidDupes[key] then
+            local icon = cell:AddImage(passive.Icon)
+            AddLocaTooltipTitled(icon, passive.DisplayName, passive.Description)
+            icon.SameLine = true
+            avoidDupes[key] = true
+        end
+    end
 end
 
 ---Adds the passives to the feat details, if present.
 ---@param parent ExtuiTreeParent
 ---@param feat table
-local function AddPassivesToFeatDetailsUI(parent, feat)
+---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
+local function AddPassivesToFeatDetailsUI(parent, feat, extraPassives)
     if #feat.PassivesAdded > 0 then
         parent:AddSpacing()
         parent:AddSeparator()
@@ -62,18 +106,9 @@ local function AddPassivesToFeatDetailsUI(parent, feat)
         end
         AddLocaTitle(parent, passivesTitle)
         local passivesCell = CreateCenteredControlCell(parent, "Passives", parent.Size[1] - 60)
-        AddPassivesToCell(passivesCell, feat)
+        AddPassivesToCell(passivesCell, feat, extraPassives)
     end
 end
-
-local abilityTitleId = { 
-    Strength="h1579d774gdbcdg4a97gb3fage409138d104d",
-    Dexterity="h8d7356d7g4c37g41e4gb8a2gef3459e12b97",
-    Constitution="h20676a9ag9216g47dbgba3ag82bd734cfd53",
-    Intelligence="ha1a41e74g2804g4a70g9a85g6235163d41da",
-    Wisdom="h2e9f1067g2dceg4640g8816gc6394e9f0303",
-    Charisma="ha2fc9b3dg3305g404eg9256gf25a06d0b2aa"
-}
 
 ---Creates a control for manipulating the ability scores
 ---@param parent ExtuiTreeParent
@@ -93,7 +128,9 @@ local function AddAbilityControl(parent, id, sharedResource, abilityName, abilit
     local win = parent:AddChildWindow(abilityName .. id .. "_Window")
     win.Size = {100, 300}
     win.SameLine = true
-    AddLocaTitle(win, abilityTitleId[abilityName])
+    local passiveInfo = abilityPassives[abilityName]
+    AddLocaTooltipTitled(win, passiveInfo.DisplayName, passiveInfo.Description)
+    AddLocaTitle(win, abilityPassives[abilityName].ShortName)
 
     local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", win.Size[1] - 40)
     local addButton = addButtonCell:AddImageButton("", "ico_plus_h")
@@ -136,8 +173,9 @@ end
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
 ---@param feat table The feat with the ability selector to process.
 ---@param playerInfo table Information about the player (in particular, ability scores).
+---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
-local function AddAbilitySelectorToFeatDetailsUI(parent, feat, playerInfo)
+local function AddAbilitySelectorToFeatDetailsUI(parent, feat, playerInfo, extraPassives)
     local resources = {}
     for _,abilityListSelector in ipairs(feat.SelectAbilities) do
         local abilityList = Ext.StaticData.Get(abilityListSelector.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
@@ -145,7 +183,7 @@ local function AddAbilitySelectorToFeatDetailsUI(parent, feat, playerInfo)
             parent:AddSpacing()
             parent:AddSeparator()
             parent:AddSpacing()
-            AddLocaTitle(parent, "he77d62c5g322fg4878g8c39g043108d4581c")
+
             local pointCount = SharedResource:new(abilityListSelector.Count)
             table.insert(resources, pointCount)
             local pointText = AddLocaTitle(parent, "h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
@@ -207,8 +245,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         description.TextWrapPos = windowDimensions[1] - 60
     end)
 
-    AddPassivesToFeatDetailsUI(childWin, feat)
-    AddAbilitySelectorToFeatDetailsUI(childWin, feat, playerInfo)
+    local extraPassives = {}
+    AddAbilitySelectorToFeatDetailsUI(childWin, feat, playerInfo, extraPassives)
+    AddPassivesToFeatDetailsUI(childWin, feat, extraPassives)
 
     local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
     local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
