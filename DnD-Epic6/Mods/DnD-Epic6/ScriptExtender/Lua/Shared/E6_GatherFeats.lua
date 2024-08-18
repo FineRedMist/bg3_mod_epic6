@@ -146,7 +146,6 @@ local function E6_ApplySelectAbilityRequirement(feat)
             E6_AddFeatRequirement(feat, E6_MatchFailure(feat, nil))
             return
         end
-        _P(Ext.Json.Stringify(E6_ToJson(abilityList)))
         local abilityNames = {}
         for _,abilityName in ipairs(abilityList.Spells) do -- TODO: Spells will likely be fixed in the future
             table.insert(abilityNames, abilityName)
