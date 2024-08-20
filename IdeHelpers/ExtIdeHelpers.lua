@@ -12239,6 +12239,7 @@ local Ext_Entity = {}
 --- @field GetPathOverride fun(a1:string):string?
 --- @field LoadFile fun(a1:string, a2:FixedString?):string?
 --- @field SaveFile fun(a1:string, a2:string):boolean
+--- @field OpenWriter fun(a1:string):fun(a1:string|number|boolean, ...:string|number|boolean) Opens a file with the given name into the user profile and returns a function to write to it.
 local Ext_IO = {}
 
 
@@ -12246,6 +12247,7 @@ local Ext_IO = {}
 --- @class Ext_Json
 --- @field Parse fun(str:string):table parsedTable
 --- @field Stringify fun(data:table, opts:JsonStringifyOptions?):string tableAsString
+--- @field ToFile fun(data:table, string, opts:JsonStringifyOptions?)
 local Ext_Json = {}
 --- @class JsonStringifyOptions
 --- @field Beautify boolean Sorts the output table, and indents with tabs. Defaults to true.

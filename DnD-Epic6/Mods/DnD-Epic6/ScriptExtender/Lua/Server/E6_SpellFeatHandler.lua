@@ -126,6 +126,10 @@ local function GatherAbilityScores(entity)
     return nil
 end
 
+local function SaveCharacterData(ent)
+    E6_ToFile(ent, "E6_Character_BaseStats.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+end
+
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
@@ -143,24 +147,7 @@ local function OnEpic6FeatSelectorSpell(caster)
         Abilities = abilityScores -- we need their current scores and maximums to display UI
     }
 
-    --_E6P("Stats.Abilities[0] = " .. tostring(ent.Stats.Abilities[0]))
-    --_E6P("Stats.Abilities[1] = " .. tostring(ent.Stats.Abilities[1]))
-    --_E6P("Stats.Abilities[2] = " .. tostring(ent.Stats.Abilities[2]))
-    --_E6P("Stats.Abilities[3] = " .. tostring(ent.Stats.Abilities[3]))
-    --_E6P("Stats.Abilities[4] = " .. tostring(ent.Stats.Abilities[4]))
-    --_E6P("Stats.Abilities[5] = " .. tostring(ent.Stats.Abilities[5]))
-    --_E6P("Stats.Abilities[6] = " .. tostring(ent.Stats.Abilities[6]))
-    --_E6P("Stats.Abilities[7] = " .. tostring(ent.Stats.Abilities[7]))
-    --_E6P("type(Stats.Abilities) = " .. tostring(type(ent.Stats.Abilities)))
-
-    --local obj = E6_ToJson(ent, {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
-    --local str = Ext.Json.Stringify(obj)
-    --Ext.IO.SaveFile("E6_character.json", str)
-    --_E6P("Character saved!")
-
-    --ent.BackgroundPassives?.field_18[].Passive uint32  -- TODO: This field will likely get renamed in the future
-    --ent.OriginPassives?.field_18[].Passive uint32  -- TODO: This field will likely get renamed in the future
-    --ent.PassiveContainer.Passives[] EntityHandle Uuid.Guid
+    SaveCharacterData(ent)
 
     local str = Ext.Json.Stringify(message)
     --_E6P(str)
