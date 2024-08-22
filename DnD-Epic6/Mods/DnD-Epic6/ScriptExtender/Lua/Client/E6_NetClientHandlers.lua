@@ -1,7 +1,7 @@
 NetClientHandlers = {}
 
 function NetClientHandlers.ShowFeatSelectorUI(_, payload, peerId)
-    _E6P("Showing feat selector UI: peer=" .. tostring(peerId) .. ", player id=" .. payload)
+    _E6P("Showing feat selector UI: peer=" .. tostring(peerId) .. ", payload=" .. payload)
     local message = Ext.Json.Parse(payload)
 
     E6_FeatSelectorUI(message)

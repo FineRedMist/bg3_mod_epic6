@@ -78,6 +78,78 @@ local function GatherSelectableFeatsForPlayer(entity, playerFeats, abilityScores
     return featList
 end
 
+---Determines if the boost should be included for the character.
+---@param entity EntityHandle The character entity
+---@param boost EntityHandle The boost instance
+---@param boostInfo BoostInfoComponent? The boost info component
+---@return boolean True if the boost should be included, false otherwise.
+local function IsValidCause(entity, boost, boostInfo)
+    if not boostInfo then
+        return false
+    end
+    if not boostInfo.Cause then
+        return false
+    end
+    local causeInfo = boostInfo.Cause
+    local cause = causeInfo.Type.Label
+    if cause == "Character" or cause == "Progression" or cause == "E6_Feat" then
+        return true
+    end
+    if cause ~= "Passive" then
+        return false
+    end
+    -- We have a passive (such as actor) for which we have to check the passive as well, as some items use passives to grant ability boosts.
+    if not causeInfo.Entity then
+        return false
+    end
+    -- The passive data indicates this passive was granted by a progression, so we can include it.
+    local progressionMeta = nil
+    pcall(function() progressionMeta = causeInfo.Entity.ProgressionMeta end)
+    if progressionMeta then
+        return true
+    end
+    -- Ensure the passive id matches the cause id
+    local passive = nil
+    pcall(function() passive = causeInfo.Entity.Passive end)
+    if not passive then
+        return false
+    end
+    local passiveId = nil
+    pcall(function() passiveId = passive.PassiveId end)
+    if not passiveId then
+        return false
+    end
+    if passiveId ~= causeInfo.Cause then
+        return false
+    end
+    
+    ---@type BackgroundComponent
+    local backgroundComponent = entity.Background
+    local backgroundId = backgroundComponent.Background
+    local background = Ext.StaticData.Get(backgroundId, Ext.Enums.ExtResourceManagerType.Background)
+    if background then
+        if background.Passives == passiveId then
+            return true
+        end
+    end
+
+    -- Check if the passive was granted by an E6 feat, in which case we can include it.
+    local e6Feats = entity.Vars.E6_Feats
+    if not e6Feats then
+        return false
+    end
+    for _, feat in ipairs(e6Feats) do
+        if feat.PassivesAdded then
+            for _,passive in ipairs(feat.PassivesAdded) do
+                if passive == passiveId then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
 ---Determines if the ability score boost should be included in the ability scores for the character.
 ---@param entity EntityHandle The character entity
 ---@param boost EntityHandle The boost instance
@@ -87,13 +159,10 @@ end
 ---@return integer? The delta value of the boost
 ---@return integer? The delta maximum of the boost
 local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
-    if not boostInfo then
+    if not IsValidCause(entity, boost, boostInfo) then
         return nil
     end
-    if not boostInfo.Cause then
-        return nil
-    end
-    local causeInfo = boostInfo.Cause
+
     ---@type AbilityBoostComponent?
     local ability = boost.AbilityBoost
     if not ability or not ability.Ability or not ability.Ability.Label then
@@ -102,52 +171,8 @@ local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
     local abilityLabel = ability.Ability.Label
     local value = ability.Value
     local max = ability.field_8 -- TODO: This field will likely get renamed in the future
-    local cause = causeInfo.Type.Label
-    if cause == "Character" or cause == "Progression" or cause == "E6_Feat" then
-        return abilityLabel, cause, value, max
-    end
-    if cause ~= "Passive" then
-        return nil
-    end
-    -- We have a passive (such as actor) for which we have to check the passive as well, as some items use passives to grant ability boosts.
-    if not causeInfo.Entity then
-        return nil
-    end
-    -- The passive data indicates this passive was granted by a progression, so we can include it.
-    local progressionMeta = nil
-    pcall(function() progressionMeta = causeInfo.Entity.ProgressionMeta end)
-    if progressionMeta then
-        return abilityLabel, cause, value, max
-    end
-    -- Ensure the passive id matches the cause id
-    local passive = nil
-    pcall(function() passive = causeInfo.Entity.Passive end)
-    if not passive then
-        return nil
-    end
-    local passiveId = nil
-    pcall(function() passiveId = passive.PassiveId end)
-    if not passiveId then
-        return nil
-    end
-    if passiveId ~= causeInfo.Cause then
-        return nil
-    end
-    -- Check if the passive was granted by an E6 feat, in which case we can include it.
-    local e6Feats = entity.Vars.E6_Feats
-    if not e6Feats then
-        return nil
-    end
-    for _, feat in ipairs(e6Feats) do
-        if feat.PassivesAdded then
-            for _,passive in ipairs(feat.PassivesAdded) do
-                if passive == passiveId then
-                    return abilityLabel, cause, value, max
-                end
-            end
-        end
-    end
-    return nil
+    local cause = boostInfo.Cause.Type.Label
+    return abilityLabel, cause, value, max
 end
 
 ---Gathers the ability scores from the ability boosts.
@@ -188,12 +213,94 @@ local function GatherAbilityScores(entity)
     if boosts == nil then
         return nil
     end
-    for _i,boost in ipairs(boosts) do
+    for _,boost in ipairs(boosts) do
         if boost.Type and boost.Type.Label == "Ability" then
             return GatherAbilityScoresFromBoosts(entity, boost.Boosts)
         end
     end
     return nil
+end
+
+---Gathers the proficiencies from the proficiency boosts.
+---@param entity EntityHandle The character entity handle
+---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
+---@param proficiencies table The proficiency table to update
+local function GatherProficienciesFromBoosts(entity, boosts, proficiencies)
+    if boosts == nil then
+        return
+    end
+
+    for _,boost in ipairs(boosts) do
+        ---@type BoostInfoComponent?
+        local boostInfo = boost.BoostInfo
+        if IsValidCause(entity, boost, boostInfo) and boost.ProficiencyBonusBoost then
+            local proficiency = boost.ProficiencyBonusBoost
+            if proficiency.Type.Label == "SavingThrow" then -- Saving throw
+                local ability = proficiency.Ability.Label
+                table.insert(proficiencies.SavingThrows, ability)
+            elseif proficiency.Type.Label == "Skill" then -- Skill
+                local skill = proficiency.Skill.Label
+                proficiencies.Skills[skill] = {Proficient = true}
+            end
+        end
+    end
+end
+
+---Gathers the expertise from the expertise boosts.
+---@param entity EntityHandle The character entity handle
+---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
+---@param proficiencies table The proficiency table to update
+local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
+    if boosts == nil then
+        return
+    end
+
+    for _,boost in ipairs(boosts) do
+        ---@type BoostInfoComponent?
+        local boostInfo = boost.BoostInfo
+        if IsValidCause(entity, boost, boostInfo) and boost.ExpertiseBonusBoost then
+            local expertise = boost.ExpertiseBonusBoost
+            if expertise then -- Expertise
+                local skill = expertise.Skill.Label
+                proficiencies.Skills[skill].Expertise = true -- The character should already have proficiency in the skill, initializing this.
+            end
+        end
+    end
+end
+
+---Gathers the ability scores for the given character, without magical modifications
+---@param entity EntityHandle
+---@return table?
+local function GatherProficiencies(entity)
+    local boostContainer = entity.BoostsContainer
+    if boostContainer == nil then
+        return nil
+    end
+    local boosts = boostContainer.Boosts
+    if boosts == nil then
+        return nil
+    end
+    -- table structure
+    -- {
+    --   "SavingThrows": [<attributes>],
+    --   "Skills": {
+    --     "<name>": {Proficient = true/false, Expertise = true/false}
+    --   }
+    -- }
+    -- Proficiency for saving throws and skills are stored in the ProficiencyBonus boosts.
+    -- Expertise is stored in the ExpertiseBonus boosts.
+    local proficiencies = {
+        SavingThrows = {},
+        Skills = {}
+    }
+    for _,boost in ipairs(boosts) do
+        if boost.Type and boost.Type.Label == "ProficiencyBonus" then
+            GatherProficienciesFromBoosts(entity, boost.Boosts, proficiencies)
+        elseif boost.Type and boost.Type.Label == "ExpertiseBonus" then
+            GatherExpertiseFromBoosts(entity, boost.Boosts, proficiencies)
+        end
+    end
+    return proficiencies
 end
 
 local function SaveCharacterData(ent)
@@ -212,16 +319,18 @@ local function OnEpic6FeatSelectorSpell(caster)
 
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
+    local proficiencies = GatherProficiencies(ent)
     local message = {
         PlayerId = caster,
         PlayerName = GetCharacterName(ent),
         PlayerFeats = playerFeats,
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, abilityScores),
-        Abilities = abilityScores -- we need their current scores and maximums to display UI
+        Abilities = abilityScores, -- we need their current scores and maximums to display UI
+        Proficiencies = proficiencies -- gathered so we know what they are proficient in and what could be granted
     }
 
     local str = Ext.Json.Stringify(message)
-    --_E6P(str)
+    _E6P(str)
 
     Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
 end
