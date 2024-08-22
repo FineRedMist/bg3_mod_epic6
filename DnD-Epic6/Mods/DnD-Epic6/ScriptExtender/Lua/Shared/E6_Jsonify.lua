@@ -2,10 +2,10 @@
 ---@type string[] -- The members to get from userdata objects
 local userdataMembers = {}
 
----Determines if the property should be skipped.
----@param skipProperties string[] -- The properties to skip
----@param property string -- The property to check
----@return boolean -- Whether the property should be skipped
+---Whether a given property name should be skipped from the output
+---@param skipProperties string[] The list of properties to skip
+---@param property string The property name to check
+---@return boolean True to skip, false otherwise
 local function ShouldSkipProperty(skipProperties, property)
     if skipProperties == nil then
         return false
@@ -18,261 +18,134 @@ local function ShouldSkipProperty(skipProperties, property)
     return false
 end
 
-local gcInterval = 10000
-local gcLastCheck = 0
-local function GCCheck()
-    gcLastCheck = gcLastCheck + 1
-    if gcLastCheck >= gcInterval then
-        collectgarbage()
-        gcLastCheck = 0
-    end
-end
-
----@type table<string, function> -- The map of types to their processing functions
-local processTypeMap = {}
-
----Determines the type of the value, and processes the type accordingly.
----@param value any -- The value to process
----@param path string -- The path to this value
----@param visited table<userdata|table, table> -- Visited objects
----@param skipProperties string[] -- Properties to skip
----@return any
-local function ProcessType(value, path, visited, skipProperties)
-    local valueType = type(value)
-    local processType = processTypeMap[valueType]
-    if processType then
-        return processType(value, path, visited, skipProperties)
-    else
-        _E6Error("Unsupported type: " .. processType)
-        return nil
-    end
-end
-
----Returns the raw value of the passed in data.
----@param value string|boolean|number|nil
----@param path string -- The path to this value (ignored)
----@param visited table<userdata|table, table> -- Visited objects (ignored)
----@param skipProperties string[] -- Properties to skip (ignored)
----@return string|boolean|number|nil
-local function ReturnRawValue(value, path, visited, skipProperties)
-    return value
-end
-
----Returns <function> for function types.
----@param value function -- The function to return the value for (ignored)
----@param path string -- The path to this value (ignored)
----@param visited table<userdata|table, table> -- Visited objects (ignored)
----@param skipProperties string[] -- Properties to skip (ignored)
----@return string
-local function ReturnFunctionValue(value, path, visited, skipProperties)
-    return "<function>"
-end
-
----Determines if the string starts with the possible prefix.
----@param str string -- The string to check for the prefix
----@param possiblePrefix string -- The prefix to check for
----@return boolean -- whether str starts with possiblePrefix
-local function StartsWith(str, possiblePrefix)
-    return string.sub(str, 1, string.len(possiblePrefix)) == possiblePrefix
-end
-
----Determines if the traversal is going to recurse into an object that has already been visited.
----If so, it will return the path that it was previously visited at.
----@param value userdata|table -- The value to check for recursion
----@param path string -- The path to this value
----@param visited table<userdata|table, table> -- Visited objects
----@return string|table|nil -- The path that it was previously visited at, or nil if it is not recursing
-local function IsRecursing(value, path, visited)
-    local visitedInfo = visited[value]
-    if not visitedInfo then
-        return nil
-    end
-    if StartsWith(path, visitedInfo.Path) then
-        _E6P("Avoiding recursion at " .. path .. ", returning " .. visitedInfo.Path)
-        return "Visited at: " .. visitedInfo.Path -- Return the path to avoid recursion
-    end
-    _E6P("Returning previously computed result for " .. path .. ", computed at " .. visitedInfo.Path)
-    return visitedInfo.Result -- Return the previously computed result for speed
-end
-
----Generalized wrapper to check for recursion and cache the result of processing a structured value.
----@param value userdata|table
----@param path string -- The path to this value
----@param visited table<userdata|table, table> -- Visited objects
----@param skipProperties string[] -- Properties to skip
----@param processor function -- The function to process the data with
----@return string|table -- The path to where it was previously visited, or the table with its members processed
-local function ReturnStructuredValue(value, path, visited, skipProperties, processor)
-    GCCheck()
-
-    local visitedResult = IsRecursing(value, path, visited)
-    if visitedResult then
-        return visitedResult
-    end
-    local lastVisitedInfo = visited[value]
-    local lastVisitedPath = nil
-    if lastVisitedInfo then
-        lastVisitedPath = lastVisitedInfo.Path
-    else
-        visited[value] = {}
-        lastVisitedInfo = visited[value]
-    end
-
-    local curPath = path
-    if curPath:len() == 0 then
-        curPath = "/"
-    end
-    lastVisitedInfo.Path = curPath
-
-    local result = processor(value, path, visited, skipProperties)
-
-    lastVisitedInfo.Path = lastVisitedPath
-    lastVisitedInfo.Result = result
-    return result
-end
-
-
----Returns the new path for the new value being processed for a key/value pair.
----@param path string The path to the current value
----@param key string The key to add to the path
----@return string The new path
-local function UpdatePathKey(path, key)
-    return path .. "/" .. key
-end
-
----Returns the new path for the new value being processed for an indexed value.
----@param path string The path to the current value
----@param index number The index of the value to add to the path
----@return string The new path
-local function UpdatePathIndex(path, index)
-    return path .. "[" .. tostring(index) .. "]"
-end
-
----Performs a traversal of the array elements and processes them. This is done without ipairs as userdata doesn't guarantee support for it.
----@param result table The result to assign values to
----@param value userdata|table The object being iterated over.
----@param path string The path to the current value
----@param visited table<userdata|table, table> Visited objects
----@param skipProperties string[] Properties to skip
----@param hasMembers boolean Whether any members have already been evaluated as a map, in which case the index should be a string.
-local function GenericArrayTraverse(result, value, path, visited, skipProperties, hasMembers)
-    local success = true
-    local hasvalue = true
-    local index = 1
-    while success and hasvalue do
-        hasvalue = false
-        success = pcall(function()
-            local v = value[index]
-            if not rawequal(v, nil) then
-                if hasMembers then
-                    local key = tostring(index)
-                    result[key] = ProcessType(v, UpdatePathKey(path, key), visited, skipProperties)
-                else
-                    result[index] = ProcessType(v, UpdatePathIndex(path, index), visited, skipProperties)
-                end
-                hasvalue = true
-            end
-        end)
-        index = index + 1
-    end
-end
-
----Processes an individual key-value pair in a table or userdata, conditionally assigning the conversion to result.
----@param result table
----@param key any The key to process
----@param value any The value associated with the key to process
----@param path string The path to this value
----@param visited table<userdata|table, table> Visited objects
----@param skipProperties string[] Properties to skip
----@return boolean Whether the key-value pair resulted in adding a member to the result
-local function ProcessTableKeyPair(result, key, value, path, visited, skipProperties)
-    local hasMembers = false
-    local stringKey = tostring(key)
-    if not rawequal(value, nil) then
-        if ShouldSkipProperty(skipProperties, key) then
-            hasMembers = true
-            result[stringKey] = "<skipped>"
-        else
-            local subvalue = ProcessType(value, UpdatePathKey(path, stringKey), visited, skipProperties)
-            if type(subvalue) ~= "table" or next(subvalue) ~= nil then
-                hasMembers = true
-                result[stringKey] = subvalue
-            end
-        end
-    end
-    return hasMembers
-end
-
----Processes a table (or array) into its members, or returns the path to where it was previously visited.
----@param value table -- The table to process
----@param path string -- The path to this value
----@param visited table<userdata|table, table> -- Visited objects
----@param skipProperties string[] -- Properties to skip
----@return string|table -- The path to where it was previously visited, or the table with its members processed
-local function GenericTableTraverse(value, path, visited, skipProperties)
-    local result = {}
-    local hasMembers = false
-    for k, v in pairs(value) do
-        local addedMember = ProcessTableKeyPair(result, k, v, path, visited, skipProperties)
-        hasMembers = hasMembers or addedMember
-    end
-    GenericArrayTraverse(result, value, path, visited, skipProperties, hasMembers)
-    return result
-end
-
----Processes a table (or array) into its members, or returns the path to where it was previously visited.
----@param value table -- The table to process
----@param path string -- The path to this value
----@param visited table<userdata|table, table> -- Visited objects
----@param skipProperties string[] -- Properties to skip
----@return string|table -- The path to where it was previously visited, or the table with its members processed
-local function ReturnTableValue(value, path, visited, skipProperties)
-    return ReturnStructuredValue(value, path, visited, skipProperties, GenericTableTraverse)
-end
-
----Processes a userdata into its members, or returns the path to where it was previously visited.
----@param value userdata -- The userdata to process
----@param path string -- The path to this value
----@param visited table<userdata|table, table> -- Visited objects
----@param skipProperties string[] -- Properties to skip
----@return string|table -- The path to where it was previously visited, or a table of the processed members
-local function ReturnUserDataValue(value, path, visited, skipProperties)
-    local processor = function(value, path, visited, skipProperties)
-        local result = {}
-        local hasMembers = false
-        for _, memberKey in ipairs(userdataMembers) do
-            local v = nil
-            local gotMember = pcall(function()
-                v = value[memberKey]
-            end)
-            if gotMember then
-                local addedMember = ProcessTableKeyPair(result, memberKey, v, path, visited, skipProperties)
-                hasMembers = hasMembers or addedMember
-            end
-        end
-        GenericArrayTraverse(result, value, path, visited, skipProperties, hasMembers)
-        return result
-    end
-
-    return ReturnStructuredValue(value, path, visited, skipProperties, processor) -- While the docs say GenericTableTraverse ought to work, it isn't returning results.
-end
-
-processTypeMap = {
-    ["string"] = ReturnRawValue,
-    ["number"] = ReturnRawValue,
-    ["boolean"] = ReturnRawValue,
-    ["nil"] = ReturnRawValue,
-    ["function"] = ReturnFunctionValue,
-    ["table"] = ReturnTableValue,
-    ["userdata"] = ReturnUserDataValue
-}
-
 ---Converts the passed in object such that all userdata is converted to a table of its members (best effort).
----@param obj any -- The object to convert
----@param skipProperties string[] -- Properties to skip
----@return string|number|boolean|table|nil -- The converted object
+---@param obj any
+---@return any
 function E6_ConvertUserData(obj, skipProperties)
-    return ProcessType(obj, "", {}, skipProperties)
+    if obj == nil then
+        return nil
+    end
+
+    local visited = {}
+    local root = { target = obj, path = "", key = nil, container = nil }
+    local stack = Dequeue:new()
+    stack:pushleft(root)
+
+    while stack:count() > 0 do
+        local current = stack:popright()
+        local target = current.target
+        local path = current.path
+        local key = current.key
+        local container = current.container
+        local value = nil
+        local targetType = nil
+
+        local function UpdatedVisited()
+            if string.len(path) > 0 then
+                visited[target] = path
+            else
+                visited[target] = "/"
+            end
+        end
+
+        local function IterateArray(hasMembers)
+            local success = true
+            local hasvalue = true
+            local index = 1
+            while success and hasvalue do
+                hasvalue = false
+                success = pcall(function()
+                    local v = target[index]
+                    if v then
+                        ---@type string|number
+                        local safeKey = index
+                        if hasMembers then
+                            safeKey = tostring(index)
+                        end
+                        stack:pushleft({ target = v, path = path .. "[" .. tostring(index) .. "]", key = safeKey, container = value })
+                        hasvalue = true
+                    end
+                end)
+                index = index + 1
+            end
+        end
+        
+        local function ProcessMember(k, v)
+            if v then
+                if ShouldSkipProperty(skipProperties, k) then
+                    value[k] = "<skipped>"
+                else
+                    stack:pushleft({ target = v, path = path .. "/" .. k, key = k, container = value })
+                end
+                return true
+            end
+            return false
+        end
+
+        local function ProcessTable()
+            UpdatedVisited()
+            value = {}
+            local hasMembers = false
+            for k, v in pairs(target) do
+                local memberQueued = ProcessMember(k, v)
+                hasMembers = hasMembers or memberQueued
+            end
+            IterateArray(hasMembers)
+        end
+        local function ProcessUserData()
+            UpdatedVisited()
+            value = {}
+            local hasMembers = false
+            local memberList = userdataMembers
+            pcall(function()
+                if target.GetAllComponentNames then
+                    memberList = target.GetAllComponentNames(true)
+                end
+            end)
+            for _, memberKey in ipairs(memberList) do
+                pcall(function()
+                    local v = target[memberKey]
+                    local memberQueued = ProcessMember(memberKey, v)
+                    hasMembers = hasMembers or memberQueued
+                end)
+            end
+            IterateArray(hasMembers)
+        end
+
+        if target then
+           targetType = type(target)
+        end
+
+        local visitedPath = visited[target]
+        if not target then
+            --_P("Value: nil")
+            value = nil
+        elseif targetType == "string" or targetType == "number" or targetType == "boolean" then
+            value = target
+            --_P("Value: " .. tostring(value))
+        elseif targetType == "function" then
+            value = "<function>"
+            --_P("Value: " .. value)
+        elseif visitedPath then
+            value = "Visited at: " .. visitedPath
+            --_P("Value: " .. value)
+        elseif targetType == "table" then
+            ProcessTable()
+            --_P("Value: <table>")
+        elseif targetType == "userdata" then
+            ProcessUserData()
+            --_P("Value: <userdata>")
+        else
+            _E6Error("Unsupported type: " .. targetType)
+        end
+
+        if container then
+            container[key] = value
+        else
+            root.container = value
+        end
+    end
+    return root.container
 end
 
 ---Converts the passed in object such that all userdata is converted to a table of its members (best effort).
@@ -280,11 +153,11 @@ end
 ---@param skipProperties string[] -- Properties to skip
 ---@return string -- The converted object as a JSON string
 function E6_ToJson(obj, skipProperties)
-    local table = E6_ConvertUserData(obj, skipProperties)
+    local userdata = E6_ConvertUserData(obj, skipProperties)
 	local opts = {
 		MaxDepth = 256
 	}
-    return Ext.Json.Stringify(table, opts)
+    return Ext.Json.Stringify(userdata, opts)
 end
 
 ---Converts the passed in object such that all userdata is converted to a table of its members (best effort).
@@ -293,7 +166,7 @@ end
 ---@param skipProperties string[] -- Properties to skip
 function E6_ToFile(obj, filename, skipProperties)
     _E6P("Converting character data!")
-    local table = E6_ConvertUserData(obj, skipProperties)
+    local userdata = E6_ConvertUserData(obj, skipProperties)
     _E6P("Writing character data!")
     local fileWriter = Ext.IO.OpenWriter(filename)
 
@@ -310,7 +183,7 @@ function E6_ToFile(obj, filename, skipProperties)
     end
     local writeIndent = function(indent)
         if indent > 0 then
-            fileWriter(string.rep("  ", indent))
+            fileWriter(string.rep("\t", indent))
         end
     end
 
@@ -347,15 +220,27 @@ function E6_ToFile(obj, filename, skipProperties)
                 end
             end
             writeIndent(indent)
-            writeRaw(indent, "]\n")
+            writeRaw(indent, "]")
         else
             writeRaw(0, "{\n")
-            for k, v in pairs(value) do
+            -- get the keys, sort them, then iterate in order
+            local keys = {}
+            for k, _ in pairs(value) do
+                table.insert(keys, k)
+            end
+
+            table.sort(keys, function(a, b)
+                return string.lower(a) < string.lower(b)
+            end)
+
+            local len = #keys
+            for i, k in ipairs(keys) do
+                local v = value[k]
                 writeIndent(indent + 1)
                 write(indent + 1, k)
                 fileWriter(": ")
                 write(indent + 1, v)
-                if k ~= firstKey then
+                if i < len then
                     fileWriter(",\n")
                 else
                     fileWriter("\n")
@@ -374,7 +259,7 @@ function E6_ToFile(obj, filename, skipProperties)
         ["table"] = writeTable
     }
 
-    write(0, table)
+    write(0, userdata)
     _E6P("Character saved!")
 end
 
