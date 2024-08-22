@@ -46,12 +46,12 @@ end
 ---@param feat table The feat to test for
 ---@param entity EntityHandle The entity to test against
 ---@return boolean True if the entity meets the requirements, false otherwise.
-local function MeetsFeatRequirements(feat, entity, abilityScores)
+local function MeetsFeatRequirements(feat, entity, playerInfo)
     if not feat.HasRequirements then
         return true
     end
     for _, req in ipairs(feat.HasRequirements) do
-        if not req(entity, abilityScores) then
+        if not req(entity, playerInfo) then
             return false
         end
     end
@@ -64,13 +64,13 @@ end
 ---@param playerFeats table
 ---@param abilityScores table?
 ---@return table
-local function GatherSelectableFeatsForPlayer(entity, playerFeats, abilityScores)
+local function GatherSelectableFeatsForPlayer(entity, playerFeats, playerInfo)
     local allFeats = E6_GatherFeats()
 
     local featList = {}
     for featId, feat in pairs(allFeats) do
         if feat.CanBeTakenMultipleTimes or playerFeats[featId] == nil then
-            if MeetsFeatRequirements(feat, entity, abilityScores) then
+            if MeetsFeatRequirements(feat, entity, playerInfo) then
                 table.insert(featList, featId)
             end
         end
@@ -122,7 +122,7 @@ local function IsValidCause(entity, boost, boostInfo)
     if passiveId ~= causeInfo.Cause then
         return false
     end
-    
+
     ---@type BackgroundComponent
     local backgroundComponent = entity.Background
     local backgroundId = backgroundComponent.Background
@@ -324,7 +324,7 @@ local function OnEpic6FeatSelectorSpell(caster)
         PlayerId = caster,
         PlayerName = GetCharacterName(ent),
         PlayerFeats = playerFeats,
-        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, abilityScores),
+        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies -- gathered so we know what they are proficient in and what could be granted
     }

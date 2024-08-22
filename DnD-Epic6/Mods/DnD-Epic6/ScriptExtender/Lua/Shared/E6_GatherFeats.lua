@@ -86,7 +86,7 @@ local function E6_ApplyRacialConstraints(feat)
     local featId = feat.ID
     if featRacialConstraints[featId] then
         local raceConstraint = featRacialConstraints[featId]
-        local raceRequirement = function(entity, abilityScores)
+        local raceRequirement = function(entity, playerInfo)
             local name = GetCharacterName(entity)
             if not entity.CharacterCreationStats then
                 _E6Error("Racial Constraints: " .. name .. " does not have CharacterCreationStats")
@@ -150,7 +150,8 @@ local function E6_ApplySelectAbilityRequirement(feat)
         for _,abilityName in ipairs(abilityList.Spells) do -- TODO: Spells will likely be fixed in the future
             table.insert(abilityNames, abilityName)
         end
-        local abilityRequirement = function(entity, abilityScores)
+        local abilityRequirement = function(entity, playerInfo)
+            local abilityScores = playerInfo.AbilityScores
             -- determine the total number of assignable points across the listed abilities. If the count is less than granted,
             -- return false.
             local availablePointRoom = 0
@@ -178,7 +179,8 @@ end
 local function E6_MakeAbilityRequirement(feat, abilityMatch)
     local ability = abilityMatch[1]
     local value = tonumber(abilityMatch[2])
-    return function(entity, abilityScores)
+    return function(entity, playerInfo)
+        local abilityScores = playerInfo.AbilityScores
         local name = GetCharacterName(entity)
         if not abilityScores then
             _E6Error("Ability Constraint(" .. feat.ShortName .. ": " .. ability .. " >= " .. tostring(value) .. "): " .. name .. " is missing the ability scores")
@@ -202,7 +204,7 @@ end
 ---@return function That evaluates to true if the character meets the requirement, false otherwise.
 local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
     local proficiency = proficiencyMatch[1]
-    return function(entity)
+    return function(entity, playerInfo)
         local name = GetCharacterName(entity)
         local proficiencyComp = entity.Proficiency
         if not proficiencyComp then
@@ -316,7 +318,8 @@ local function E6_ApplyFeatAbilityConstraints(feat)
         MergeAbilityBoosts(abilityBoosts, passiveBoosts)
     end
     if next(abilityBoosts) ~= nil then
-        local function validateAbilityBoosts(entity, abilityScores)
+        local function validateAbilityBoosts(entity, playerInfo)
+            local abilityScores = playerInfo.AbilityScores
             for ability,delta in pairs(abilityBoosts) do
                 local name = GetCharacterName(entity)
                 if not abilityScores then
