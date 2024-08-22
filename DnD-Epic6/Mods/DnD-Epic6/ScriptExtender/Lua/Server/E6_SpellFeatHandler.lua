@@ -78,29 +78,99 @@ local function GatherSelectableFeatsForPlayer(entity, playerFeats, abilityScores
     return featList
 end
 
+---Determines if the ability score boost should be included in the ability scores for the character.
+---@param entity EntityHandle The character entity
+---@param boost EntityHandle The boost instance
+---@param boostInfo BoostInfoComponent? The boost info component
+---@return string? The name of the ability
+---@return string? The cause of the boost
+---@return integer? The delta value of the boost
+---@return integer? The delta maximum of the boost
+local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
+    if not boostInfo then
+        return nil
+    end
+    if not boostInfo.Cause then
+        return nil
+    end
+    local causeInfo = boostInfo.Cause
+    ---@type AbilityBoostComponent?
+    local ability = boost.AbilityBoost
+    if not ability or not ability.Ability or not ability.Ability.Label then
+        return nil
+    end
+    local abilityLabel = ability.Ability.Label
+    local value = ability.Value
+    local max = ability.field_8 -- TODO: This field will likely get renamed in the future
+    local cause = causeInfo.Type.Label
+    if cause == "Character" or cause == "Progression" or cause == "E6_Feat" then
+        return abilityLabel, cause, value, max
+    end
+    if cause ~= "Passive" then
+        return nil
+    end
+    -- We have a passive (such as actor) for which we have to check the passive as well, as some items use passives to grant ability boosts.
+    if not causeInfo.Entity then
+        return nil
+    end
+    -- The passive data indicates this passive was granted by a progression, so we can include it.
+    local progressionMeta = nil
+    pcall(function() progressionMeta = causeInfo.Entity.ProgressionMeta end)
+    if progressionMeta then
+        return abilityLabel, cause, value, max
+    end
+    -- Ensure the passive id matches the cause id
+    local passive = nil
+    pcall(function() passive = causeInfo.Entity.Passive end)
+    if not passive then
+        return nil
+    end
+    local passiveId = nil
+    pcall(function() passiveId = passive.PassiveId end)
+    if not passiveId then
+        return nil
+    end
+    if passiveId ~= causeInfo.Cause then
+        return nil
+    end
+    -- Check if the passive was granted by an E6 feat, in which case we can include it.
+    local e6Feats = entity.Vars.E6_Feats
+    if not e6Feats then
+        return nil
+    end
+    for _, feat in ipairs(e6Feats) do
+        if feat.PassivesAdded then
+            for _,passive in ipairs(feat.PassivesAdded) do
+                if passive == passiveId then
+                    return abilityLabel, cause, value, max
+                end
+            end
+        end
+    end
+    return nil
+end
+
 ---Gathers the ability scores from the ability boosts.
+---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
 ---@return table? The ability scores and their maximums, or nil if it could not be determined.
-local function GatherAbilityScoresFromBoosts(boosts)
+local function GatherAbilityScoresFromBoosts(entity, boosts)
     if boosts == nil then
         return nil
     end
 
     local scores = {}
-    for _,boost in ipairs(boosts) do
+    for boostIndex,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
-        if boostInfo and boostInfo.Cause and (boostInfo.Cause.Type == "Character" or boostInfo.Cause.Type == "Progression" or boostInfo.Cause.Cause == "E6_Feat") then
-            ---@type AbilityBoostComponent?
-            local ability = boost.AbilityBoost
-            if ability and ability.Ability and ability.Ability.Label then
-                local abilityLabel = ability.Ability.Label
-                if not scores[abilityLabel] then
-                    scores[abilityLabel] = {Current = 0, Maximum = 20}
-                end
-                scores[abilityLabel].Current = scores[abilityLabel].Current + ability.Value
-                scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + ability.field_8 -- TODO: This field will likely get renamed in the future
+        local abilityLabel, cause, value, max = IncludeAbilityScoreBoost(entity, boost, boostInfo)
+        if abilityLabel then
+            if not scores[abilityLabel] then
+                scores[abilityLabel] = {Current = 0, Maximum = 20}
             end
+            _E6P("Found ability boost [" .. tostring(boostIndex) .. "] " .. abilityLabel .. " (" .. cause .. "): amount delta=" .. tostring(value) .. ", max delta=" .. tostring(max))
+            scores[abilityLabel].Current = scores[abilityLabel].Current + value
+            scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + max
         end
     end
     return scores
@@ -120,14 +190,14 @@ local function GatherAbilityScores(entity)
     end
     for _i,boost in ipairs(boosts) do
         if boost.Type and boost.Type.Label == "Ability" then
-            return GatherAbilityScoresFromBoosts(boost.Boosts)
+            return GatherAbilityScoresFromBoosts(entity, boost.Boosts)
         end
     end
     return nil
 end
 
 local function SaveCharacterData(ent)
-    E6_ToFile(ent, "E6_Character_BaseStats.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+    --E6_ToFile(ent, "E6_Character.json", {"ProgressionContainer", "Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
 end
 
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
@@ -135,6 +205,9 @@ end
 local function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
+
+    SaveCharacterData(ent)
+
     _E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
 
     local playerFeats = GatherPlayerFeats(ent)
@@ -146,8 +219,6 @@ local function OnEpic6FeatSelectorSpell(caster)
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, abilityScores),
         Abilities = abilityScores -- we need their current scores and maximums to display UI
     }
-
-    SaveCharacterData(ent)
 
     local str = Ext.Json.Stringify(message)
     --_E6P(str)
