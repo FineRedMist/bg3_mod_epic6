@@ -19,14 +19,6 @@ local function E6_IsFeatSupported(feat)
     if feat.SelectPassives ~= nil and #feat.SelectPassives > 0 then
         return "the feat selects passives"
     end
-    -- We don't support skills yet
-    if feat.SelectSkills ~= nil and #feat.SelectSkills > 0 then
-        return "the feat selects skills"
-    end
-    -- We don't support skill expertise yet
-    if feat.SelectSkillsExpertise ~= nil and #feat.SelectSkillsExpertise > 0 then
-        return "the feat selects skill expertise"
-    end
     -- We don't support spell yet
     if feat.SelectSpells ~= nil and #feat.SelectSpells > 0 then
         return "the feat selects spells"
@@ -392,6 +384,33 @@ local function E6_MakeFeatInfo(featId, spec, desc)
         feat.SelectAbilities = abilities
     else
         feat.SelectAbilities = {}
+    end
+    if #spec.SelectSkills > 0 then
+        local skills = {}
+        for _,skill in ipairs(spec.SelectSkills) do
+            local skillRemap = {}
+            skillRemap.Count = skill.Arg2
+            skillRemap.Source = skill.Arg3
+            skillRemap.SourceId = skill.UUID
+            table.insert(skills, skillRemap)
+        end
+        feat.SelectSkills = skills
+    else
+        feat.SelectSkills = {}
+    end
+    if #spec.SelectSkillsExpertise > 0 then
+        local skills = {}
+        for _,skill in ipairs(spec.SelectSkillsExpertise) do
+            local skillRemap = {}
+            skillRemap.Count = skill.Arg2
+            skillRemap.Arg3 = skill.Arg3
+            skillRemap.Source = skill.Arg4
+            skillRemap.SourceId = skill.UUID
+            table.insert(skills, skillRemap)
+        end
+        feat.SelectSkillsExpertise = skills
+    else
+        feat.SelectSkillsExpertise = {}
     end
     E6_ApplyFeatOverrides(feat, spec)
     return feat

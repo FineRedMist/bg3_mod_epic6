@@ -8,11 +8,16 @@ SharedResource.__index = SharedResource
 
 --- Creates a new SharedResource instance.
 --- @param count number The initial count of the shared resource.
+--- @param max number? The maximum count of the shared resource, or nil to use the count
 --- @return SharedResource
-function SharedResource:new(count)
+function SharedResource:new(count, max)
     local res = setmetatable({}, self)
     res.count = count
-    res.capacity = count
+    if max then
+        res.capacity = max
+    else
+        res.capacity = count
+    end
     res.callbacks = {}
     return res
 end

@@ -46,6 +46,34 @@ local abilityPassives = {
         Icon = "E6_Ability_Charisma" }
 }
 
+local skillLoca = {
+    Athletics = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_12", Description = "ha90cb8b6g3aa7g4b94ga7e3gfa0823672af1" },
+    Acrobatics = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_4", Description = "h241bfb0fgffa2g4ccega96fgb26da384ecf8" },
+    SleightOfHand = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_5", Description = "ha18e79b2g111ag441egb532g3ff79d4ba842" },
+    Stealth = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_6", Description = "hb2487d1bga7a8g4a2dgb6a8g447842179f6d" },
+    Arcana = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_7", Description = "hda75bbd8g5613g4f40g8b8dgb8d3f4f6855d" },
+    History = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_8", Description = "ha31089eegb95fg44d8gb191g302341c0b57a" },
+    Investigation = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_9", Description = "h2a7019efgfaf7g455fg8fd9g4b7c275fbbfa" },
+    Nature = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_10", Description = "h94f2954eg8a71g49c9ga9bdg66b65a04a23c" },
+    Religion = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_11", Description = "h3adc18e5gc8c3g459dgbe82gb27aca09da54" },
+    AnimalHandling = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_13", Description = "hfa186a8cg869cg4ecdgadf3gb7326ab444c4" },
+    Insight = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_14", Description = "h2eb576b5gc088g40e6gad9ag52751e1f9be7" },
+    Medicine = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_15", Description = "h0eb7380bg4477g4d04ga797ge577e24aa856" },
+    Perception = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_16", Description = "h7896bd12g83b9g4058gbc2cg477ba13c728a" },
+    Survival = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_17", Description = "had65a34cg53b1g4d6ag86d2g04258e4ed338" },
+    Deception = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_0", Description = "h5febcaf6g13f4g4662g9c68ge24ec3c2d80a" },
+    Intimidation = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_1", Description = "h5e849499g23bfg4e5dga9f3gb6ce36f9abc2" },
+    Performance = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_2", Description = "ha6c0ffb0g73ccg4435g9d7ag8a24ee90a849" },
+    Persuasion = { DisplayName = "h65e11968gf9b6g4c47g9efcg03fb60fb923c_3", Description = "h3d5ecb16g20f8g4febgba03g41ae11b9ddf2" },
+}
+
+local abilitySkillMap = {
+    Strength = { "Athletics" },
+    Dexterity = { "Acrobatics", "SleightOfHand", "Stealth" },
+    Intelligence = { "Arcana", "History", "Investigation", "Nature", "Religion" },
+    Wisdom = { "AnimalHandling", "Insight", "Medicine", "Perception", "Survival" },
+    Charisma = { "Deception", "Intimidation", "Performance", "Persuasion" }
+}
 ---Adds the list of passives to the cell.
 ---@param cell ExtuiTableCell
 ---@param feat table
@@ -93,8 +121,9 @@ end
 ---@param sharedResource SharedResource
 ---@param pointInfo table
 ---@param state table
+---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
 ---@return table?
-local function AddAbilityControl(parent, sharedResource, pointInfo, state)
+local function AddAbilityControl(parent, sharedResource, pointInfo, state, abilityResources)
     local abilityName = state.Name
     local id = pointInfo.ID
     local maxPoints = pointInfo.Max
@@ -120,9 +149,12 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state)
         minButton.Enabled = state.Current > state.Initial and sharedResource.count < sharedResource.capacity
     end
 
+    local abilityResource = SharedResource:new(state.Current, 100)
+    abilityResources[abilityName] = abilityResource
+
     addButton.OnClick = function()
         if sharedResource:AcquireResource() then
-            state.Current = state.Current + 1
+            abilityResource:ReleaseResource()
             currentScore.Label = tostring(state.Current)
         end
         updateButtons()
@@ -130,7 +162,7 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state)
 
     minButton.OnClick = function()
         if sharedResource:ReleaseResource() then
-            state.Current = state.Current - 1
+            abilityResource:AcquireResource()
             currentScore.Label = tostring(state.Current)
         end
         updateButtons()
@@ -144,8 +176,9 @@ end
 ---Adds the ability selector to the feat details, if ability selection is present.
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
 ---@param abilityInfo table The ability information to render
+---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
-local function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo)
+local function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo, abilityResources)
     local resources = {}
     for _,abilityListSelector in ipairs(abilityInfo) do
         parent:AddSpacing()
@@ -164,11 +197,261 @@ local function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo)
         local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.ID, parent.Size[1] - 60)
 
         for _,ability in ipairs(abilityListSelector.State) do -- TODO: Will likely get renamed in the future
-            AddAbilityControl(abilitiesCell, pointCount, abilityListSelector, ability)
+            AddAbilityControl(abilitiesCell, pointCount, abilityListSelector, ability, abilityResources)
         end
 
         pointCount:trigger()
     end
+    return resources
+end
+
+local function GatherSkillsToShow(skillsToShow, skillColumns, skillsFromFeat, expertise)
+    for _, skill in ipairs(skillsFromFeat) do
+        local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
+        local skillGroup = {}
+        if skillList then
+            for _,skillEnum in ipairs(skillList.Skills) do
+                local skillName = skillEnum.Label
+                table.insert(skillGroup, skillName)
+                skillsToShow[skillName] = true
+                table.insert(skillColumns, {Points = skill.Count, Info = skill, IsExpertise = expertise, Group = skillGroup, Resource = SharedResource:new(skill.Count)})
+            end
+        end
+    end
+end
+
+---Adds the ability selector to the feat details, if ability selection is present.
+---@param parent ExtuiTreeParent The parent container to add the ability selector to.
+---@param feat table
+---@param playerInfo table The ability information to render
+---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
+---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
+local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResources)
+    if #feat.SelectSkills == 0 and #feat.SelectSkillsExpertise == 0 then
+        return {}
+    end
+
+    local resources = {}
+
+    local skillsToShow = {}
+    local skillColumns = {}
+    GatherSkillsToShow(skillsToShow, skillColumns, feat.SelectSkills, false)
+    GatherSkillsToShow(skillsToShow, skillColumns, feat.SelectSkillsExpertise, true)
+
+    for _, column in skillColumns do
+        table.insert(resources, column.Resource)
+    end
+
+    parent:AddSpacing()
+    parent:AddSeparator()
+    parent:AddSpacing()
+
+    local uniquingName = feat.ShortName .. "_Skills"
+    local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", parent.Size[1] - 60)
+    AddLocaTitle(skillTitleCell, "h03cd984dg2334g4bb7g86bfg0b9419b803cf") -- Skills
+
+    local skillControlCell = CreateCenteredControlCell(parent, uniquingName .. "_Control", parent.Size[1] - 60)
+
+    -- The layout is:
+    --  <skills column> <skill check amount> <proficiency column> ... <expertise column> ...
+    --     <blank>                            <proficiency icon>  ...  <expertise icon> ...
+    --     <blank>                            <# of total points> ...  <# of total points> ...
+    --  <skill name>     <+/- #>               <check box>        ...    <check box> ...
+
+    -- only selectable skills are listed, grouped by ability then alphabetically
+    -- If the player has proficiency/expertise, the box is checked and greyed out
+    -- If not, the box is unchecked and available to be checked, unless the resource count of the column goes to zero
+    -- If the player checks a proficiency box, then an expertise box, then the proficiency box becomes read only and the expertise box needs to be unchecked to reenable the proficiency box
+    local tableNameId = uniquingName .. "_Table"
+    local skillTable = skillControlCell:AddTable(tableNameId, 2 + #skillColumns)
+    for i = 1, 3 + #skillColumns do
+        skillTable:AddColumn(tableNameId .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthFixed)
+    end
+
+    -- Skill point images
+    local row = skillTable:AddRow()
+    for i = 1, 3 do
+        row:AddCell()
+    end
+    for _, column in ipairs(skillColumns) do
+        local cell = row:AddCell()
+        if column.IsExpertise then
+            local image = cell:AddImage("E6_Expertise")
+            AddLocaTooltipTitled(image, "h601ff4c6g67b8g4f32gaaf7g8b29d6daa426", "hb7bf72ebgcd1ag40fbg9f1eg85d9a5853d4d")
+        else
+            local image cell:AddImage("E6_Proficient")
+            AddLocaTooltipTitled(image, "h5cab4ab6g7b46g46cegb82fg3ea721099318", "hda608d66g306eg4739g8ea2g974918945bb8")
+        end
+    end
+
+    -- Skill point count row
+    row = skillTable:AddRow()
+    for i = 1, 3 do
+        row:AddCell()
+    end
+    for _, column in ipairs(skillColumns) do
+        local cell = row:AddCell()
+        local pointCount = column.Resource
+        local text = Ext.Loca.GetTranslatedString("h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712")
+        local pointText = AddLocaTitle(cell, "h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712")
+        pointCount:add(function(_, _)
+            text = SubstituteParameters(text, { Count = pointCount.count, Max = column.PointCount })
+            pointText.Label = text
+        end)
+    end
+
+    -- Determine the order of skills to show (grouped by ability, then alphabetically)
+    local sortedSkills = {}
+    for _,ability in ipairs({"Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom"}) do
+        local abilityResource = abilityResources[ability]
+        if not abilityResource then
+            abilityResource = SharedResource:new(playerInfo.Abilities[ability].Current, 100)
+        end
+
+        local abilitySkills = {}
+        for _, skill in abilitySkillMap[ability] do
+            table.insert(abilitySkills, {Ability = ability, Skill = skill, DisplayName = skillLoca[skill].DisplayName, Description = skillLoca[skill].Description})
+        end
+        table.sort(abilitySkills, function(a, b)
+            return string.lower(a.DisplayName) < string.lower(b.DisplayName)
+        end)
+        for _,skill in ipairs(abilitySkills) do
+            if skillsToShow[skill.Skill] then
+                table.insert(sortedSkills, skill)
+            end
+        end
+    end
+
+    -- now add a row for each skill
+    for _,skill in ipairs(sortedSkills) do
+        local row = skillTable:AddRow()
+        local skillName = skill.Skill
+
+        -- First column is an icon indicating whether the player is already proficient or an expert
+        local playerProficiency = playerInfo.Proficiencies[skillName]
+        local isProficient = false
+        local isExpert = false
+        if playerProficiency then
+            isProficient = playerProficiency.Proficient
+            isExpert = playerProficiency.Expert
+        end
+        local skillStateCell = row:AddCell()
+        if isExpert then
+            local image = skillStateCell:AddImage("E6_Expertise")
+            AddLocaTooltipTitled(image, "h601ff4c6g67b8g4f32gaaf7g8b29d6daa426", "hb7bf72ebgcd1ag40fbg9f1eg85d9a5853d4d")
+        elseif isProficient then
+            local image skillStateCell:AddImage("E6_Proficient")
+            AddLocaTooltipTitled(image, "h5cab4ab6g7b46g46cegb82fg3ea721099318", "hda608d66g306eg4739g8ea2g974918945bb8")
+        end
+
+        -- Second column is the skill name
+        local skillNameCell = row:AddCell()
+        AddLocaTitle(skillNameCell, skill.DisplayName)
+
+        -- Third column is the skill bonus total
+        local skillBonusCell = row:AddCell()
+        local skillBonusText = skillBonusCell:AddText("0")
+        local abilityResource = abilityResources[skill.Ability]
+
+        local skillWiring = {}
+
+        for columnIndex, column in ipairs(skillColumns) do
+            local cell = row:AddCell()
+            local checkBox = cell:AddCheckbox(tableNameId .. skillName .. tostring(columnIndex) .. "checkbox")
+
+            skillWiring:insert({Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise})
+        end
+
+        local getProficient = function()
+            if isProficient then
+                return true
+            end
+            for _,wiring in ipairs(skillWiring) do
+                if wiring.Checkbox.Checked then
+                    return true
+                end
+            end
+            return false
+        end
+
+        local getExpertise = function()
+            if isExpert then
+                return true
+            end
+            for _,wiring in ipairs(skillWiring) do
+                if wiring.Checkbox.Checked and wiring.IsExpertise then
+                    return true
+                end
+            end
+            return false
+        end
+
+        -- Now that I have all the check boxes for the skill, I can wire them up
+        -- I need to have an update for the skill bonus text to update based on:
+        --  changes to the ability score
+        --  changes in the proficiency allocation
+        --  the initial proficiency/expertise state
+        local updateSkillBonus = function()
+            local bonus = math.floor((abilityResource.count - 10)/2)
+            local hasProficiency = getProficient()
+            local hasExpertise = getExpertise()
+            if hasProficiency then
+                bonus = bonus + playerInfo.ProficiencyBonus
+            end
+            if hasExpertise then
+                bonus = bonus + playerInfo.ProficiencyBonus
+            end
+
+            local signText = "+"
+            if bonus < 0 then
+                signText = "-"
+            end
+            skillBonusText.Label = signText .. tostring(bonus)
+        end
+
+        updateSkillBonus()
+
+        abilityResource:add(function(_, _)
+            updateSkillBonus()
+        end)
+        for _,wiring in ipairs(skillWiring) do
+            wiring.checkBox.OnChange = function()
+                updateSkillBonus()
+            end
+        end
+
+        -- Check boxes need to follow the rules of:
+        --  If I'm already proficient, the box is read only (no updates occur)
+        --  If I'm already an expert, the box is read only (no updates occur)
+        --  If I set proficiency in any other column, all other proficiency check boxes are disabled
+        --  If I set expertise in any other column, all other proficiency and expertise check boxes are disabled (forcing the proficiency to be checked)
+        --  If there is no proficiency for a skill, the expertise box is disabled
+        for _,wiring in ipairs(skillWiring) do
+            if isProficient and not wiring.IsExpertise then
+                
+                wiring.Checkbox.Enabled = false
+            end
+            if isExpert and wiring.IsExpertise then
+                wiring.Checkbox.Enabled = false
+            end
+        end
+
+        local updateSkillRowStates = function()
+            
+        end
+
+        for _,wiring in ipairs(skillWiring) do
+            wiring.checkBox.OnChange = function()
+                updateCheckboxState()
+            end
+        end
+    end
+
+
+    for _, resource in resources do
+        resource:trigger()
+    end
+
     return resources
 end
 
@@ -248,23 +531,18 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     end)
 
     local extraPassives = {}
+    local abilityResources = {}
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddPassivesToFeatDetailsUI(childWin, feat, extraPassives)
-    local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo)
+    local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
+    local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources)
+
 
     local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
     local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
 
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
-    -- Doesn't work :(
-    select.OnActivate = function()
-        local buttonWidth = select.ItemWidth
-        local offset = select.PositionOffset
-        if offset and buttonWidth then
-            local newX = (windowDimensions[1] - 2 * offset[1] - buttonWidth) / 2
-            select.PositionOffset = {newX, offset[2]}
-        end
-    end
+
     select.OnClick = function()
         featUI.Visible = false
         featUI.Open = false
@@ -372,7 +650,7 @@ function E6_FeatSelectorUI(message)
         if feat == nil then
             _E6Error("Failed to find feat for name: " .. featName)
         else
-            MakeFeatButton(featUI, windowDimensions[1], { ID = message.PlayerId, Name = message.PlayerName, Abilities = message.Abilities }, feat)
+            MakeFeatButton(featUI, windowDimensions[1], { ID = message.PlayerId, Name = message.PlayerName, Abilities = message.Abilities, Proficiencies = message.Proficiencies, ProficiencyBonus = message.ProficiencyBonus }, feat)
         end
     end
 

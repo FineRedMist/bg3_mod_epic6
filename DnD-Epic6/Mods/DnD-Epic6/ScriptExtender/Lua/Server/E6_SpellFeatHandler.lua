@@ -326,7 +326,8 @@ local function OnEpic6FeatSelectorSpell(caster)
         PlayerFeats = playerFeats,
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
-        Proficiencies = proficiencies -- gathered so we know what they are proficient in and what could be granted
+        Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
+        ProficiencyBonus = ent.Stats.ProficiencyBonus -- to show skill bonuses
     }
 
     local str = Ext.Json.Stringify(message)
