@@ -389,7 +389,7 @@ local function E6_MakeFeatInfo(featId, spec, desc)
         local skills = {}
         for _,skill in ipairs(spec.SelectSkills) do
             local skillRemap = {}
-            skillRemap.Count = skill.Arg2
+            skillRemap.Count = skill.Amount
             skillRemap.Source = skill.Arg3
             skillRemap.SourceId = skill.UUID
             table.insert(skills, skillRemap)
@@ -402,7 +402,7 @@ local function E6_MakeFeatInfo(featId, spec, desc)
         local skills = {}
         for _,skill in ipairs(spec.SelectSkillsExpertise) do
             local skillRemap = {}
-            skillRemap.Count = skill.Arg2
+            skillRemap.Count = skill.Amount
             skillRemap.Arg3 = skill.Arg3
             skillRemap.Source = skill.Arg4
             skillRemap.SourceId = skill.UUID
