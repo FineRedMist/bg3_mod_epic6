@@ -71,6 +71,7 @@ local abilitySkillMap = {
     Strength = { "Athletics" },
     Dexterity = { "Acrobatics", "SleightOfHand", "Stealth" },
     Intelligence = { "Arcana", "History", "Investigation", "Nature", "Religion" },
+    Constitution = {},
     Wisdom = { "AnimalHandling", "Insight", "Medicine", "Perception", "Survival" },
     Charisma = { "Deception", "Intimidation", "Performance", "Persuasion" }
 }
@@ -205,13 +206,20 @@ local function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo, abilityRes
     return resources
 end
 
-local function GatherSkillsToShow(skillsToShow, skillColumns, skillsFromFeat, expertise)
+---@param feat table
+---@param skillsToShow table
+---@param skillColumns table
+---@param skillsFromFeat table
+---@param expertise boolean
+local function GatherSkillsToShow(feat, skillsToShow, skillColumns, skillsFromFeat, expertise)
     for _, skill in ipairs(skillsFromFeat) do
+        _E6P("Skill ID (" .. feat.ShortName .. "): " .. skill.SourceId)
         local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
         local skillGroup = {}
         if skillList then
             for _,skillEnum in ipairs(skillList.Skills) do
                 local skillName = skillEnum.Label
+                _E6P("--Skill Name: " .. skillName)
                 table.insert(skillGroup, skillName)
                 skillsToShow[skillName] = true
                 table.insert(skillColumns, {Points = skill.Count, Info = skill, IsExpertise = expertise, Group = skillGroup, Resource = SharedResource:new(skill.Count)})
@@ -235,10 +243,10 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
     local skillsToShow = {}
     local skillColumns = {}
-    GatherSkillsToShow(skillsToShow, skillColumns, feat.SelectSkills, false)
-    GatherSkillsToShow(skillsToShow, skillColumns, feat.SelectSkillsExpertise, true)
+    GatherSkillsToShow(feat, skillsToShow, skillColumns, feat.SelectSkills, false)
+    GatherSkillsToShow(feat, skillsToShow, skillColumns, feat.SelectSkillsExpertise, true)
 
-    for _, column in skillColumns do
+    for _, column in ipairs(skillColumns) do
         table.insert(resources, column.Resource)
     end
 
@@ -248,7 +256,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
     local uniquingName = feat.ShortName .. "_Skills"
     local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", parent.Size[1] - 60)
-    AddLocaTitle(skillTitleCell, "h03cd984dg2334g4bb7g86bfg0b9419b803cf") -- Skills
+    skillTitleCell:AddText(Ext.Loca.GetTranslatedString("h03cd984dg2334g4bb7g86bfg0b9419b803cf")) -- Skills
 
     local skillControlCell = CreateCenteredControlCell(parent, uniquingName .. "_Control", parent.Size[1] - 60)
 
@@ -279,7 +287,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             local image = cell:AddImage("E6_Expertise")
             AddLocaTooltipTitled(image, "h601ff4c6g67b8g4f32gaaf7g8b29d6daa426", "hb7bf72ebgcd1ag40fbg9f1eg85d9a5853d4d")
         else
-            local image cell:AddImage("E6_Proficient")
+            local image = cell:AddImage("E6_Proficient")
             AddLocaTooltipTitled(image, "h5cab4ab6g7b46g46cegb82fg3ea721099318", "hda608d66g306eg4739g8ea2g974918945bb8")
         end
     end
@@ -293,7 +301,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         local cell = row:AddCell()
         local pointCount = column.Resource
         local text = Ext.Loca.GetTranslatedString("h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712")
-        local pointText = AddLocaTitle(cell, "h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712")
+        local pointText = cell:AddText(text)
         pointCount:add(function(_, _)
             text = SubstituteParameters(text, { Count = pointCount.count, Max = column.PointCount })
             pointText.Label = text
@@ -302,14 +310,14 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
     -- Determine the order of skills to show (grouped by ability, then alphabetically)
     local sortedSkills = {}
-    for _,ability in ipairs({"Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom"}) do
+    for _,ability in ipairs({"Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"}) do
         local abilityResource = abilityResources[ability]
         if not abilityResource then
             abilityResource = SharedResource:new(playerInfo.Abilities[ability].Current, 100)
         end
 
         local abilitySkills = {}
-        for _, skill in abilitySkillMap[ability] do
+        for _, skill in ipairs(abilitySkillMap[ability]) do
             table.insert(abilitySkills, {Ability = ability, Skill = skill, DisplayName = skillLoca[skill].DisplayName, Description = skillLoca[skill].Description})
         end
         table.sort(abilitySkills, function(a, b)
@@ -346,7 +354,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
         -- Second column is the skill name
         local skillNameCell = row:AddCell()
-        AddLocaTitle(skillNameCell, skill.DisplayName)
+        skillNameCell:AddText(Ext.Loca.GetTranslatedString(skill.DisplayName))
 
         -- Third column is the skill bonus total
         local skillBonusCell = row:AddCell()
@@ -357,9 +365,21 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
         for columnIndex, column in ipairs(skillColumns) do
             local cell = row:AddCell()
-            local checkBox = cell:AddCheckbox(tableNameId .. skillName .. tostring(columnIndex) .. "checkbox")
-
-            skillWiring:insert({Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise})
+            local addCheckbox = false
+            -- Don't add checkboxes for proficiences or expertise that I already possess.
+            if column.IsExpertise then
+                if not isExpert then
+                    addCheckbox = true
+                end
+            else
+                if not isProficient then
+                    addCheckbox = true
+                end
+            end
+            if addCheckbox then
+                local checkBox = cell:AddCheckbox(tableNameId .. skillName .. tostring(columnIndex) .. "checkbox")
+                table.insert(skillWiring, {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise})
+            end
         end
 
         local getProficient = function()
@@ -415,40 +435,28 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             updateSkillBonus()
         end)
         for _,wiring in ipairs(skillWiring) do
-            wiring.checkBox.OnChange = function()
+            wiring.Checkbox.OnChange = function()
                 updateSkillBonus()
             end
         end
 
         -- Check boxes need to follow the rules of:
-        --  If I'm already proficient, the box is read only (no updates occur)
-        --  If I'm already an expert, the box is read only (no updates occur)
         --  If I set proficiency in any other column, all other proficiency check boxes are disabled
         --  If I set expertise in any other column, all other proficiency and expertise check boxes are disabled (forcing the proficiency to be checked)
         --  If there is no proficiency for a skill, the expertise box is disabled
-        for _,wiring in ipairs(skillWiring) do
-            if isProficient and not wiring.IsExpertise then
-                
-                wiring.Checkbox.Enabled = false
-            end
-            if isExpert and wiring.IsExpertise then
-                wiring.Checkbox.Enabled = false
-            end
-        end
-
         local updateSkillRowStates = function()
             
         end
 
         for _,wiring in ipairs(skillWiring) do
-            wiring.checkBox.OnChange = function()
-                updateCheckboxState()
+            wiring.Checkbox.OnChange = function()
+                updateSkillRowStates()
             end
         end
     end
 
 
-    for _, resource in resources do
+    for _, resource in ipairs(resources) do
         resource:trigger()
     end
 
