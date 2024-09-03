@@ -150,24 +150,35 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
         minButton.Enabled = state.Current > state.Initial and sharedResource.count < sharedResource.capacity
     end
 
-    local abilityResource = SharedResource:new(state.Current, 100)
-    abilityResources[abilityName] = abilityResource
+    -- In case there is more than one selection that is possible for an ability (haven't found any yet, but paranoid).
+    -- Might be worthwhile to create some test feats to validate this.
+    local abilityResource = nil
+    if abilityResources[abilityName] then
+        abilityResource = abilityResources[abilityName]
+    else
+        abilityResource = SharedResource:new(state.Current, 100)
+        abilityResources[abilityName] = abilityResource
+    end
 
     addButton.OnClick = function()
         if sharedResource:AcquireResource() then
+            state.Current = state.Current + 1
             abilityResource:ReleaseResource()
-            currentScore.Label = tostring(state.Current)
         end
         updateButtons()
     end
 
     minButton.OnClick = function()
         if sharedResource:ReleaseResource() then
+            state.Current = state.Current - 1
             abilityResource:AcquireResource()
-            currentScore.Label = tostring(state.Current)
         end
         updateButtons()
     end
+
+    abilityResource:add(function(_, _)
+        currentScore.Label = tostring(abilityResource.count)
+    end)
 
     sharedResource:add(function(_, _)
         updateButtons()
@@ -545,6 +556,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
     local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources)
 
+    for _, resource in ipairs(skillSharedResources) do
+        table.insert(sharedResources, resource)
+    end
 
     local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
     local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
