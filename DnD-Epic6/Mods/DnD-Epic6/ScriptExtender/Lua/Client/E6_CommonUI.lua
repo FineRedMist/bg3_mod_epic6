@@ -1,9 +1,19 @@
+---Removes all children from the parent.
+---@param parent ExtuiTreeParent
+function ClearChildren(parent)
+    local children = parent.Children
+    for _, child in ipairs(children) do
+        parent:RemoveChild(child)
+    end
+end
+
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
 ---@param text string The text of the tooltip
 function AddTooltip(target, text)
     local tooltip = target:Tooltip()
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
+    ClearChildren(tooltip)
     local textControl = tooltip:AddText(text)
     textControl.ItemWidth = 500
     textControl.TextWrapPos = 500

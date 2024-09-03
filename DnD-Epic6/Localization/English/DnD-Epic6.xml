@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="h522a98b0gd1b0g4bd8ga74dgb33b8cdaa8cb" version="1">{Ability} Modifier: {AbilityMod}
+Proficiency Bonus: {ProficiencyBonus}
+Expertise Bonus: {ProficiencyBonus}</content>
+	<content contentuid="h4aabf6e2gf7d1g4d29ga2a2g0b1703d10f23" version="1">{Ability} Modifier: {AbilityMod}
+Proficiency Bonus: {ProficiencyBonus}</content>
+	<content contentuid="hb0265d8egc78ag416eg810ag2b94aaf0941b" version="1">{Ability} Modifier: {AbilityMod}</content>
 	<content contentuid="h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712" version="1">{Count}/{Max}</content>
 	<content contentuid="h8cb5f019g91b8g4873ga7c4g2c79d5579a78" version="1">Ability Points: {Count}/{Max}</content>
 	<content contentuid="h43800b7agdc92g46b6g82dcg22fb987efe6c" version="1">Feat Details</content>

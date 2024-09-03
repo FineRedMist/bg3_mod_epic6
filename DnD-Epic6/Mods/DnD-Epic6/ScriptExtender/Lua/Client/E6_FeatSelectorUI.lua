@@ -389,7 +389,8 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         -- Third column is the skill name
         local skillNameCell = row:AddCell()
         local skillNameText = Ext.Loca.GetTranslatedString(skill.DisplayName)
-        skillNameCell:AddText(skillNameText)
+        local skillTextbox = skillNameCell:AddText(skillNameText)
+        AddLocaTooltip(skillTextbox, skill.Description)
 
         -- Fourth column is the skill bonus total
         local skillBonusCell = row:AddCell()
@@ -448,34 +449,40 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             return false
         end
 
+        local signNumber = function(value)
+            if value < 0 then
+                return tostring(value)
+            else
+                return "+" .. tostring(value)
+            end
+        end
+
         -- Now that I have all the check boxes for the skill, I can wire them up
         -- I need to have an update for the skill bonus text to update based on:
         --  changes to the ability score
         --  changes in the proficiency allocation
         --  the initial proficiency/expertise state
         local updateSkillBonus = function()
-            local bonus = math.floor((abilityResource.count - 10)/2)
+            local abilityBonus = math.floor((abilityResource.count - 10)/2)
+            local bonus = abilityBonus
             local hasProficiency = getProficient()
             local hasExpertise = getExpertise()
+            local tooltipTextId = "hb0265d8egc78ag416eg810ag2b94aaf0941b"
             if hasProficiency then
                 bonus = bonus + playerInfo.ProficiencyBonus
+                tooltipTextId = "h4aabf6e2gf7d1g4d29ga2a2g0b1703d10f23"
             end
             if hasExpertise then
                 bonus = bonus + playerInfo.ProficiencyBonus
+                tooltipTextId = "h522a98b0gd1b0g4bd8ga74dgb33b8cdaa8cb"
             end
 
-            local signText = "+"
-            if bonus < 0 then
-                signText = "-"
-            end
-            local text = nil
-            if bonus < 0 then
-                text = tostring(bonus)
-            else
-                text = signText .. tostring(bonus)
-            end
+            local text = signNumber(bonus)
             _E6P("Updating skill bonus for " .. skillName .. " to " .. text)
             skillBonusText.Label = text
+            local tooltip = Ext.Loca.GetTranslatedString(tooltipTextId)
+            local abilityName = Ext.Loca.GetTranslatedString(abilityPassives[skill.Ability].DisplayName)
+            AddTooltip(skillBonusText, SubstituteParameters(tooltip, { Ability = abilityName, AbilityMod = signNumber(abilityBonus), ProficiencyBonus = signNumber(playerInfo.ProficiencyBonus) }))
         end
 
         updateSkillBonus()
@@ -571,10 +578,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     featDetailUI:SetFocus()
     uiPendingCount = uiPendingTickCount
 
-    local children = featDetailUI.Children
-    for _, child in ipairs(children) do
-        featDetailUI:RemoveChild(child)
-    end
+    ClearChildren(featDetailUI)
 
     local childWin = featDetailUI:AddChildWindow("Selection")
     childWin.Size = {windowDimensions[1] - 30, windowDimensions[2] - 130}
@@ -683,10 +687,7 @@ function E6_FeatSelectorUI(message)
     featUI:SetFocus()
     uiPendingCount = uiPendingTickCount
 
-    local children = featUI.Children
-    for _, child in ipairs(children) do
-        featUI:RemoveChild(child)
-    end
+    ClearChildren(featUI)
 
     local allFeats = E6_GatherFeats()
 
