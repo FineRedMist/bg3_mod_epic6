@@ -224,17 +224,17 @@ end
 ---@param expertise boolean
 local function GatherSkillsToShow(feat, skillsToShow, skillColumns, skillsFromFeat, expertise)
     for _, skill in ipairs(skillsFromFeat) do
-        _E6P("Skill ID (" .. feat.ShortName .. "): " .. skill.SourceId)
+        --_E6P("Skill ID (" .. feat.ShortName .. "): " .. skill.SourceId)
         local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
         local skillGroup = {}
         if skillList then
             for _,skillEnum in ipairs(skillList.Skills) do
                 local skillName = skillEnum.Label
-                _E6P("--Skill Name: " .. skillName)
+                --_E6P("--Skill Name: " .. skillName)
                 table.insert(skillGroup, skillName)
                 skillsToShow[skillName] = true
-                table.insert(skillColumns, {Points = skill.Count, Info = skill, IsExpertise = expertise, Group = skillGroup, Resource = SharedResource:new(skill.Count)})
             end
+            table.insert(skillColumns, {Points = skill.Count, Info = skill, IsExpertise = expertise, Group = skillGroup, Resource = SharedResource:new(skill.Count)})
         end
     end
 end
@@ -269,27 +269,28 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
     local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", parent.Size[1] - 60)
     skillTitleCell:AddText(Ext.Loca.GetTranslatedString("h03cd984dg2334g4bb7g86bfg0b9419b803cf")) -- Skills
 
-    local skillControlCell = CreateCenteredControlCell(parent, uniquingName .. "_Control", parent.Size[1] - 60)
+    local skillControlCell = CreateCenteredControlCell(parent, uniquingName .. "_Control", parent.Size[1] - 30)
 
     -- The layout is:
-    --  <skills column> <skill check amount> <proficiency column> ... <expertise column> ...
-    --     <blank>                            <proficiency icon>  ...  <expertise icon> ...
-    --     <blank>                            <# of total points> ...  <# of total points> ...
-    --  <skill name>     <+/- #>               <check box>        ...    <check box> ...
+    -- <skill proficiency icon>  <skills column> <skill check amount> <proficiency column> ... <expertise column> ...
+    --                              <blank>                            <proficiency icon>  ...  <expertise icon> ...
+    --                              <blank>                            <# of total points> ...  <# of total points> ...
+    --  <possible image>         <skill name>     <+/- #>               <check box>        ...    <check box> ...
 
     -- only selectable skills are listed, grouped by ability then alphabetically
     -- If the player has proficiency/expertise, the box is checked and greyed out
     -- If not, the box is unchecked and available to be checked, unless the resource count of the column goes to zero
     -- If the player checks a proficiency box, then an expertise box, then the proficiency box becomes read only and the expertise box needs to be unchecked to reenable the proficiency box
+    local rowsBeforeCheckboxes = 3
     local tableNameId = uniquingName .. "_Table"
-    local skillTable = skillControlCell:AddTable(tableNameId, 2 + #skillColumns)
-    for i = 1, 3 + #skillColumns do
+    local skillTable = skillControlCell:AddTable(tableNameId, rowsBeforeCheckboxes + #skillColumns)
+    for i = 1, rowsBeforeCheckboxes + #skillColumns do
         skillTable:AddColumn(tableNameId .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthFixed)
     end
 
     -- Skill point images
     local row = skillTable:AddRow()
-    for i = 1, 3 do
+    for i = 1, rowsBeforeCheckboxes do
         row:AddCell()
     end
     for _, column in ipairs(skillColumns) do
@@ -305,7 +306,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
     -- Skill point count row
     row = skillTable:AddRow()
-    for i = 1, 3 do
+    for i = 1, rowsBeforeCheckboxes do
         row:AddCell()
     end
     for _, column in ipairs(skillColumns) do
@@ -325,20 +326,17 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         local abilityResource = abilityResources[ability]
         if not abilityResource then
             abilityResource = SharedResource:new(playerInfo.Abilities[ability].Current, 100)
+            abilityResources[ability] = abilityResource
         end
 
-        local abilitySkills = {}
         for _, skill in ipairs(abilitySkillMap[ability]) do
-            table.insert(abilitySkills, {Ability = ability, Skill = skill, DisplayName = skillLoca[skill].DisplayName, Description = skillLoca[skill].Description})
-        end
-        table.sort(abilitySkills, function(a, b)
-            return string.lower(a.DisplayName) < string.lower(b.DisplayName)
-        end)
-        for _,skill in ipairs(abilitySkills) do
-            if skillsToShow[skill.Skill] then
-                table.insert(sortedSkills, skill)
+            if skillsToShow[skill] then
+                table.insert(sortedSkills, {Ability = ability, Skill = skill, DisplayName = skillLoca[skill].DisplayName, Description = skillLoca[skill].Description})
             end
         end
+        table.sort(sortedSkills, function(a, b)
+            return string.lower(a.DisplayName) < string.lower(b.DisplayName)
+        end)
     end
 
     -- now add a row for each skill
@@ -347,7 +345,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         local skillName = skill.Skill
 
         -- First column is an icon indicating whether the player is already proficient or an expert
-        local playerProficiency = playerInfo.Proficiencies[skillName]
+        local playerProficiency = playerInfo.Proficiencies.Skills[skillName]
         local isProficient = false
         local isExpert = false
         if playerProficiency then
@@ -356,16 +354,19 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         end
         local skillStateCell = row:AddCell()
         if isExpert then
+            _E6P("Player is an expert for " .. skillName)
             local image = skillStateCell:AddImage("E6_Expertise")
-            AddLocaTooltipTitled(image, "h601ff4c6g67b8g4f32gaaf7g8b29d6daa426", "hb7bf72ebgcd1ag40fbg9f1eg85d9a5853d4d")
+            AddLocaTooltipTitled(skillStateCell, "h601ff4c6g67b8g4f32gaaf7g8b29d6daa426", "hb7bf72ebgcd1ag40fbg9f1eg85d9a5853d4d")
         elseif isProficient then
-            local image skillStateCell:AddImage("E6_Proficient")
-            AddLocaTooltipTitled(image, "h5cab4ab6g7b46g46cegb82fg3ea721099318", "hda608d66g306eg4739g8ea2g974918945bb8")
+            _E6P("Player is proficient for " .. skillName)
+            local image = skillStateCell:AddImage("E6_Proficient")
+            AddLocaTooltipTitled(skillStateCell, "h5cab4ab6g7b46g46cegb82fg3ea721099318", "hda608d66g306eg4739g8ea2g974918945bb8")
         end
 
         -- Second column is the skill name
         local skillNameCell = row:AddCell()
-        skillNameCell:AddText(Ext.Loca.GetTranslatedString(skill.DisplayName))
+        local skillNameText = Ext.Loca.GetTranslatedString(skill.DisplayName)
+        skillNameCell:AddText(skillNameText)
 
         -- Third column is the skill bonus total
         local skillBonusCell = row:AddCell()
@@ -377,9 +378,11 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         for columnIndex, column in ipairs(skillColumns) do
             local cell = row:AddCell()
             local addCheckbox = false
+            local checkBoxType = "proficiency"
             -- Don't add checkboxes for proficiences or expertise that I already possess.
             if column.IsExpertise then
                 if not isExpert then
+                    checkBoxType = "expertise"
                     addCheckbox = true
                 end
             else
@@ -388,6 +391,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
                 end
             end
             if addCheckbox then
+                _E6P("Adding " .. checkBoxType .. " checkbox for " .. skillName)
                 local checkBox = cell:AddCheckbox(tableNameId .. skillName .. tostring(columnIndex) .. "checkbox")
                 table.insert(skillWiring, {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise})
             end
@@ -437,7 +441,14 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             if bonus < 0 then
                 signText = "-"
             end
-            skillBonusText.Label = signText .. tostring(bonus)
+            local text = nil
+            if bonus < 0 then
+                text = tostring(bonus)
+            else
+                text = signText .. tostring(bonus)
+            end
+            _E6P("Updating skill bonus for " .. skillName .. " to " .. text)
+            skillBonusText.Label = text
         end
 
         updateSkillBonus()
