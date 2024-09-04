@@ -7,6 +7,33 @@ function ClearChildren(parent)
     end
 end
 
+--- Create a table for the RGBA values
+--- This is useful because of syntax highlighting that is not present when typing a table directly
+---@param r number
+---@param g number
+---@param b number
+---@param a number
+---@return table<number>
+function RGBA(r, g, b, a)
+    return { r, g, b, a }
+end
+
+--- Create a table for the RGBA values, normalized to 0-1
+--- This is useful because of syntax highlighting that is not present when typing a table directly
+---@param r number
+---@param g number
+---@param b number
+---@param a number
+---@return table<number>
+function NormalizedRGBA(r, g, b, a)
+    if r > 1 or g > 1 or b > 1 then
+        return { r / 255, g / 255, b / 255, a }
+    else
+        return RGBA(r, g, b, a)
+    end
+end
+
+
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
 ---@param text string The text of the tooltip
