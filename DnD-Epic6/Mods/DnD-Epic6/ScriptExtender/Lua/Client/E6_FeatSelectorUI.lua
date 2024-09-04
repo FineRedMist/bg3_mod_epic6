@@ -397,9 +397,8 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         local skillBonusText = skillBonusCell:AddText("+0")
         local abilityResource = abilityResources[skill.Ability]
 
-        local skillWiring = {}
-
         -- Remaining columns are the skill check boxes (less the last centering column)
+        local rowSkillWiring = {}
         for columnIndex, column in ipairs(skillColumns) do
             local cell = row:AddCell()
             local addCheckbox = false
@@ -418,35 +417,37 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             if addCheckbox then
                 _E6P("Adding " .. checkBoxType .. " checkbox for " .. skillName)
                 local checkBox = cell:AddCheckbox("")
-                table.insert(skillWiring, {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise})
+                local skillInstance = {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise}
+                table.insert(rowSkillWiring, skillInstance)
             end
         end
 
         -- Last column is a centering column
         row:AddCell()
 
-        local getProficient = function()
-            if isProficient then
-                return true
+        local wiringProficiency = function()
+            for _,wiring in ipairs(rowSkillWiring) do
+                if wiring.Checkbox.Checked and not wiring.IsExpertise then
+                    return true
+                end
             end
-            for _,wiring in ipairs(skillWiring) do
-                if wiring.Checkbox.Checked then
+            return false
+        end
+        local wiringExpertise = function()
+            for _,wiring in ipairs(rowSkillWiring) do
+                if wiring.Checkbox.Checked and wiring.IsExpertise then
                     return true
                 end
             end
             return false
         end
 
+        local getProficient = function()
+            return isProficient or wiringProficiency()
+        end
+
         local getExpertise = function()
-            if isExpert then
-                return true
-            end
-            for _,wiring in ipairs(skillWiring) do
-                if wiring.Checkbox.Checked and wiring.IsExpertise then
-                    return true
-                end
-            end
-            return false
+            return isExpert or wiringExpertise()
         end
 
         local signNumber = function(value)
@@ -478,7 +479,6 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             end
 
             local text = signNumber(bonus)
-            _E6P("Updating skill bonus for " .. skillName .. " to " .. text)
             skillBonusText.Label = text
             local tooltip = Ext.Loca.GetTranslatedString(tooltipTextId)
             local abilityName = Ext.Loca.GetTranslatedString(abilityPassives[skill.Ability].DisplayName)
@@ -490,24 +490,62 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         abilityResource:add(function(_, _)
             updateSkillBonus()
         end)
-        for _,wiring in ipairs(skillWiring) do
-            wiring.Checkbox.OnChange = function()
-                updateSkillBonus()
-            end
-        end
 
         -- Check boxes need to follow the rules of:
         --  If I set proficiency in any other column, all other proficiency check boxes are disabled
         --  If I set expertise in any other column, all other proficiency and expertise check boxes are disabled (forcing the proficiency to be checked)
         --  If there is no proficiency for a skill, the expertise box is disabled
         local updateSkillRowStates = function()
-            
+            local isSelectedProficient = wiringProficiency()
+            local isSelectedExpertise = wiringExpertise()
+
+            for _,wiring in ipairs(rowSkillWiring) do
+                local hasResources = wiring.PointResource.count > 0
+                local isChecked = wiring.Checkbox.Checked
+                local checkboxEnabled = true
+                checkboxEnabled = true
+                -- Disable all other unselected proficiency checkboxes
+                if isSelectedProficient then
+                    if not wiring.IsExpertise and not isChecked then
+                        checkboxEnabled = false
+                    end
+                end
+                if isSelectedExpertise then
+                    -- Disable all other expertise checkboxes
+                    if wiring.IsExpertise and not isChecked then
+                        checkboxEnabled = false
+                    end
+                    -- Disable the proficiency checkbox if the expertise checkbox is checked to ensure it doesn't get unchecked
+                    if not wiring.IsExpertise and isChecked then
+                        checkboxEnabled = false
+                    end
+                else
+                    -- Disable the expertise checkbox if the proficiency checkbox is unchecked
+                    if wiring.IsExpertise and not isSelectedProficient and not isProficient then
+                        checkboxEnabled = false
+                    end
+                end
+                if not hasResources and not isChecked then
+                    checkboxEnabled = false
+                end
+                wiring.Checkbox.Enabled = checkboxEnabled
+            end
         end
 
-        for _,wiring in ipairs(skillWiring) do
+        for _,wiring in ipairs(rowSkillWiring) do
             wiring.Checkbox.OnChange = function()
+                local isChecked = wiring.Checkbox.Checked
+                if isChecked then
+                    wiring.PointResource:AcquireResource()
+                elseif not isChecked then
+                    wiring.PointResource:ReleaseResource()
+                end
+                updateSkillBonus()
                 updateSkillRowStates()
             end
+            wiring.PointResource:add(function(_, _)
+                updateSkillRowStates()
+            end)
         end
     end
 
