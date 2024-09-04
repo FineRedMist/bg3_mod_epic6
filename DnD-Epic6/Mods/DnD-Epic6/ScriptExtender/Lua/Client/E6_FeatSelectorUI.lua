@@ -261,13 +261,28 @@ local function AddProficiencyImage(parent, isProficient, isExpert)
     end
 end
 
+local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
+local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
+local function SpicyCheckbox(parent)
+    local checkbox = parent:AddCheckbox("")
+    for k, v in pairs(checkBoxColors) do
+        checkbox:SetColor(k, v)
+    end
+    for k, v in pairs(checkBoxBorder) do
+        checkbox:SetStyle(k, v)
+    end
+    return checkbox
+end
+
+
 ---Adds the ability selector to the feat details, if ability selection is present.
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
 ---@param feat table
 ---@param playerInfo table The ability information to render
 ---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
+---@param skillStates table<string, table> The skill states to update when the feat is committed.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
-local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResources)
+local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResources, skillStates)
     if #feat.SelectSkills == 0 and #feat.SelectSkillsExpertise == 0 then
         return {}
     end
@@ -381,7 +396,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         local isExpert = false
         if playerProficiency then
             isProficient = playerProficiency.Proficient
-            isExpert = playerProficiency.Expert
+            isExpert = playerProficiency.Expertise
         end
         local skillStateCell = row:AddCell()
         AddProficiencyImage(skillStateCell, isProficient, isExpert)
@@ -399,7 +414,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
 
         -- Remaining columns are the skill check boxes (less the last centering column)
         local rowSkillWiring = {}
-        for columnIndex, column in ipairs(skillColumns) do
+        for _, column in ipairs(skillColumns) do
             local cell = row:AddCell()
             local addCheckbox = false
             local checkBoxType = "proficiency"
@@ -416,7 +431,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             end
             if addCheckbox then
                 _E6P("Adding " .. checkBoxType .. " checkbox for " .. skillName)
-                local checkBox = cell:AddCheckbox("")
+                local checkBox = SpicyCheckbox(cell)
                 local skillInstance = {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise}
                 table.insert(rowSkillWiring, skillInstance)
             end
@@ -537,7 +552,20 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
                 local isChecked = wiring.Checkbox.Checked
                 if isChecked then
                     wiring.PointResource:AcquireResource()
+                    if not skillStates[skillName] then
+                        skillStates[skillName] = {}
+                    end
+                    if wiring.IsExpertise then
+                        skillStates[skillName].Expertise = true
+                    else
+                        skillStates[skillName].Proficient = true
+                    end
                 elseif not isChecked then
+                    if wiring.IsExpertise then
+                        skillStates[skillName].Expertise = nil
+                    else
+                        skillStates[skillName].Proficient = nil
+                    end
                     wiring.PointResource:ReleaseResource()
                 end
                 updateSkillBonus()
@@ -631,10 +659,11 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
 
     local extraPassives = {}
     local abilityResources = {}
+    local skillStates = {}
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddPassivesToFeatDetailsUI(childWin, feat, extraPassives)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
-    local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources)
+    local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources, skillStates)
 
     for _, resource in ipairs(skillSharedResources) do
         table.insert(sharedResources, resource)
@@ -662,6 +691,15 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
                     local boost = "Ability(" .. ability.Name .. "," .. tostring(ability.Current - ability.Initial) .. ")"
                     table.insert(boosts, boost)
                 end
+            end
+        end
+
+        for skillName, skillState in pairs(skillStates) do
+            if skillState.Proficient then
+                table.insert(boosts, "ProficiencyBonus(Skill," .. skillName .. ")")
+            end
+            if skillState.Expertise then
+                table.insert(boosts, "ExpertiseBonus(" .. skillName .. ")")
             end
         end
 
