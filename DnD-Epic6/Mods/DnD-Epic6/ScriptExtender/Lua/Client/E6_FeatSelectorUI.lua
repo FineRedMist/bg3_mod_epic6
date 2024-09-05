@@ -107,11 +107,11 @@ end
 ---@param feat table
 ---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
 local function AddPassivesToFeatDetailsUI(parent, feat, extraPassives)
-    if #feat.PassivesAdded > 0 then
+    if #feat.PassivesAdded > 0 or #extraPassives then
         parent:AddSpacing()
         parent:AddSeparator()
         parent:AddSpacing()
-        AddLocaTitle(parent, "hffc72a17g6934g42f8ga935g447764ee6f43")
+        AddLocaTitle(parent, "hffc72a17g6934g42f8ga935g447764ee6f43") -- Features
         local passivesCell = CreateCenteredControlCell(parent, "Passives", parent.Size[1] - 60)
         AddPassivesToCell(passivesCell, feat, extraPassives)
     end
@@ -199,10 +199,10 @@ local function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo, abilityRes
 
         local pointCount = SharedResource:new(abilityListSelector.PointCount)
         table.insert(resources, pointCount)
-        local pointText = AddLocaTitle(parent, "h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
+        local pointText = AddLocaTitle(parent, "h8cb5f019g91b8g4873ga7c4g2c79d5579a78") -- Ability Points: {Count}/{Max}
 
         pointCount:add(function(_, _)
-            local text = Ext.Loca.GetTranslatedString("h8cb5f019g91b8g4873ga7c4g2c79d5579a78")
+            local text = Ext.Loca.GetTranslatedString("h8cb5f019g91b8g4873ga7c4g2c79d5579a78") -- Ability Points: {Count}/{Max}
             text = SubstituteParameters(text, { Count = pointCount.count, Max = abilityListSelector.PointCount })
             pointText.Label = text
         end)
@@ -348,7 +348,7 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
         local cell = row:AddCell()
         ---@type SharedResource
         local pointCount = column.Resource
-        local rawText = Ext.Loca.GetTranslatedString("h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712")
+        local rawText = Ext.Loca.GetTranslatedString("h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712") -- {Count}/{Max}
         local pointText = cell:AddText(rawText)
         pointCount:add(function(_, _)
             local text = SubstituteParameters(rawText, { Count = pointCount.count, Max = pointCount.capacity })
@@ -483,13 +483,19 @@ local function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, ability
             local bonus = abilityBonus
             local hasProficiency = getProficient()
             local hasExpertise = getExpertise()
+            -- {Ability} Modifier: {AbilityMod}
             local tooltipTextId = "hb0265d8egc78ag416eg810ag2b94aaf0941b"
             if hasProficiency then
                 bonus = bonus + playerInfo.ProficiencyBonus
+                -- {Ability} Modifier: {AbilityMod}
+                -- Proficiency Bonus: {ProficiencyBonus}
                 tooltipTextId = "h4aabf6e2gf7d1g4d29ga2a2g0b1703d10f23"
             end
             if hasExpertise then
                 bonus = bonus + playerInfo.ProficiencyBonus
+                -- {Ability} Modifier: {AbilityMod}
+                -- Proficiency Bonus: {ProficiencyBonus}
+                -- Expertise Bonus: {ProficiencyBonus}
                 tooltipTextId = "h522a98b0gd1b0g4bd8ga74dgb33b8cdaa8cb"
             end
 
@@ -629,7 +635,7 @@ end
 local function ShowFeatDetailSelectUI(feat, playerInfo)
     local windowDimensions = {1000, 1450}
     if not featDetailUI then
-        local featDetails = Ext.Loca.GetTranslatedString("h43800b7agdc92g46b6g82dcg22fb987efe6c")
+        local featDetails = Ext.Loca.GetTranslatedString("h43800b7agdc92g46b6g82dcg22fb987efe6c") -- Feat Details
         featDetailUI = Ext.IMGUI.NewWindow(featDetails)
         featDetailUI.Closeable = true
         featDetailUI.NoMove = true
@@ -670,7 +676,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     end
 
     local centerCell = CreateCenteredControlCell(featDetailUI, "Select", windowDimensions[1] - 30)
-    local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5"))
+    local select = centerCell:AddButton(Ext.Loca.GetTranslatedString("h04f38549g65b8g4b72g834eg87ee8863fdc5")) -- Select
 
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
 
@@ -742,7 +748,7 @@ function E6_FeatSelectorUI(message)
     CalculateLayout()
 
     if featUI == nil then
-        local featTitle = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8")
+        local featTitle = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8") -- Feats
         featUI = Ext.IMGUI.NewWindow(featTitle)
         featUI.Closeable = true
         featUI.NoMove = true
