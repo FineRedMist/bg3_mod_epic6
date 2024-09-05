@@ -1,7 +1,7 @@
 
 ---We need to gather feats that have already been selected for the entity so we can filter if necessary.
----@param entity EntityHandle
----@return table
+---@param entity EntityHandle The player entity to gather feats for.
+---@return table<string, number> The count of occurrences for each feat. 
 local function GatherPlayerFeats(entity)
     local feats = {}
     if entity == nil then
@@ -40,6 +40,56 @@ local function GatherPlayerFeats(entity)
         end
     end
     return feats
+end
+
+---We need to gather passives that have already been selected for the entity so we can filter if necessary.
+---@param entity EntityHandle The player entity to gather passives for.
+---@return table<string, number> The count of occurrences for each passive. 
+local function GatherPlayerPassives(entity)
+    local passives = {}
+    if entity == nil then
+        return passives
+    end
+    local passiveContainer = entity.PassiveContainer
+    if passiveContainer == nil then
+        return passives
+    end
+    local playerPassives = passiveContainer.Passives
+    if playerPassives == nil then
+        return passives
+    end
+    local function AddPassive(passive)
+        if passive == nil or string.len(passive) == 0 then
+            return
+        end
+        _E6P("Adding passive: " .. passive)
+        local curCount = passives[passive]
+        if curCount == nil then
+            curCount = 1
+        else
+            curCount = curCount + 1
+        end
+        passives[passive] = curCount
+    end
+
+    for _, playerPassiveObject in ipairs(playerPassives) do
+        local playerPassive = playerPassiveObject.Passive
+        if playerPassive and (not playerPassive.field_8 or playerPassive.field_8.ProgressionMeta) then
+            AddPassive(playerPassive.PassiveId)
+        end
+    end
+
+    local e6Feats = entity.Vars.E6_Feats
+    if e6Feats ~= nil then
+        for _, feat in ipairs(e6Feats) do
+            if feat.PassivesAdded then
+                for _,passive in ipairs(feat.PassivesAdded) do
+                    AddPassive(passive)
+                end
+            end
+        end
+    end
+    return passives
 end
 
 ---Determines if the character meets the requirements for a feat.
@@ -324,6 +374,7 @@ local function OnEpic6FeatSelectorSpell(caster)
         PlayerId = caster,
         PlayerName = GetCharacterName(ent),
         PlayerFeats = playerFeats,
+        PlayerPassives = GatherPlayerPassives(ent),
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
