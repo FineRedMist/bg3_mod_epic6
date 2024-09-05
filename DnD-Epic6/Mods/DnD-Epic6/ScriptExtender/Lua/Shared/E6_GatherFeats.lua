@@ -15,10 +15,6 @@ local function E6_IsFeatSupported(feat)
     if feat.SelectEquipment ~= nil and #feat.SelectEquipment > 0 then
         return "the feat selects equipment"
     end
-    -- We don't support passives yet
-    if feat.SelectPassives ~= nil and #feat.SelectPassives > 0 then
-        return "the feat selects passives"
-    end
     -- We don't support spell yet
     if feat.SelectSpells ~= nil and #feat.SelectSpells > 0 then
         return "the feat selects spells"
@@ -411,6 +407,20 @@ local function E6_MakeFeatInfo(featId, spec, desc)
         feat.SelectSkillsExpertise = skills
     else
         feat.SelectSkillsExpertise = {}
+    end
+    if #spec.SelectPassives > 0 then
+        local passives = {}
+        for _,passive in ipairs(spec.SelectPassives) do
+            local passiveRemap = {}
+            passiveRemap.Count = passive.Amount
+            passiveRemap.Unknown = passive.Amount2
+            passiveRemap.Arg3 = passive.Arg3
+            passiveRemap.SourceId = passive.UUID
+            table.insert(passives, passiveRemap)
+        end
+        feat.SelectPassives = passives
+    else
+        feat.SelectPassives = {}
     end
     E6_ApplyFeatOverrides(feat, spec)
     return feat
