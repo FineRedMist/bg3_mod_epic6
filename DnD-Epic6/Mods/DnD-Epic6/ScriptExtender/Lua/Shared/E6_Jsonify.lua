@@ -203,11 +203,13 @@ function E6_ToFile(obj, filename, skipProperties)
         -- determine if we are empty, an array, or a map
         local firstKey = next(value)
         if firstKey == nil then
-            writeRaw(indent, "[]") -- default is to assume an array
+            writeRaw(indent, "[]\n") -- default is to assume an array
             return
         end
 
         if type(firstKey) == "number" then
+            writeRaw(0, "\n")
+            writeIndent(indent)
             writeRaw(0, "[\n")
             local len = #value
             for i, v in ipairs(value) do
@@ -222,6 +224,8 @@ function E6_ToFile(obj, filename, skipProperties)
             writeIndent(indent)
             writeRaw(indent, "]")
         else
+            writeRaw(0, "\n")
+            writeIndent(indent)
             writeRaw(0, "{\n")
             -- get the keys, sort them, then iterate in order
             local keys = {}
@@ -238,7 +242,7 @@ function E6_ToFile(obj, filename, skipProperties)
                 local v = value[k]
                 writeIndent(indent + 1)
                 write(indent + 1, k)
-                fileWriter(": ")
+                fileWriter(" : ")
                 write(indent + 1, v)
                 if i < len then
                     fileWriter(",\n")
