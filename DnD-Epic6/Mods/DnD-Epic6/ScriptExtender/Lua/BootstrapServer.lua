@@ -1,5 +1,2 @@
-Ext.Require("E6_CommonInit.lua")
-Ext.Require("E6_FeatPoints.lua")
-
-DnDEpic6Init()
-E6_FeatPointInit()
+Ext.Require("Shared/E6_Init.lua")
+Ext.Require("Server/E6_Init.lua")
