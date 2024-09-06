@@ -142,11 +142,18 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
 
         updateTitle(nil, nil)
 
-        local row = 1
-        local passiveCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(row), parent.Size[1] - 60)
-
         local iconsPerRow = ComputeIconsPerRow(#passiveList.Passives)
         local iconRowCount = 0
+        local row = 0
+
+        local function AddRow()
+            iconRowCount = 0
+            row = row + 1
+            return CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(row), parent.Size[1] - 60)
+        end
+
+        local passiveCell = AddRow()
+
         for _,passive in ipairs(passiveList.Passives) do
             local passiveStat = Ext.Stats.Get(passive, -1, true, true)
             --_E6P("Passive " .. passive .. ": " .. E6_ToJson(passiveStat, {}))
@@ -177,13 +184,11 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
                 end)
             end
             AddLocaTooltipTitled(IconControl, passiveStat.DisplayName, passiveStat.Description)
+            IconControl.SameLine = true
+
             iconRowCount = iconRowCount + 1
-            if iconRowCount <= iconsPerRow then
-                IconControl.SameLine = true
-            else
-                iconRowCount = 0
-                row = row + 1
-                passiveCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(row), parent.Size[1] - 60)
+            if iconRowCount >= iconsPerRow then
+                passiveCell = AddRow()
             end
         end
     end
