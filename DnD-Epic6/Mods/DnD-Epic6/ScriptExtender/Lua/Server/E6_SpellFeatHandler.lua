@@ -62,7 +62,7 @@ local function GatherPlayerPassives(entity)
         if passive == nil or string.len(passive) == 0 then
             return
         end
-        _E6P("Adding passive: " .. passive)
+        --_E6P("Adding passive: " .. passive)
         local curCount = passives[passive]
         if curCount == nil then
             curCount = 1
@@ -110,10 +110,10 @@ end
 
 ---Gathers the feats that the player can select. It checks constraints server side as client doesn't
 ---seem to have all the data to do so.
----@param entity EntityHandle
----@param playerFeats table
----@param abilityScores table?
----@return table
+---@param entity EntityHandle The player entity to test against.
+---@param playerFeats table The feats the player already has.
+---@param playerInfo table Information about what the player has for abilities, proficiencies, etc.
+---@return table The collection of feats the player can actually select
 local function GatherSelectableFeatsForPlayer(entity, playerFeats, playerInfo)
     local allFeats = E6_GatherFeats()
 
@@ -243,7 +243,7 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
             if not scores[abilityLabel] then
                 scores[abilityLabel] = {Current = 0, Maximum = 20}
             end
-            _E6P("Found ability boost [" .. tostring(boostIndex) .. "] " .. abilityLabel .. " (" .. cause .. "): amount delta=" .. tostring(value) .. ", max delta=" .. tostring(max))
+            --_E6P("Found ability boost [" .. tostring(boostIndex) .. "] " .. abilityLabel .. " (" .. cause .. "): amount delta=" .. tostring(value) .. ", max delta=" .. tostring(max))
             scores[abilityLabel].Current = scores[abilityLabel].Current + value
             scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + max
         end
@@ -308,7 +308,7 @@ local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
     for _,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
-        if IsValidCause(entity, boost, boostInfo) and boost.ExpertiseBonusBoost then
+        if IsValidCause(entity, boost, boostInfo) then
             local expertise = boost.ExpertiseBonusBoost
             if expertise then -- Expertise
                 local skill = expertise.Skill.Label
@@ -317,6 +317,39 @@ local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
         end
     end
 end
+
+local EquipmentCategories = {
+    SimpleWeapons = {"clubs", "daggers", "greatclubs", "handaxes", "javelins", "lighthammers", "maces", "quarterstaffs", "sickles", "spears", "lightcrossbows", "darts", "shortbows", "slings"},
+    MartialWeapons = {"battleaxes", "flails", "glaives", "greataxes", "greatswords", "halberds", "lances", "longswords", "mauls", "morningstars", "pikes", "rapiers", "scimitars", "shortswords", "tridents", "warpicks", "warhammers", "whips", "blowguns", "handcrossbows", "heavycrossbows", "longbows", "nets"}
+}
+---Gathers proficiencies for equipment from the proficiency boosts.
+---@param entity EntityHandle The character entity handle
+---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
+---@param proficiencies table The proficiency table to update
+local function GatherOtherProficiencesFromBoosts(entity, boosts, proficiencies)
+    if boosts == nil then
+        return
+    end
+
+    for _,boost in ipairs(boosts) do
+        ---@type BoostInfoComponent?
+        local boostInfo = boost.BoostInfo
+        if IsValidCause(entity, boost, boostInfo) and boost.ProficiencyBoost then
+            --_E6P("Processing boost: " .. E6_ToJson(boost, {"Owner", "Entity", "Dependency"}))
+            local proficiencyFlags = boost.ProficiencyBoost.Flags
+            for _,proficiency in ipairs(proficiencyFlags) do
+                proficiencies.Equipment[string.lower(proficiency)] = true
+                local category = EquipmentCategories[proficiency]
+                if category then
+                    for _,item in ipairs(category) do
+                        proficiencies.Equipment[item] = true
+                    end
+                end
+            end
+        end
+    end
+end
+
 
 ---Gathers the ability scores for the given character, without magical modifications
 ---@param entity EntityHandle
@@ -341,13 +374,17 @@ local function GatherProficiencies(entity)
     -- Expertise is stored in the ExpertiseBonus boosts.
     local proficiencies = {
         SavingThrows = {},
-        Skills = {}
+        Skills = {},
+        Equipment = {}
     }
     for _,boost in ipairs(boosts) do
         if boost.Type and boost.Type.Label == "ProficiencyBonus" then
             GatherProficienciesFromBoosts(entity, boost.Boosts, proficiencies)
         elseif boost.Type and boost.Type.Label == "ExpertiseBonus" then
             GatherExpertiseFromBoosts(entity, boost.Boosts, proficiencies)
+        else if boost.Type and boost.Type.Label == "Proficiency" then
+            GatherOtherProficiencesFromBoosts(entity, boost.Boosts, proficiencies)
+        end
         end
     end
     return proficiencies
@@ -365,14 +402,14 @@ local function OnEpic6FeatSelectorSpell(caster)
 
     SaveCharacterData(ent)
 
-    _E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
+    --_E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
 
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
     local message = {
         PlayerId = caster,
-        PlayerName = GetCharacterName(ent),
+        PlayerName = charname,
         PlayerFeats = playerFeats,
         PlayerPassives = GatherPlayerPassives(ent),
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
