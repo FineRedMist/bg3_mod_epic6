@@ -41,7 +41,7 @@ function AddTooltip(target, text)
     local tooltip = target:Tooltip()
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
     ClearChildren(tooltip)
-    local textControl = tooltip:AddText(text)
+    local textControl = tooltip:AddText(TidyDescription(text))
     textControl.ItemWidth = 500
     textControl.TextWrapPos = 500
 end
@@ -59,7 +59,7 @@ end
 ---@param textId string The id of the text in the localization system to lookup.
 function AddLocaTooltip(target, textId)
     local text = Ext.Loca.GetTranslatedString(textId)
-    AddTooltip(target, TidyDescription(text))
+    AddTooltip(target, text)
 end
 
 ---Adds a tooltip to the target with a title and text.
@@ -69,7 +69,7 @@ end
 function AddLocaTooltipTitled(target, titleId, textId)
     local title = Ext.Loca.GetTranslatedString(titleId)
     local text = Ext.Loca.GetTranslatedString(textId)
-    AddTooltipTitled(target, TidyDescription(title), TidyDescription(text))
+    AddTooltipTitled(target, title, text)
 end
 
 ---Creates a table that facilitates centering an object through brute force.
