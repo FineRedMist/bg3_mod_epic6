@@ -16,18 +16,24 @@ local uiPendingTickCount = 2
 local function ShowFeatDetailSelectUI(feat, playerInfo)
     local windowDimensions = {1000, 1450}
     if not featDetailUI then
-        local featDetails = Ext.Loca.GetTranslatedString("h43800b7agdc92g46b6g82dcg22fb987efe6c") -- Feat Details
-        featDetailUI = Ext.IMGUI.NewWindow(featDetails)
+        featDetailUI = Ext.IMGUI.NewWindow("FeatDetailsWindow")
         featDetailUI.Closeable = true
         featDetailUI.NoMove = true
         featDetailUI.NoResize = true
         featDetailUI.NoCollapse = true
-        featDetailUI:SetSize(windowDimensions)
-        featDetailUI:SetPos({1400, 100})
     end
 
+    featDetailUI.Label = feat.DisplayName
+    -- When the label changes, I need to reset the size and position of the window as it ends up moving.
+    featDetailUI:SetSize(windowDimensions)
+    featDetailUI:SetPos({1400, 100})
+    featDetailUI.Closeable = true
+    featDetailUI.NoMove = true
+    featDetailUI.NoResize = true
+    featDetailUI.NoCollapse = true
     featDetailUI.Visible = true
     featDetailUI.Open = true
+
     featDetailUI:SetFocus()
     uiPendingCount = uiPendingTickCount
 
@@ -72,7 +78,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         featDetailUI.Visible = false
         featDetailUI.Open = false
 
-        -- Gather the selected abilities and any boosts from passives
+        -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
         local boosts = {}
         for _, passive in ipairs(extraPassives) do
             table.insert(boosts, passive.Boost)
@@ -86,6 +92,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             end
         end
 
+        -- Add the boosts for the skills
         for skillName, skillState in pairs(skillStates) do
             if skillState.Proficient then
                 table.insert(boosts, "ProficiencyBonus(Skill," .. skillName .. ")")
@@ -95,15 +102,25 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             end
         end
 
+        -- Gather the passives selected and from the feat itself
+        local passivesForFeat = {}
+        for _,passive in ipairs(feat.PassivesAdded) do
+            table.insert(passivesForFeat, passive)
+        end
+        for passive,_ in pairs(selectedPassives) do
+            table.insert(passivesForFeat, passive)
+        end
+
         local payload = {
             PlayerId = playerInfo.ID,
             Feat = {
                 FeatId = feat.ID,
-                PassivesAdded = feat.PassivesAdded,
+                PassivesAdded = passivesForFeat,
                 Boosts = boosts
             }
         }
         local payloadStr = Ext.Json.Stringify(payload)
+        _E6P("Sending selected feat: " .. payloadStr)
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC, payloadStr)
     end
 

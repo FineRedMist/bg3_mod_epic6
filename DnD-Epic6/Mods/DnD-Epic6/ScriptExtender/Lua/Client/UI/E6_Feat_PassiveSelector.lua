@@ -27,80 +27,96 @@ local function IsPassiveSafe(playerInfo, passive, passiveStat)
                 return false
             end
         end
+        -- Check equipment proficiencies
+        local equipment = ParseProficiencyBoost(boost)
+        if equipment then
+            if playerInfo.Proficiencies.Equipment[string.lower(equipment)] then
+                return false
+            end
+        end
     end
     return true
 end
 
-local proficiencyIconMap = {
-    battleaxes = "ico_proficiency_battleAxe",
-    clubs = "ico_proficiency_club",
-    daggers = "ico_proficiency_dagger",
-    darts = "ico_proficiency_dart",
-    flails = "ico_proficiency_flail",
-    glaives = "ico_proficiency_glaive",
-    greataxes = "ico_proficiency_greatAxe",
-    greatclubs = "ico_proficiency_greatClub",
-    greatswords = "ico_proficiency_greatSword",
-    halbards = "ico_proficiency_halberd",
-    handaxes= "ico_proficiency_handAxe",
-    handcrossbows = "ico_proficiency_handCrossbow",
-    javelins = "ico_proficiency_javelin",
-    lightarmour = "ico_proficiency_lightArmour",
-    lightcrossbows = "ico_proficiency_lightCrossbow",
-    lighthammers = "ico_proficiency_lightHammer",
-    longbows = "ico_proficiency_longBow",
-    longswords = "ico_proficiency_longSword",
-    maces = "ico_proficiency_mace",
-    mauls = "ico_proficiency_maul",
-    mediumarmour = "ico_proficiency_mediumArmour",
-    morningstars = "ico_proficiency_morningStar",
-    pikes = "ico_proficiency_pike",
-    quarterstaffs = "ico_proficiency_quarterstaff",
-    rapiers = "ico_proficiency_rapier",
-    scimitars = "ico_proficiency_scimitar",
-    shields = "ico_proficiency_shield",
-    shortbows = "ico_proficiency_shortBow",
-    shortswords = "ico_proficiency_shortSword",
-    sickles = "ico_proficiency_sickle",
-    slings = "ico_proficiency_sling",
-    spears = "ico_proficiency_spear",
-    tridents = "ico_proficiency_trident",
-    warhammers = "ico_proficiency_warhammer",
-    warpicks = "ico_proficiency_warPick",
-}
-
----Identifies the icon to display for the passive
----@param passiveStat table
----@return string
-local function GetPassiveIcon(passive, passiveStat)
-    local icon = passiveStat.Icon
-    if icon and string.len(icon) > 0 then
-        _E6P("Passive " .. passive .. " is getting the icon for proficiency: " .. icon)
-        return icon
+local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
+    if not renderState.CenterCell then
+        renderState.CenterCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex), parent.Size[1] - 60)
     end
 
-    -- Check for proficiencies
-    local boosts = SplitString(passiveStat.Boosts, ";")
-    for _,boost in ipairs(boosts) do
-        local proficiency = ParseProficiencyBoost(boost)
-        if proficiency then
-            local lowerProf = string.lower(proficiency)
-            local mapped = proficiencyIconMap[lowerProf]
-            if mapped then
-                mapped = "Assets/Shared/ProficiencyIcons/" .. mapped .. ".DDS"
-                _E6P("Passive " .. passive .. " is getting the icon for proficiency: " .. mapped)
-                return mapped
+    local passiveID = passive.ID
+    local checkBoxControl = renderState.CenterCell:AddCheckbox(passive.DisplayName)
+    if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
+        checkBoxControl.Enabled = false
+    else
+        checkBoxControl.OnChange = function()
+            if checkBoxControl.Checked then
+                selectedPassives[passiveID] = true
+                sharedResource:AcquireResource()
+            else
+                selectedPassives[passiveID] = nil
+                sharedResource:ReleaseResource()
             end
-            if string.sub(proficiency, string.len(proficiency)) == "s" then
-                proficiency = string.sub(proficiency, 1, string.len(proficiency) - 1)
-            end
-            icon = "ico_proficiency_" .. proficiency
-            _E6P("Passive " .. passive .. " is getting the icon for proficiency: " .. icon)
-            return icon
         end
+        sharedResource:add(function(hasResources, _)
+            if hasResources then
+                checkBoxControl.Enabled = true
+            else
+                checkBoxControl.Enabled = selectedPassives[passiveID] ~= nil
+            end
+        end)
     end
-    _E6Error("Could not find icon for passive " .. passive)
-    return "Item_Unknown"
+    AddTooltip(checkBoxControl, passive.Description)
+end
+
+local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
+    local function AddRow()
+        renderState.IconRowCount = 0
+        renderState.Row = renderState.Row + 1
+        return CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(renderState.Row), parent.Size[1] - 60)
+    end
+
+    if not renderState.Row then
+        renderState.IconsPerRow = ComputeIconsPerRow(#passiveList.Passives)
+        renderState.IconRowCount = 0
+        renderState.Row = 0
+        renderState.PassiveCell = AddRow()
+    end
+
+    --_E6P("Passive " .. passive .. ": " .. E6_ToJson(passiveStat, {}))
+    local passiveID = passive.ID
+    local iconId = passive.Icon
+    local IconControl = nil
+    if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
+        IconControl = renderState.PassiveCell:AddImage(iconId)
+        IconControl.Enabled = false
+    else
+        IconControl = renderState.PassiveCell:AddImageButton("", iconId)
+        IconControl.OnClick = function()
+            if selectedPassives[passiveID] then
+                selectedPassives[passiveID] = nil
+                sharedResource:ReleaseResource()
+                MakeBland(IconControl)
+            else
+                selectedPassives[passiveID] = true
+                sharedResource:AcquireResource()
+                MakeSpicy(IconControl)
+            end
+        end
+        sharedResource:add(function(hasResources, _)
+            if hasResources then
+                IconControl.Enabled = true
+            else
+                IconControl.Enabled = selectedPassives[passiveID] ~= nil
+            end
+        end)
+    end
+    AddTooltipTitled(IconControl, passive.DisplayName, passive.Description)
+    IconControl.SameLine = true
+
+    renderState.IconRowCount = renderState.IconRowCount + 1
+    if renderState.IconRowCount >= renderState.IconsPerRow then
+        renderState.PassiveCell = AddRow()
+    end
 end
 
 ---Adds the ability selector to the feat details, if ability selection is present.
@@ -142,54 +158,33 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
 
         updateTitle(nil, nil)
 
-        local iconsPerRow = ComputeIconsPerRow(#passiveList.Passives)
-        local iconRowCount = 0
-        local row = 0
+        local renderState = {}
 
-        local function AddRow()
-            iconRowCount = 0
-            row = row + 1
-            return CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(row), parent.Size[1] - 60)
+        local sortedPassives = {}
+        local isMissingIcons = false
+        for _,passive in ipairs(passiveList.Passives) do
+            local stat = Ext.Stats.Get(passive, -1, true, true)
+            local iconId = stat.Icon
+            if not iconId or string.len(iconId) == 0 then
+                isMissingIcons = true
+            end
+            table.insert(sortedPassives, { ID = passive, Stat = stat, Icon = iconId, DisplayName = Ext.Loca.GetTranslatedString(stat.DisplayName), Description = Ext.Loca.GetTranslatedString(stat.Description) })
         end
 
-        local passiveCell = AddRow()
+        -- Disable the sort as the specified order is assumed intentional.       
+        --table.sort(sortedPassives, function(a,b)
+        --    return a.Stat.DisplayName < b.Stat.DisplayName
+        --end)
 
-        for _,passive in ipairs(passiveList.Passives) do
-            local passiveStat = Ext.Stats.Get(passive, -1, true, true)
-            --_E6P("Passive " .. passive .. ": " .. E6_ToJson(passiveStat, {}))
-            local iconId = GetPassiveIcon(passive, passiveStat)
-            local IconControl = nil
-            if not IsPassiveSafe(playerInfo, passive, passiveStat) then
-                IconControl = passiveCell:AddImage(iconId)
-                IconControl.Enabled = false
-            else
-                IconControl = passiveCell:AddImageButton("", iconId)
-                IconControl.OnClick = function()
-                    if selectedPassives[passive] then
-                        selectedPassives[passive] = nil
-                        sharedResource:ReleaseResource()
-                        MakeBland(IconControl)
-                    else
-                        selectedPassives[passive] = true
-                        sharedResource:AcquireResource()
-                        MakeSpicy(IconControl)
-                    end
-                end
-                sharedResource:add(function(hasResources, _)
-                    if hasResources then
-                        IconControl.Enabled = true
-                    else
-                        IconControl.Enabled = selectedPassives[passive] ~= nil
-                    end
-                end)
-            end
-            AddLocaTooltipTitled(IconControl, passiveStat.DisplayName, passiveStat.Description)
-            IconControl.SameLine = true
+        local addPassiveFunction = nil
+        if isMissingIcons then
+            addPassiveFunction = AddPassiveByCheckbox
+        else
+            addPassiveFunction = AddPassiveByIcon
+        end
 
-            iconRowCount = iconRowCount + 1
-            if iconRowCount >= iconsPerRow then
-                passiveCell = AddRow()
-            end
+        for _,passive in ipairs(sortedPassives) do
+            addPassiveFunction(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
         end
     end
 
