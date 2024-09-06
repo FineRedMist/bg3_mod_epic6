@@ -287,7 +287,7 @@ local function GatherProficienciesFromBoosts(entity, boosts, proficiencies)
             local proficiency = boost.ProficiencyBonusBoost
             if proficiency.Type.Label == "SavingThrow" then -- Saving throw
                 local ability = proficiency.Ability.Label
-                table.insert(proficiencies.SavingThrows, ability)
+                proficiencies.SavingThrows[ability] = true
             elseif proficiency.Type.Label == "Skill" then -- Skill
                 local skill = proficiency.Skill.Label
                 proficiencies.Skills[skill] = {Proficient = true}

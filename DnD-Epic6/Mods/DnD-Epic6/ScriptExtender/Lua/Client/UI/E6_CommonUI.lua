@@ -134,3 +134,61 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
     -- Call it at the outset to set the initial state.
     EnableOnAllResourcesAllocated(control, sharedResources)
 end
+
+local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
+local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
+local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
+
+---Adds a border around the target object.
+---@param target ExtuiStyledRenderable The object to add a border to.
+function MakeSpicy(target)
+    for k, v in pairs(checkBoxColors) do
+        target:SetColor(k, v)
+    end
+    for k, v in pairs(checkBoxBorder) do
+        target:SetStyle(k, v)
+    end
+end
+
+---Removes the border around the target object.
+---@param target ExtuiStyledRenderable The object to add a border to.
+function MakeBland(target)
+    for k, v in pairs(checkBoxBorderBland) do
+        target:SetStyle(k, v)
+    end
+end
+
+---Adds a checkbox to the parent with a spicy border.
+---@param parent ExtuiTreeParent The parent to add the checkbox to.
+---@return ExtuiCheckbox The checkbox that was added.
+function SpicyCheckbox(parent)
+    local checkbox = parent:AddCheckbox("")
+    MakeSpicy(checkbox)
+    return checkbox
+end
+
+local minIconsPerRow = 7
+local maxIconsPerRow = 9
+
+---Try to determine a decent arrangement of icons per row, so that it looks boxy.
+---@param iconCount number The total number of icons to place
+---@return number The number of icons to place per row.
+function ComputeIconsPerRow(iconCount)
+    if iconCount <= maxIconsPerRow then
+        return iconCount
+    end
+    local minRowCount = minIconsPerRow
+    local minLost = minIconsPerRow - math.fmod(iconCount, minIconsPerRow)
+    for i = minIconsPerRow, maxIconsPerRow - 1 do
+        local modValue = math.fmod(iconCount, i)
+        if modValue == 0 then
+            return i
+        end
+        local lost = i - modValue
+        if lost < minLost then
+            minLost = lost
+            minRowCount = i
+        end
+    end
+    return minRowCount
+end

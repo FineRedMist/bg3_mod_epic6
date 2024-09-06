@@ -269,10 +269,8 @@ local function GatherPassiveAbilityModifiers(passiveName)
     if passive and passive.Boosts then
         local boosts = SplitString(passive.Boosts, ";")
         for _,boost in ipairs(boosts) do
-            local parts = GetFullMatch(boost, "%s*Ability%s*%(%s*(%a+)%s*,%s*(%d+),?%s*%d*%s*%)%s*")
-            if parts then
-                local ability = parts[1]
-                local delta = tonumber(parts[2])
+            local ability, delta = ParseAbilityBoost(boost)
+            if ability then
                 if not result[ability] then
                     result[ability] = delta
                 else
