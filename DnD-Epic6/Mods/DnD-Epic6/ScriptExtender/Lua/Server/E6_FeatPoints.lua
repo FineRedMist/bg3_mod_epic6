@@ -204,14 +204,59 @@ local function E6_OnRespecComplete(characterGuid)
     if not E6_IsPlayerEntity(char) then
         return
     end
-    -- When a respec completes, we'll remove the feat granter spell.
-    -- Then the Tick will handle updating the feat count so the player can select them again once
-    -- the respect is complete.
+    
+    -- When a respec completes, we'll remove the feat granter spell, the feat counts, and feat that were previously granted.
+    -- We needed to preserve the feat list from starting the respec in case it was cancelled so we could restore it.
+
+    -- Tick will handle updating the feat count so the player can select them again once the respect is complete.
     Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
     if char.Vars.E6_Feats then
-        E6_RemoveFeats(characterGuid, char.Vars.E6_Feats)
         char.Vars.E6_Feats = nil
+    end
+end
+
+---If the user cancels the respec, we reapply the feats that were removed when the respec was started.
+---@param characterGuid string
+local function E6_OnRespecCancelled(characterGuid)
+    -- When entering levels, the various creatures in the level trigger the respec, ignore them
+    -- by only focusing on those that have the IsPlayer flag.
+    local char = Ext.Entity.Get(characterGuid)
+    if not E6_IsPlayerEntity(char) then
+        return
+    end
+    if char.Vars.E6_Feats then
+        E6_ApplyFeats(characterGuid, char.Vars.E6_Feats)
+    end
+end
+
+---We need to remove the feat passives and boosts ahead of time as it may create erroneous behaviour during the respec itself.
+---If the user cancels the respec, we reapply the feats.
+---@param characterGuid string
+local function E6_OnRespecStart(characterGuid)
+    -- When entering levels, the various creatures in the level trigger the respec, ignore them
+    -- by only focusing on those that have the IsPlayer flag.
+    local char = Ext.Entity.Get(characterGuid)
+    if not E6_IsPlayerEntity(char) then
+        return
+    end
+    if char.Vars.E6_Feats then
+        E6_RemoveFeats(characterGuid, char.Vars.E6_Feats)
+    end
+end
+
+---We need to remove the feat passives and boosts ahead of time as it may create erroneous behaviour during the respec itself.
+---If the user cancels the respec, we reapply the feats.
+---@param characterGuid string
+local function E6_OnRespecRequest(characterGuid)
+    -- When entering levels, the various creatures in the level trigger the respec, ignore them
+    -- by only focusing on those that have the IsPlayer flag.
+    local char = Ext.Entity.Get(characterGuid)
+    if not E6_IsPlayerEntity(char) then
+        return
+    end
+    if char.Vars.E6_Feats then
+        E6_RemoveFeats(characterGuid, char.Vars.E6_Feats)
     end
 end
 
@@ -226,4 +271,7 @@ function E6_FeatPointInit()
 
     --Ext.Osiris.RegisterListener("LeveledUp", 1, "after", E6_OnLevelUpComplete)
     Ext.Osiris.RegisterListener("RespecCompleted", 1, "after", E6_OnRespecComplete)
+    Ext.Osiris.RegisterListener("RespecCancelled", 1, "after", E6_OnRespecCancelled)
+    Ext.Osiris.RegisterListener("StartRespec", 1, "before", E6_OnRespecStart)
+    Ext.Osiris.RegisterListener("RequestRespec", 1, "before", E6_OnRespecRequest)
 end
