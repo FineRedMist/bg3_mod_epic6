@@ -14,4 +14,6 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="h1a5184cdgaba1g432fga0d3g51ac15b8a0a8" version="1">Feats</content>
 	<content contentuid="h262bbb67gb8abg4d35g9822g854af550a474" version="1">Number of Epic feats chosen.</content>
 	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
+	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Export Character</content>
+	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">The exported character can be found in %LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/Script Extender/E6_Character.json.</content>
 </contentList>

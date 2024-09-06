@@ -199,6 +199,16 @@ function E6_FeatSelectorUI(message)
         end
     end
 
+    featUI:AddSpacing()
+    featUI:AddSeparator()
+    featUI:AddSpacing()
+
+    local centerCell = CreateCenteredControlCell(featUI, "ExportCharacterCell", windowDimensions[1] - 30)
+    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
+    AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33")
+    exportButton.OnClick = function()
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, message.PlayerId)
+    end
 end
 
 ---Checks the feat windows to determine if they have lost focus, in which case, close them.
