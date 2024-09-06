@@ -390,17 +390,11 @@ local function GatherProficiencies(entity)
     return proficiencies
 end
 
-local function SaveCharacterData(ent)
-    --E6_ToFile(ent, "E6_Character.json", {"ProgressionContainer", "Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
-end
-
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
-
-    SaveCharacterData(ent)
 
     --_E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
 
