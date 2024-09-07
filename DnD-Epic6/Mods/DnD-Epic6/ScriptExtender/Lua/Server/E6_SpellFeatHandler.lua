@@ -12,7 +12,7 @@ local function GatherPlayerFeats(entity)
         return feats
     end
     local function AddFeat(feat)
-        if feat ~= nil and feat ~= "00000000-0000-0000-0000-000000000000" then
+        if IsValidGuid(feat) then
             --_E6P("Adding feat: " .. feat)
             local curCount = feats[feat]
             if curCount == nil then
@@ -390,6 +390,88 @@ local function GatherProficiencies(entity)
     return proficiencies
 end
 
+local function GatherSpells(entity)
+    local result = {}
+    local cc = entity.CCLevelUp
+    if not cc then
+        return result
+    end
+    local levelUps = cc.LevelUps
+    if not levelUps then
+        return result
+    end
+
+    local function GetSpellResultList(listId)
+        local spellResults = result[listId]
+        if not spellResults then
+            spellResults = {}
+            result[listId] = spellResults
+        end
+        return spellResults
+    end
+
+    local function RemoveSpellFromList(resultList, spellName)
+        resultList[spellName] = nil
+    end
+
+    local function AddSpellToList(resultList, spellName)
+        resultList[spellName] = true
+    end
+
+    ---Adds the spell to the spellList, mapping class -> {classID, spells[]}
+    ---@param levelup LevelUpData
+    local function AddSpell(levelup)
+        local upgrades = levelup.Upgrades
+        if not upgrades then
+            return
+        end
+        local upgradeSpells = upgrades.Spells
+        if not upgradeSpells then
+            return
+        end
+        for _,spellData in ipairs(upgradeSpells) do
+            local list = spellData.SpellList
+            if IsValidGuid(list) then
+                local spells = spellData.Spells
+                local replaceSpells = spellData.ReplaceSpells
+                if replaceSpells then
+                    local spellResults = GetSpellResultList(list)
+                    for _,spell in ipairs(replaceSpells) do
+                        RemoveSpellFromList(spellResults, spell)
+                    end
+                end
+                if spells then
+                    local spellResults = GetSpellResultList(list)
+                    for _,spell in ipairs(spells) do
+                        AddSpellToList(spellResults, spell)
+                    end
+                end
+            end
+        end
+    end
+
+    for _,levelup in ipairs(levelUps) do
+        AddSpell(levelup)
+    end
+
+    local e6Feats = entity.Vars.E6_Feats
+    if e6Feats ~= nil then
+        for _, feat in ipairs(e6Feats) do
+            local featSpells = feat.Spells
+            if featSpells then
+                for listId, spells in pairs(featSpells) do
+                    local spellResults = GetSpellResultList(listId)
+                    for _,spell in ipairs(spells) do
+                        AddSpellToList(spellResults, spell)
+                    end
+                end
+            end
+        end
+    end
+
+    return result
+end
+
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
@@ -401,6 +483,8 @@ local function OnEpic6FeatSelectorSpell(caster)
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
+    local spells = GatherSpells(ent)
+
     local message = {
         PlayerId = caster,
         PlayerName = charname,
@@ -409,6 +493,7 @@ local function OnEpic6FeatSelectorSpell(caster)
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
+        Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus -- to show skill bonuses
     }
 

@@ -1,5 +1,11 @@
 EpicSpellContainerName = "E6_Shout_EpicFeats"
 
+GuidZero = "00000000-0000-0000-0000-000000000000"
+
+function IsValidGuid(guid)
+    return guid ~= nil and string.len(guid) == string.len(GuidZero) and guid ~= GuidZero
+end
+
 ---Splits a string based on the separator, which defaults to whitspace
 ---@param inputstr string The string to split
 ---@param separator any The separator to split the string with
