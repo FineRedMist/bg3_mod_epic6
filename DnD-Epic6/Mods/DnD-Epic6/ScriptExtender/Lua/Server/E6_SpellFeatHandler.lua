@@ -391,7 +391,7 @@ local function GatherProficiencies(entity)
 end
 
 local function GatherSpells(entity)
-    local result = {}
+    local result = { Added = {}, Selected = {} }
     local cc = entity.CCLevelUp
     if not cc then
         return result
@@ -402,10 +402,10 @@ local function GatherSpells(entity)
     end
 
     local function GetSpellResultList(listId)
-        local spellResults = result[listId]
+        local spellResults = result.Selected[listId]
         if not spellResults then
             spellResults = {}
-            result[listId] = spellResults
+            result.Selected[listId] = spellResults
         end
         return spellResults
     end
@@ -450,16 +450,85 @@ local function GatherSpells(entity)
         end
     end
 
+    local classInfos = {}
+    ---@param levelup LevelUpData
+    local function AddClassLevelUp(levelup)
+        local classId = levelup.Class
+        local subClassId = levelup.SubClass
+        if not classInfos[classId] then
+            classInfos[classId] = { Class = classId, Level = 0 }
+        end
+        local class = classInfos[classId]
+        class.Level = class.Level + 1
+        if IsValidGuid(subClassId) then
+            class.SubClass = subClassId
+        end
+    end
+
     for _,levelup in ipairs(levelUps) do
+        -- Gather class info to check progressions for granted spell categories
+        AddClassLevelUp(levelup)
+        -- Add the spells explicitly chosen
         AddSpell(levelup)
     end
 
+    -- Gather progression data to compare against the classes
+    -- Group by TableUUID
+    local progressions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
+    local progressionTables = {}
+    for _,progressionId in ipairs(progressions) do
+        local progression = Ext.StaticData.Get(progressionId, Ext.Enums.ExtResourceManagerType.Progression)
+        local pTable = progressionTables[progression.TableUUID]
+        if not pTable then
+            pTable = {}
+            progressionTables[progression.TableUUID] = pTable
+        end
+        local progressionInfo = {Level = progression.Level, Added = {}}
+        local addedSpells = progression.AddSpells
+        local hasAdds = false
+        for _, addSpell in ipairs(addedSpells) do
+            progressionInfo.Added[addSpell.SpellUUID] = true
+            hasAdds = true
+        end
+        if hasAdds then
+            table.insert(pTable, progressionInfo)
+        end
+    end
+
+    -- Now go through the classes and compare against the progression data.
+    for classId, classInfo in pairs(classInfos) do
+        local ids = { classId, classInfo.SubClass}
+        for _, id in ipairs(ids) do
+            if id and IsValidGuid(id) then
+                local class = Ext.StaticData.Get(classId, Ext.Enums.ExtResourceManagerType.ClassDescription)
+                local progressionId = class.ProgressionTableUUID
+                if IsValidGuid(progressionId) then
+                    local pTable = progressionTables[progressionId]
+                    for _, progressionInfo in ipairs(pTable) do
+                        if progressionInfo.Level <= classInfo.Level then
+                            for spellId,_ in pairs(progressionInfo.Added) do
+                                result.Added[spellId] = true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Add information from the E6 Feats
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
-            local featSpells = feat.Spells
-            if featSpells then
-                for listId, spells in pairs(featSpells) do
+            local addedSpells = feat.AddedSpells
+            if addedSpells then
+                for _, listId in ipairs(addedSpells) do
+                    result.Added[listId] = true
+                end
+            end
+            local selectedSpells = feat.SelectedSpells
+            if selectedSpells then
+                for listId, spells in pairs(selectedSpells) do
                     local spellResults = GetSpellResultList(listId)
                     for _,spell in ipairs(spells) do
                         AddSpellToList(spellResults, spell)
