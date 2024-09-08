@@ -42,7 +42,7 @@ end
 ---@param feat table
 ---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
 function AddFeaturesToFeatDetailsUI(parent, feat, extraPassives)
-    if #feat.PassivesAdded > 0 or #extraPassives then
+    if #feat.PassivesAdded > 0 or #extraPassives or #feat.AddSpells > 0 then
         parent:AddSpacing()
         parent:AddSeparator()
         parent:AddSpacing()
