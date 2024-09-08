@@ -4,23 +4,35 @@
 ---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
 local function AddFeaturesToCell(cell, feat, extraPassives)
     local avoidDupes = {}
-    for _,passive in ipairs(feat.PassivesAdded) do
-        local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
-        local key = passiveStat.DisplayName .. "|" .. passiveStat.Description .. "|" .. passiveStat.Icon
+
+    local function AddPassiveIcon(displayNameId, descriptionId, iconId)
+        local key = displayNameId .. "|" .. descriptionId .. "|" .. iconId
         if not avoidDupes[key] then
-            local icon = cell:AddImage(passiveStat.Icon)
-            AddLocaTooltipTitled(icon, passiveStat.DisplayName, passiveStat.Description)
+            local icon = cell:AddImage(iconId)
+            AddLocaTooltipTitled(icon, displayNameId, descriptionId)
             icon.SameLine = true
             avoidDupes[key] = true
         end
     end
+
+    for _,passive in ipairs(feat.PassivesAdded) do
+        local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
+        AddPassiveIcon(passiveStat.DisplayName, passiveStat.Description, passiveStat.Icon)
+    end
     for _,passive in ipairs(extraPassives) do
-        local key = passive.DisplayName .. "|" .. passive.Description .. "|" .. passive.Icon
-        if not avoidDupes[key] then
-            local icon = cell:AddImage(passive.Icon)
-            AddLocaTooltipTitled(icon, passive.DisplayName, passive.Description)
-            icon.SameLine = true
-            avoidDupes[key] = true
+        AddPassiveIcon(passive.DisplayName, passive.Description, passive.Icon)
+    end
+    for _,addSpells in ipairs(feat.AddSpells) do
+        table.insert(extraPassives, { Boost = MakeBoost_AddSpells(addSpells) })
+        local spells = Ext.StaticData.Get(addSpells.SpellsId, Ext.Enums.ExtResourceManagerType.SpellList)
+        _E6P("Spell info for " .. addSpells.SpellsId .. ": " .. E6_ToJson(spells, {}))
+        if spells then
+            for _,spellId in pairs(spells.Spells) do -- not ipairs intentionally, it doesn't handle Array_FixedString for some reason.
+                local spellStat = Ext.Stats.Get(spellId, -1, true, true)
+                if spellStat then
+                    AddPassiveIcon(spellStat.DisplayName, spellStat.Description, spellStat.Icon)
+                end
+            end
         end
     end
 end

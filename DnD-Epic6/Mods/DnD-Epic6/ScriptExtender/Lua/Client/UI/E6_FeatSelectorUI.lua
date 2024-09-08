@@ -86,7 +86,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         for _, abilitySelector in ipairs(abilityInfo) do
             for _, ability in ipairs(abilitySelector.State) do
                 if ability.Current > ability.Initial then
-                    local boost = "Ability(" .. ability.Name .. "," .. tostring(ability.Current - ability.Initial) .. ")"
+                    local boost = "Ability(" .. JoinArgs({ability.Name, ability.Current - ability.Initial}) .. ")"
                     table.insert(boosts, boost)
                 end
             end
@@ -205,7 +205,7 @@ function E6_FeatSelectorUI(message)
 
     local centerCell = CreateCenteredControlCell(featUI, "ExportCharacterCell", windowDimensions[1] - 30)
     local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
-    AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33")
+    AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
     exportButton.OnClick = function()
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, message.PlayerId)
     end
