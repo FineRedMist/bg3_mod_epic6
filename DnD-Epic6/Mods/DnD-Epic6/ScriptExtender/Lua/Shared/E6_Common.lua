@@ -6,6 +6,27 @@ function IsValidGuid(guid)
     return guid ~= nil and string.len(guid) == string.len(GuidZero) and guid ~= GuidZero
 end
 
+---Joins multiple terms together as a string for various functions.
+---@param args table The list of arguments to join. Must be amenable to tostring. nil is converted to the empty string
+---@param separator string? The separator to join the terms with. Defaults to comma if unspecified.
+---@return unknown
+function JoinArgs(args, separator)
+    if not separator then
+        separator = ","
+    end
+    local result = ""
+    for i,v in ipairs(args) do
+        if i > 1 then
+            result = result .. separator
+        end
+        if type(v) == "nil" then
+            v = ""
+        end
+        result = result .. tostring(v)
+    end
+    return result
+end
+
 ---Splits a string based on the separator, which defaults to whitspace
 ---@param inputstr string The string to split
 ---@param separator any The separator to split the string with
