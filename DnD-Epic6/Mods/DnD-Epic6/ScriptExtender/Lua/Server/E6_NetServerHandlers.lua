@@ -20,7 +20,7 @@ end
 function NetServerHandlers.ExportCharacter(_, payload, peerId)
     local entity = Ext.Entity.Get(payload)
     if entity ~= nil then
-        E6_ToFile(entity, "E6_Character.json", {"ProgressionContainer", "Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+        E6_ToFile(entity, "E6_Character.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
     end
 end
 
