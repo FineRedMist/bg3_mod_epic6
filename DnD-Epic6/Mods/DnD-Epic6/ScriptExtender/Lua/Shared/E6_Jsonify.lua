@@ -170,6 +170,30 @@ function E6_ToFile(obj, filename, skipProperties)
     _E6P("Writing character data!")
     local fileWriter = Ext.IO.OpenWriter(filename)
 
+    local lastCharIsNewline = false
+
+    ---Writes a value to the file, and tracks if the last character was a newline
+    ---@param value string|number|boolean
+    local function fileWriterProxy(value)
+        if type(value) ~= "string" then
+            fileWriter(value)
+            lastCharIsNewline = false
+        end
+        if string.len(value) == 0 then
+            return
+        end
+        local first = string.sub(value, 1, 1)
+        while lastCharIsNewline and string.len(value) > 0 and first == "\n" do
+            value = string.sub(value, 2)
+            first = string.sub(value, 1, 1)
+        end
+        if string.len(value) > 0 then
+            fileWriter(value)
+            local last = string.sub(value, string.len(value), 1)
+            lastCharIsNewline = last == "\n"
+        end
+    end
+
     local writeMap = {}
 
     local write = function(indent, value)
@@ -183,27 +207,27 @@ function E6_ToFile(obj, filename, skipProperties)
     end
     local writeIndent = function(indent)
         if indent > 0 then
-            fileWriter(string.rep("\t", indent))
+            fileWriterProxy(string.rep("\t", indent))
         end
     end
 
     local writeNull = function(indent, value)
-        fileWriter("null")
+        fileWriterProxy("null")
     end
     local writeRaw = function(indent, value)
-        fileWriter(value)
+        fileWriterProxy(value)
     end
     local writeString = function(indent, value)
         local newValue = string.gsub(value, "\\", "\\\\")
         newValue = string.gsub(newValue, "\"", "\\\"")
-        fileWriter("\"", newValue, "\"")
+        fileWriterProxy("\"", newValue, "\"")
     end
 
     local writeTable = function(indent, value)
         -- determine if we are empty, an array, or a map
         local firstKey = next(value)
         if firstKey == nil then
-            writeRaw(indent, "[]\n") -- default is to assume an array
+            writeRaw(indent, "[]") -- default is to assume an array
             return
         end
 
@@ -216,9 +240,9 @@ function E6_ToFile(obj, filename, skipProperties)
                 writeIndent(indent + 1)
                 write(indent + 1, v)
                 if i < len then
-                    fileWriter(",\n")
+                    fileWriterProxy(",\n")
                 else
-                    fileWriter("\n")
+                    fileWriterProxy("\n")
                 end
             end
             writeIndent(indent)
@@ -242,12 +266,12 @@ function E6_ToFile(obj, filename, skipProperties)
                 local v = value[k]
                 writeIndent(indent + 1)
                 write(indent + 1, k)
-                fileWriter(" : ")
+                fileWriterProxy(" : ")
                 write(indent + 1, v)
                 if i < len then
-                    fileWriter(",\n")
+                    fileWriterProxy(",\n")
                 else
-                    fileWriter("\n")
+                    fileWriterProxy("\n")
                 end
             end
             writeIndent(indent)
