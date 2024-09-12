@@ -220,7 +220,7 @@ local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
     end
     local abilityLabel = ability.Ability.Label
     local value = ability.Value
-    local max = ability.field_8 -- TODO: This field will likely get renamed in the future
+    local max = ability.ValueCap
     local cause = boostInfo.Cause.Type.Label
     return abilityLabel, cause, value, max
 end

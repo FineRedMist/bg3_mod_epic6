@@ -45,10 +45,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     childWin.NoTitleBar = true
     local description = childWin:AddText(TidyDescription(feat.Description))
     description.ItemWidth = windowDimensions[1] - 60
-    pcall(function()
-        -- This isn't in the standard bg3se yet. I have a PR for it at: https://github.com/Norbyte/bg3se/pull/431
-        description.TextWrapPos = windowDimensions[1] - 60
-    end)
+    description.TextWrapPos = windowDimensions[1] - 60
 
     local extraPassives = {}
     local abilityResources = {}

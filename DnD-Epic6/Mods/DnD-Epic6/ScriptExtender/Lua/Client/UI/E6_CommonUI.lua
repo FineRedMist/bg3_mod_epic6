@@ -33,6 +33,28 @@ function NormalizedRGBA(r, g, b, a)
     end
 end
 
+---Enables a UI element
+---@param control ExtuiStyledRenderable The control to enable.
+function UI_Enable(control)
+    control.ItemFlags = control.ItemFlags & ~Ext.Enums.GuiItemFlags.Disabled
+end
+
+---Disables a UI element
+---@param control ExtuiStyledRenderable The control to disable.
+function UI_Disable(control)
+    control.ItemFlags = control.ItemFlags | Ext.Enums.GuiItemFlags.Disabled
+end
+
+---Sets whether the control is enabled or disabled based on isEnabled.
+---@param control ExtuiStyledRenderable The control to enable or disable.
+---@param isEnabled boolean Whether the control should be enabled or disabled.
+function UI_SetEnable(control, isEnabled)
+    if isEnabled then
+        UI_Enable(control)
+    else
+        UI_Disable(control)
+    end
+end
 
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
@@ -115,11 +137,11 @@ end
 local function EnableOnAllResourcesAllocated(control, sharedResources)
     for _, resource in pairs(sharedResources) do
         if resource.count > 0 then
-            control.Enabled = false
+            UI_Disable(control)
             return
         end
     end
-    control.Enabled = true;
+    UI_Enable(control)
 end
 
 ---Configures the control to enable the control when all resources are allocated and disable when any are not.

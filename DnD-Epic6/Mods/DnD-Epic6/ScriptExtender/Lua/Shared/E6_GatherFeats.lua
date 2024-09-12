@@ -136,8 +136,8 @@ local function E6_ApplySelectAbilityRequirement(feat)
             return
         end
         local abilityNames = {}
-        for _,abilityName in ipairs(abilityList.Spells) do -- TODO: Spells will likely be fixed in the future
-            table.insert(abilityNames, abilityName)
+        for _,abilityName in ipairs(abilityList.Abilities) do
+            table.insert(abilityNames, abilityName.Label)
         end
         local abilityRequirement = function(entity, playerInfo)
             local abilityScores = playerInfo.AbilityScores
