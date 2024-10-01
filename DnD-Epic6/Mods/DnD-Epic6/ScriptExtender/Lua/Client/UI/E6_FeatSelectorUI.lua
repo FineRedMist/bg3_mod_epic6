@@ -3,12 +3,6 @@
 local featUI = nil
 ---@type ExtuiWindow?
 local featDetailUI = nil
----@type number
-local uiPendingCount = 0
----The number of ticks to wait before checking the UI focus.
----@type number
-local uiPendingTickCount = 2
-
 
 ---The details panel for the feat.
 ---@param feat table The feat to create the window for.
@@ -31,11 +25,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     featDetailUI.NoMove = true
     featDetailUI.NoResize = true
     featDetailUI.NoCollapse = true
-    featDetailUI.Visible = true
     featDetailUI.Open = true
 
     featDetailUI:SetFocus()
-    uiPendingCount = uiPendingTickCount
 
     ClearChildren(featDetailUI)
 
@@ -70,9 +62,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
 
     select.OnClick = function()
-        featUI.Visible = false
         featUI.Open = false
-        featDetailUI.Visible = false
         featDetailUI.Open = false
 
         -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
@@ -141,35 +131,11 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
     return featButton
 end
 
----Shows the Feat Selector UI
+---Generates the feat buttons to add to the window.
+---@param win ExtuiWindow
+---@param windowDimensions table
 ---@param message table
-function E6_FeatSelectorUI(message)
-    local windowDimensions = {500, 1450}
-
-    if featUI == nil then
-        local featTitle = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8") -- Feats
-        featUI = Ext.IMGUI.NewWindow(featTitle)
-        featUI.Closeable = true
-        featUI.NoMove = true
-        featUI.NoResize = true
-        featUI.NoCollapse = true
-        featUI:SetSize(windowDimensions)
-        featUI:SetPos({800, 100})
-        featUI.OnClose = function()
-            if featDetailUI then
-                featDetailUI.Visible = false
-                featDetailUI.Open = false
-            end
-        end
-    end
-
-    featUI.Visible = true
-    featUI.Open = true
-    featUI:SetFocus()
-    uiPendingCount = uiPendingTickCount
-
-    ClearChildren(featUI)
-
+local function AddFeatButtons(win, windowDimensions, message)
     local allFeats = E6_GatherFeats()
 
     local featList = {}
@@ -192,15 +158,17 @@ function E6_FeatSelectorUI(message)
         if feat == nil then
             _E6Error("Failed to find feat for name: " .. featName)
         else
-            MakeFeatButton(featUI, windowDimensions[1], { ID = message.PlayerId, Name = message.PlayerName, Abilities = message.Abilities, PlayerPassives = message.PlayerPassives, Proficiencies = message.Proficiencies, ProficiencyBonus = message.ProficiencyBonus }, feat)
+            MakeFeatButton(win, windowDimensions[1], { ID = message.PlayerId, Name = message.PlayerName, Abilities = message.Abilities, PlayerPassives = message.PlayerPassives, Proficiencies = message.Proficiencies, ProficiencyBonus = message.ProficiencyBonus }, feat)
         end
     end
+end
 
-    featUI:AddSpacing()
-    featUI:AddSeparator()
-    featUI:AddSpacing()
+local function AddExportCharacterButton(win, windowDimensions, message)
+    win:AddSpacing()
+    win:AddSeparator()
+    win:AddSpacing()
 
-    local centerCell = CreateCenteredControlCell(featUI, "ExportCharacterCell", windowDimensions[1] - 30)
+    local centerCell = CreateCenteredControlCell(win, "ExportCharacterCell", windowDimensions[1] - 30)
     local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
     AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
     exportButton.OnClick = function()
@@ -208,60 +176,40 @@ function E6_FeatSelectorUI(message)
     end
 end
 
----Checks the feat windows to determine if they have lost focus, in which case, close them.
-local function E6_CheckUIFocus(tickParams)
-    if true then
-        return -- skipping it all for now
-    end
-
-    -- There is a tick timing event between creating the window, and drawing the window with focus.
-    if uiPendingCount > 0 then
-        uiPendingCount = uiPendingCount - 1
-        return
-    end
-
-    local isOpen = false
-    local queue = Dequeue:new()
+local function ConfigureFeatSelectorUI(windowDimensions)
     if featUI then
-        queue:pushright(featUI)
-        isOpen = featUI.Open
+        return featUI
     end
-    if featDetailUI then
-        queue:pushright(featDetailUI)
-        isOpen = isOpen or featDetailUI.Open
-    end
-    if not isOpen then
-        return
-    end
-
-    while queue:count() > 0 do
-        local ui = queue:popleft()
-        if ui then
-            if ui.Focus then
-                return
-            end
-            pcall(function ()
-                if ui.Children then
-                    for _,child in ipairs(ui.Children) do
-                        if child then
-                            queue:pushright(child)
-                        end
-                    end
-                end
-            end)
+    local win = Ext.IMGUI.NewWindow("FeatSelector")
+    win.Label = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8") -- Feats
+    win.Closeable = true
+    win.NoMove = true
+    win.NoResize = true
+    win.NoCollapse = true
+    win:SetSize(windowDimensions)
+    win:SetPos({800, 100})
+    win.OnClose = function()
+        if featDetailUI then
+            featDetailUI.Open = false
         end
     end
-
-    if featUI then
-        featUI.Visible = false
-        featUI.Open = false
-    end
-    if featDetailUI then
-        featDetailUI.Visible = false
-        featDetailUI.Open = false
-    end
+    featUI = win
+    return win
 end
+---Shows the Feat Selector UI
+---@param message table
+function E6_FeatSelectorUI(message)
+    local windowDimensions = {500, 1450}
+    
+    ---@type ExtuiWindow
+    local win = ConfigureFeatSelectorUI(windowDimensions)
 
----Checking every tick seems less than optimal, but checking focus is proving a little 
----more involved to operate reliably by callbacks.
-Ext.Events.Tick:Subscribe(E6_CheckUIFocus)
+    win.Open = true
+    win:SetFocus()
+
+    ClearChildren(win)
+
+    AddFeatButtons(win, windowDimensions, message)
+
+    AddExportCharacterButton(win, windowDimensions, message)
+end

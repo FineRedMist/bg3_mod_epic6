@@ -33,17 +33,36 @@ function NormalizedRGBA(r, g, b, a)
     end
 end
 
+--- The amount to modify alpha when enabling or disabling a control.
+local alphaFactor = 4
+
 ---Enables a UI element
 ---@param control ExtuiStyledRenderable The control to enable.
 function UI_Enable(control)
-    control.ItemFlags = control.ItemFlags & ~Ext.Enums.GuiItemFlags.Disabled
+    if not control.Disabled then
+       return
+    end
+    control.Disabled = false
+    local curAlpha = control:GetStyle("Alpha")
+    if not curAlpha then
+        curAlpha = 1/alphaFactor
+    end
+    control:SetStyle("Alpha",  curAlpha * alphaFactor)
 end
 
 ---Disables a UI element
 ---@param control ExtuiStyledRenderable The control to disable.
 function UI_Disable(control)
-    control.ItemFlags = control.ItemFlags | Ext.Enums.GuiItemFlags.Disabled
-end
+    if control.Disabled then
+        return
+     end
+     control.Disabled = true
+     local curAlpha = control:GetStyle("Alpha")
+     if not curAlpha then
+        curAlpha = 1
+    end
+     control:SetStyle("Alpha",  curAlpha / alphaFactor)
+ end
 
 ---Sets whether the control is enabled or disabled based on isEnabled.
 ---@param control ExtuiStyledRenderable The control to enable or disable.

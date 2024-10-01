@@ -142,7 +142,7 @@ local function IsValidCause(entity, boost, boostInfo)
     end
     local causeInfo = boostInfo.Cause
     local cause = causeInfo.Type.Label
-    if cause == "Character" or cause == "Progression" or causeInfo.Cause == "E6_Feat" then
+    if cause == "CharacterCreation" or cause == "Progression" or causeInfo.Cause == "E6_Feat" then
         return true
     end
     if cause ~= "Passive" then
