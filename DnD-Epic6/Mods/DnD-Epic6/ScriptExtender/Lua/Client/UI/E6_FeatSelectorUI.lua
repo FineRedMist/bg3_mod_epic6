@@ -48,11 +48,15 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
     local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources, skillStates)
     local passiveSharedResources = AddPassiveSelectorToFeatDetailsUI(childWin, feat, playerInfo, selectedPassives)
+    local spellSharedResources = AddSpellSelectorToFeatDetailsUI(childWin, feat, playerInfo)
 
     for _, resource in ipairs(skillSharedResources) do
         table.insert(sharedResources, resource)
     end
     for _, resource in ipairs(passiveSharedResources) do
+        table.insert(sharedResources, resource)
+    end
+    for _, resource in ipairs(spellSharedResources) do
         table.insert(sharedResources, resource)
     end
 
