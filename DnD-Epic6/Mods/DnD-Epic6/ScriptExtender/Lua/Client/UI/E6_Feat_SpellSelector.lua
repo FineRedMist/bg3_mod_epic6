@@ -50,14 +50,18 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
 
         icon.OnClick = function()
             if unlockSpell.IsEnabled then
+                unlockSpell.IsEnabled = false
                 if sharedResource:ReleaseResource() then
-                    unlockSpell.IsEnabled = false
                     MakeBland(icon)
+                else
+                    unlockSpell.IsEnabled = true
                 end
             else
+                unlockSpell.IsEnabled = true
                 if sharedResource:AcquireResource() then
-                    unlockSpell.IsEnabled = true
-                    MakeSpicy(icon)
+                    MakeSelected(icon)
+                else
+                    unlockSpell.IsEnabled = false
                 end
             end
         end

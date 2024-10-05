@@ -177,6 +177,7 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
 end
 
 local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
+local selectedColors = {Border = NormalizedRGBA(255, 215, 0, 0.76), BorderShadow = NormalizedRGBA(192, 159, 106, 0.76)}
 local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
 local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
 
@@ -184,6 +185,17 @@ local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
 ---@param target ExtuiStyledRenderable The object to add a border to.
 function MakeSpicy(target)
     for k, v in pairs(checkBoxColors) do
+        target:SetColor(k, v)
+    end
+    for k, v in pairs(checkBoxBorder) do
+        target:SetStyle(k, v)
+    end
+end
+
+---Adds a selected border around the target object.
+---@param target ExtuiStyledRenderable The object to add a border to.
+function MakeSelected(target)
+    for k, v in pairs(selectedColors) do
         target:SetColor(k, v)
     end
     for k, v in pairs(checkBoxBorder) do

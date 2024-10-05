@@ -16,13 +16,14 @@ function JoinArgs(args, separator)
     end
     local result = ""
     for i,v in ipairs(args) do
+        local cur = v
         if i > 1 then
             result = result .. separator
         end
-        if type(v) == "nil" then
-            v = ""
+        if cur == nil then
+            cur = ""
         end
-        result = result .. tostring(v)
+        result = result .. tostring(cur)
     end
     return result
 end

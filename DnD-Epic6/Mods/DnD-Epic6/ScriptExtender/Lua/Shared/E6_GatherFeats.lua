@@ -412,12 +412,12 @@ local function E6_MakeFeatInfo(featId, spec, desc)
     end
     feat.AddSpells = ProcessProperty(spec.AddSpells, function(source)
         local result = processSpells(source)
-        result.Ability = source.Ability
+        result.Ability = source.Ability.Label
         return result
     end)
     feat.SelectSpells = ProcessProperty(spec.SelectSpells, function(source)
         local result = processSpells(source)
-        result.Ability = source.CastingAbility
+        result.Ability = source.CastingAbility.Label
         result.Count = source.Amount
         return result
     end)

@@ -15,6 +15,10 @@ end
 ---@param makeMultiuseSpells boolean Whether the spell should be castable using spell slots
 ---@return string The boost string.
 function MakeBoost_UnlockSpell(spell, makeMultiuseSpells)
+    _E6P("Spell Info: " .. E6_ToJson(spell, {}))
+    if spell.CooldownType == "Default" then
+        spell.CooldownType = nil
+    end
     local base = MakeUnlockSpellBoost(spell.SpellId, nil, nil, spell.CooldownType, spell.Ability)
     if makeMultiuseSpells then
         base = base .. ";IF(HasActionResource('SpellSlot')):" .. MakeUnlockSpellBoost(spell.SpellId, "AddChildren", "d136c5d9-0ff0-43da-acce-a74a07f8d6bf", nil, spell.Ability)

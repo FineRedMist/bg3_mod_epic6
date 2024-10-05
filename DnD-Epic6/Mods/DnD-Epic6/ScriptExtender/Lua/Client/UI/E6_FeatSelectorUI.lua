@@ -94,6 +94,15 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             end
         end
 
+        for _, spellGroup in ipairs(selectedSpells) do
+            for _, spell in ipairs(spellGroup) do
+                if spell.IsEnabled then
+                    _E6P("Adding spell: " .. MakeBoost_UnlockSpell(spell, not spell.IsCantrip))
+                    --table.insert(boosts, MakeBoost_UnlockSpell(spell.Boost, not spell.IsCantrip))
+                end
+            end
+        end
+
         -- Gather the passives selected and from the feat itself
         local passivesForFeat = {}
         for _,passive in ipairs(feat.PassivesAdded) do
