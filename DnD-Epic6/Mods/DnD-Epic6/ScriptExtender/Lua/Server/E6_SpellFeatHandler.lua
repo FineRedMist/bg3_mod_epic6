@@ -335,7 +335,6 @@ local function GatherOtherProficiencesFromBoosts(entity, boosts, proficiencies)
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
         if IsValidCause(entity, boost, boostInfo) and boost.ProficiencyBoost then
-            --_E6P("Processing boost: " .. E6_ToJson(boost, {"Owner", "Entity", "Dependency"}))
             local proficiencyFlags = boost.ProficiencyBoost.Flags
             for _,proficiency in ipairs(proficiencyFlags) do
                 proficiencies.Equipment[string.lower(proficiency)] = true

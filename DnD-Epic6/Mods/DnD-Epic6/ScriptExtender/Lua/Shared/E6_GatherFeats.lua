@@ -11,10 +11,6 @@ local function E6_IsFeatSupported(feat)
     if feat.SelectEquipment ~= nil and #feat.SelectEquipment > 0 then
         return "the feat selects equipment"
     end
-    -- We don't support spell yet
-    if feat.SelectSpells ~= nil and #feat.SelectSpells > 0 then
-        return "the feat selects spells"
-    end
     return nil
 end
 
@@ -405,15 +401,25 @@ local function E6_MakeFeatInfo(featId, spec, desc)
             SourceId = source.UUID
         }
     end)
-    feat.AddSpells = ProcessProperty(spec.AddSpells, function(source)
+    local processSpells = function(source)
         return {
             SpellsId = source.SpellUUID,
             SelectorId = source.SelectorId,
-            Ability = source.Ability,
             ActionResource = "",
             PrepareType = source.PrepareType.Label,
             CooldownType = source.CooldownType.Label
         }
+    end
+    feat.AddSpells = ProcessProperty(spec.AddSpells, function(source)
+        local result = processSpells(source)
+        result.Ability = source.Ability
+        return result
+    end)
+    feat.SelectSpells = ProcessProperty(spec.SelectSpells, function(source)
+        local result = processSpells(source)
+        result.Ability = source.CastingAbility
+        result.Count = source.Amount
+        return result
     end)
 
     E6_ApplyFeatOverrides(feat, spec)
