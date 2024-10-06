@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="h23fb3bb3gd957g433fgbdfag862d70a20649" version="1">New Spells</content>
 	<content contentuid="h00c4820cgf31bg4b3agab92g7058ba3c44e5" version="1">Select Spells: {Count}/{Max}</content>
 	<content contentuid="h522a98b0gd1b0g4bd8ga74dgb33b8cdaa8cb" version="1">{Ability} Modifier: {AbilityMod}
 Proficiency Bonus: {ProficiencyBonus}

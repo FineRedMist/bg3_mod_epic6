@@ -36,16 +36,18 @@ end
 local viewportWidth = Ext.IMGUI.GetViewportSize()[1]
 local viewportHeight = Ext.IMGUI.GetViewportSize()[2]
 
-function ScaleToViewport(dimensions)
-    return { ScaleToViewportWidth(dimensions[1]), ScaleToViewportHeight(dimensions[2]) }
-end
-
 function ScaleToViewportWidth(width)
     return (width * viewportWidth) // 3840
 end
 function ScaleToViewportHeight(height)
     return (height * viewportHeight) // 2160
 end
+
+function ScaleToViewport(dimensions)
+    return { ScaleToViewportWidth(dimensions[1]), ScaleToViewportHeight(dimensions[2]) }
+end
+
+DefaultIconSize = ScaleToViewport({48, 48})
 
 function ScaleFromViewportWidth(width)
     return (width * 3840) // viewportWidth

@@ -86,10 +86,10 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
     local iconId = passive.Icon
     local IconControl = nil
     if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
-        IconControl = renderState.PassiveCell:AddImage(iconId)
+        IconControl = renderState.PassiveCell:AddImage(iconId, DefaultIconSize)
         UI_Disable(IconControl)
     else
-        IconControl = renderState.PassiveCell:AddImageButton("", iconId)
+        IconControl = renderState.PassiveCell:AddImageButton("", iconId, DefaultIconSize)
         IconControl.OnClick = function()
             if selectedPassives[passiveID] then
                 selectedPassives[passiveID] = nil
@@ -98,7 +98,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
             else
                 selectedPassives[passiveID] = true
                 sharedResource:AcquireResource()
-                MakeSpicy(IconControl)
+                MakeSelected(IconControl)
             end
         end
         sharedResource:add(function(hasResources, _)

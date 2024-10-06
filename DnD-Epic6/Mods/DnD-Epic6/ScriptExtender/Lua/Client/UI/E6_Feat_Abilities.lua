@@ -50,20 +50,22 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
     local maxPoints = pointInfo.Max
 
     local win = parent:AddChildWindow(abilityName .. id .. "_Window")
-    SetSizeToViewport(win, 100, 180)
+    SetSizeToViewport(win, 100, 240)
     win.SameLine = true
     local passiveInfo = AbilityPassives[abilityName]
     AddLocaTooltipTitled(win, passiveInfo.DisplayName, passiveInfo.Description)
     AddLocaTitle(win, AbilityPassives[abilityName].ShortName)
 
-    local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", GetWidthFromViewport(win) - 40)
-    local addButton = addButtonCell:AddImageButton("", "ico_plus_h")
+    local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", GetWidthFromViewport(win) - 20)
+    addButtonCell.ItemWidth = ScaleToViewportWidth(52)
+    local addButton = addButtonCell:AddImageButton("", "ico_plus_h", DefaultIconSize)
 
-    local currentScoreCell = CreateCenteredControlCell(win, abilityName .. id .. "_Current", GetWidthFromViewport(win) - 40)
+    local currentScoreCell = CreateCenteredControlCell(win, abilityName .. id .. "_Current", GetWidthFromViewport(win) - 20)
     local currentScore = currentScoreCell:AddText(tostring(state.Current))
 
-    local minButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_-", GetWidthFromViewport(win) - 40)
-    local minButton = minButtonCell:AddImageButton("", "ico_min_h")
+    local minButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_-", GetWidthFromViewport(win) - 20)
+    minButtonCell.ItemWidth = ScaleToViewportWidth(52)
+    local minButton = minButtonCell:AddImageButton("", "ico_min_h", DefaultIconSize)
 
     local updateButtons = function()
         UI_SetEnable(addButton, sharedResource.count > 0 and state.Current < state.Maximum and state.Current - state.Initial < maxPoints)

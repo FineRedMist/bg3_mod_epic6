@@ -45,7 +45,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
     local centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_1", GetWidthFromViewport(parent) - 60)
 
     local function AddSpellButton(unlockSpell)
-        local icon = centeredCell:AddImageButton("", unlockSpell.Icon)
+        local icon = centeredCell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
         AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description)
         icon.SameLine = true
 

@@ -26,10 +26,9 @@ local imageLookup = {
 ---Adds the given image by name to the parent container.
 ---@param parent ExtuiTreeParent The parent to add the image to.
 ---@param name string The name of the image in the lookup table that has the tooltip information as well.
----@param size table[2]? The size of the image to render. Optional. Defaults to {48, 48}.
-local function AddSkillImage(parent, name, size)
+local function AddSkillImage(parent, name)
     local imageInfo = imageLookup[name]
-    local image = parent:AddImage(imageInfo.ImageName, size or {48, 48})
+    local image = parent:AddImage(imageInfo.ImageName, DefaultIconSize)
     AddLocaTooltipTitled(image, imageInfo.Title, imageInfo.Description)
 end
 
