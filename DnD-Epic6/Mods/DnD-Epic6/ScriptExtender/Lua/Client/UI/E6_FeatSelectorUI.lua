@@ -120,7 +120,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             }
         }
         local payloadStr = Ext.Json.Stringify(payload)
-        _E6P("Sending selected feat: " .. payloadStr)
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC, payloadStr)
     end
 

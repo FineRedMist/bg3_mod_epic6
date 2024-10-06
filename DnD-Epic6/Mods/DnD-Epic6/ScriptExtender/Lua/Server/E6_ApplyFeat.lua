@@ -35,7 +35,6 @@ function E6_RemoveFeat(entityId, feat)
     end
     if feat.Boosts then
         for _,boost in ipairs(feat.Boosts) do
-            _E6P("Removing boost from " .. entityId .. ": " .. boost)
             Osi.RemoveBoosts(entityId,boost,1,"E6_Feat",entityId)
         end
     end

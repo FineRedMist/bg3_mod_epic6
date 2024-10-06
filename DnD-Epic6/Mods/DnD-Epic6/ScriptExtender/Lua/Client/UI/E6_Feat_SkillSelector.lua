@@ -6,13 +6,11 @@
 ---@param expertise boolean
 local function GatherSkillsToShow(feat, skillsToShow, skillColumns, skillsFromFeat, expertise)
     for _, skill in ipairs(skillsFromFeat) do
-        --_E6P("Skill ID (" .. feat.ShortName .. "): " .. skill.SourceId)
         local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
         local skillGroup = {}
         if skillList then
             for _,skillEnum in ipairs(skillList.Skills) do
                 local skillName = skillEnum.Label
-                --_E6P("--Skill Name: " .. skillName)
                 table.insert(skillGroup, skillName)
                 skillsToShow[skillName] = true
             end
@@ -186,11 +184,9 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
         for _, column in ipairs(skillColumns) do
             local cell = row:AddCell()
             local addCheckbox = false
-            local checkBoxType = "proficiency"
             -- Don't add checkboxes for proficiences or expertise that I already possess.
             if column.IsExpertise then
                 if not isExpert then
-                    checkBoxType = "expertise"
                     addCheckbox = true
                 end
             else
@@ -199,7 +195,6 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
                 end
             end
             if addCheckbox then
-                _E6P("Adding " .. checkBoxType .. " checkbox for " .. skillName)
                 local checkBox = SpicyCheckbox(cell)
                 local skillInstance = {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise}
                 table.insert(rowSkillWiring, skillInstance)

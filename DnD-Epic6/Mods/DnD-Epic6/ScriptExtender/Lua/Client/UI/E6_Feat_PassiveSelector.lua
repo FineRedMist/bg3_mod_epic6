@@ -82,7 +82,6 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
         renderState.PassiveCell = AddRow()
     end
 
-    --_E6P("Passive " .. passive .. ": " .. E6_ToJson(passiveStat, {}))
     local passiveID = passive.ID
     local iconId = passive.Icon
     local IconControl = nil
