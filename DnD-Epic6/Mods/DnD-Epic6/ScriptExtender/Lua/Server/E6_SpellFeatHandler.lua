@@ -13,7 +13,6 @@ local function GatherPlayerFeats(entity)
     end
     local function AddFeat(feat)
         if IsValidGuid(feat) then
-            --_E6P("Adding feat: " .. feat)
             local curCount = feats[feat]
             if curCount == nil then
                 curCount = 1
@@ -62,7 +61,6 @@ local function GatherPlayerPassives(entity)
         if passive == nil or string.len(passive) == 0 then
             return
         end
-        --_E6P("Adding passive: " .. passive)
         local curCount = passives[passive]
         if curCount == nil then
             curCount = 1
