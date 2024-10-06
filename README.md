@@ -3,7 +3,7 @@
 My current progress on creating the D&amp;D Epic 6 implementation for Baldur's Gate 3
 
 ## What is Epic 6?
-D&amp;D Epic 6 limits level progressing to 6th level (where power between casters and melee start to diverge substantially). After which, at 10k experience, you earn a feat.
+D&amp;D Epic 6 limits level progressing to 6th level (where power between casters and melee start to diverge substantially). After which, at 5k experience, you earn a feat.
 
 ## Outline of Basic Method
 
