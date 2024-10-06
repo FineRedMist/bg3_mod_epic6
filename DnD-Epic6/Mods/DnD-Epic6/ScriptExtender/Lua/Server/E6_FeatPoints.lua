@@ -123,7 +123,6 @@ local function E6_CanUpdateEpic6FeatCounts()
     end)
 
     if not success or char == nil then
-        --_E6P("Skipping update--call result: " .. tostring(success) .. ", character: " .. tostring(char))
         return nil
     end
 

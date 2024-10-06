@@ -13,7 +13,6 @@ local function GatherPlayerFeats(entity)
     end
     local function AddFeat(feat)
         if IsValidGuid(feat) then
-            --_E6P("Adding feat: " .. feat)
             local curCount = feats[feat]
             if curCount == nil then
                 curCount = 1
@@ -62,7 +61,6 @@ local function GatherPlayerPassives(entity)
         if passive == nil or string.len(passive) == 0 then
             return
         end
-        --_E6P("Adding passive: " .. passive)
         local curCount = passives[passive]
         if curCount == nil then
             curCount = 1
@@ -243,7 +241,6 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
             if not scores[abilityLabel] then
                 scores[abilityLabel] = {Current = 0, Maximum = 20}
             end
-            --_E6P("Found ability boost [" .. tostring(boostIndex) .. "] " .. abilityLabel .. " (" .. cause .. "): amount delta=" .. tostring(value) .. ", max delta=" .. tostring(max))
             scores[abilityLabel].Current = scores[abilityLabel].Current + value
             scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + max
         end
@@ -546,8 +543,6 @@ local function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
-    --_E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
-
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
@@ -566,13 +561,11 @@ local function OnEpic6FeatSelectorSpell(caster)
     }
 
     local str = Ext.Json.Stringify(message)
-    _E6P(str)
 
     Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
 end
 
 function E6_SpellFeatHandlerInit()
-    _E6P("E6_Initializing spell feat handler.")
     Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function (caster, spell, _, _, _)
         if spell == EpicSpellContainerName then
             OnEpic6FeatSelectorSpell(caster)

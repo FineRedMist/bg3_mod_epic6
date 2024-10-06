@@ -39,18 +39,19 @@ local races = {
 }
 
 local featRacialConstraints = {}
-featRacialConstraints["ebf69e0c-9a32-4a16-9b7a-1f2b0036d15d"] = {races.Dragonborn} -- DragonHide
+--Disabled for now. Not sure how much i want this. I don't want to be maintaining other people's feat dependencies.
+--featRacialConstraints["ebf69e0c-9a32-4a16-9b7a-1f2b0036d15d"] = {races.Dragonborn} -- DragonHide
 --featRacialConstraints["fa386a9d-962b-4d73-af04-660377fa0e0c"] = {races.Dwarf} -- DwarvenFortitude
-featRacialConstraints["c3810995-3bb1-429e-9411-fa2bc9426518"] = {races.Dwarf, races.Gnome, races.Halfling} -- SquatNimbleness
-featRacialConstraints["daf81082-ce05-4835-b8a0-5e60b2f027e3"] = {races.Elf, races.HighElf, races.WoodElf, races.Drow, races.HalfElf} -- ElvenAccuracy
+--featRacialConstraints["c3810995-3bb1-429e-9411-fa2bc9426518"] = {races.Dwarf, races.Gnome, races.Halfling} -- SquatNimbleness
+--featRacialConstraints["daf81082-ce05-4835-b8a0-5e60b2f027e3"] = {races.Elf, races.HighElf, races.WoodElf, races.Drow, races.HalfElf} -- ElvenAccuracy
 --featRacialConstraints["09859f63-ad8e-4950-9f07-ad8e81ed91b7"] = {races.WoodElf, races.WoodHalfElf} -- WoodElfMagic
-featRacialConstraints["74a5d838-d72c-4205-a42e-9f4bf1e52b3c"] = {races.Gnome} -- FadeAway
-featRacialConstraints["38614cda-1b13-4583-8fa8-18a7dd3bb6b6"] = {races.HalfOrc} -- OrcishFury
-featRacialConstraints["e65b2814-fc8e-4290-821b-4e243f64982b"] = {races.Halfling} -- BountifulLuck
-featRacialConstraints["6c59e67a-76f9-4c9b-af59-dbe6bb2048f7"] = {races.Halfling} -- SecondChance
-featRacialConstraints["e0457947-44b7-4316-b700-d1a69a10ced7"] = {races.Tiefling} -- FlamesOfPhlegethos
-featRacialConstraints["168923b1-75a0-46dd-b6a8-bf44736e3ec8"] = {races.Tiefling} -- InfernalConstitution
-featRacialConstraints["5a726c22-5bc8-442f-b161-7f1b338879ff"] = {races.HalfElf} -- EverybodysFriend
+--featRacialConstraints["74a5d838-d72c-4205-a42e-9f4bf1e52b3c"] = {races.Gnome} -- FadeAway
+--featRacialConstraints["38614cda-1b13-4583-8fa8-18a7dd3bb6b6"] = {races.HalfOrc} -- OrcishFury
+--featRacialConstraints["e65b2814-fc8e-4290-821b-4e243f64982b"] = {races.Halfling} -- BountifulLuck
+--featRacialConstraints["6c59e67a-76f9-4c9b-af59-dbe6bb2048f7"] = {races.Halfling} -- SecondChance
+--featRacialConstraints["e0457947-44b7-4316-b700-d1a69a10ced7"] = {races.Tiefling} -- FlamesOfPhlegethos
+--featRacialConstraints["168923b1-75a0-46dd-b6a8-bf44736e3ec8"] = {races.Tiefling} -- InfernalConstitution
+--featRacialConstraints["5a726c22-5bc8-442f-b161-7f1b338879ff"] = {races.HalfElf} -- EverybodysFriend
 --featRacialConstraints["8db4b515-2bed-48fc-a15b-2f357c68e91d"] = {races.DeepGnome} -- SvirfneblinMagic
 
 
@@ -84,7 +85,6 @@ local function E6_ApplyRacialConstraints(feat)
             end
             for raceName,raceId in ipairs(raceConstraint) do
                 if race == raceId then
-                    --_E6P("Racial Constraints: " .. name .. " has the race " .. raceName .. " matching the constraint for: " .. feat.ShortName)
                     return true
                 end
             end
@@ -92,12 +92,10 @@ local function E6_ApplyRacialConstraints(feat)
             if subRace then
                 for raceName,raceId in ipairs(raceConstraint) do
                     if subRace == raceId then
-                        --_E6P("Racial Constraints: " .. name .. " has the subrace " .. raceName .. " matching the constraint for: " .. feat.ShortName)
                         return true
                     end
                 end
             end
-            --_E6Warn("Racial Constraints: " .. name .. " with race " .. race .. " and subrace " .. tostring(subRace) .. " does not match the constraint for: " .. feat.ShortName)
             return false
         end
         E6_AddFeatRequirement(feat, raceRequirement)
@@ -318,7 +316,6 @@ local function E6_ApplyFeatAbilityConstraints(feat)
                     _E6Warn("Ability constraint failed for " .. feat.ShortName .. ": " .. ability .. " is " .. abilityScore.Current .. " + " .. delta .. " > " .. abilityScore.Maximum)
                     return false
                 end
-                --_E6P("Ability constraint passed for " .. feat.ShortName .. ": " .. ability .. " is " .. abilityScore.Current .. " + " .. delta .. " <= " .. abilityScore.Maximum)
             end
             return true
         end

@@ -40,7 +40,7 @@ end
 
 local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
     if not renderState.CenterCell then
-        renderState.CenterCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex), parent.Size[1] - 60)
+        renderState.CenterCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
     end
 
     local passiveID = passive.ID
@@ -72,7 +72,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
     local function AddRow()
         renderState.IconRowCount = 0
         renderState.Row = renderState.Row + 1
-        return CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(renderState.Row), parent.Size[1] - 60)
+        return CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex) .. "_" .. tostring(renderState.Row), GetWidthFromViewport(parent) - 60)
     end
 
     if not renderState.Row then
@@ -82,15 +82,14 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
         renderState.PassiveCell = AddRow()
     end
 
-    --_E6P("Passive " .. passive .. ": " .. E6_ToJson(passiveStat, {}))
     local passiveID = passive.ID
     local iconId = passive.Icon
     local IconControl = nil
     if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
-        IconControl = renderState.PassiveCell:AddImage(iconId)
+        IconControl = renderState.PassiveCell:AddImage(iconId, DefaultIconSize)
         UI_Disable(IconControl)
     else
-        IconControl = renderState.PassiveCell:AddImageButton("", iconId)
+        IconControl = renderState.PassiveCell:AddImageButton("", iconId, DefaultIconSize)
         IconControl.OnClick = function()
             if selectedPassives[passiveID] then
                 selectedPassives[passiveID] = nil
@@ -99,7 +98,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
             else
                 selectedPassives[passiveID] = true
                 sharedResource:AcquireResource()
-                MakeSpicy(IconControl)
+                MakeSelected(IconControl)
             end
         end
         sharedResource:add(function(hasResources, _)
@@ -142,7 +141,7 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
 
         local passiveList = Ext.StaticData.Get(featPassiveInfo.SourceId, Ext.Enums.ExtResourceManagerType.PassiveList)
 
-        local titleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title_" .. tostring(passiveIndex), parent.Size[1] - 60)
+        local titleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
         local title = titleCell:AddText("")
 
         local locString = "h447df23cgb2f2g405bgbe3eg1617f0209e39" -- Select Features: {Count}/{Max}

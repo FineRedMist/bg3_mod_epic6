@@ -3,13 +3,13 @@
 My current progress on creating the D&amp;D Epic 6 implementation for Baldur's Gate 3
 
 ## What is Epic 6?
-D&amp;D Epic 6 limits level progressing to 6th level (where power between casters and melee start to diverge substantially). After which, at 10k experience, you earn a feat.
+D&amp;D Epic 6 limits level progressing to 6th level (where power between casters and melee start to diverge substantially). After which, at 5k experience, you earn a feat.
 
 ## Outline of Basic Method
 
-Imgui is now available in the script extender and I'm revisiting this. (Note: I have a pending pull request for word wrapping for the script extender at: https://github.com/Norbyte/bg3se/pull/431.)
+Imgui is now available in the script extender and I'm revisiting this.
 
-I'm now gathering information about each of the feats dynamically at runtime and processing each. This is resulting in more parsing than desired, but this seems to be working so far. I can bring up a couple of windows showing available feat options and selecting one will show the description and the option to select the feat.
+I gather information about each of the feats dynamically at runtime and process each. This results in more parsing than desired, but this works so far. I can bring up a couple of windows showing available feat options and selecting one will show the description and the option to select the feat.
 
 The "spell" to select the option now is captured in server code, which gathers information about the player and sends a message to the client to show the UI. The client renders the UI with the provided data. The selection is sent back to the server which is stored as a feat object on the character's Vars.E6_Feats variable.
 

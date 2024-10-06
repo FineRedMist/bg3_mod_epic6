@@ -33,6 +33,53 @@ function NormalizedRGBA(r, g, b, a)
     end
 end
 
+local viewportWidth = Ext.IMGUI.GetViewportSize()[1]
+local viewportHeight = Ext.IMGUI.GetViewportSize()[2]
+
+function ScaleToViewportWidth(width)
+    return (width * viewportWidth) // 3840
+end
+function ScaleToViewportHeight(height)
+    return (height * viewportHeight) // 2160
+end
+
+function ScaleToViewport(dimensions)
+    return { ScaleToViewportWidth(dimensions[1]), ScaleToViewportHeight(dimensions[2]) }
+end
+
+DefaultIconSize = ScaleToViewport({48, 48})
+
+function ScaleFromViewportWidth(width)
+    return (width * 3840) // viewportWidth
+end
+
+function ScaleFromViewportHeight(height)
+    return (height * 2160) // viewportHeight
+end
+
+function SetSizeToViewport(control, width, Height)
+    control.Size = { ScaleToViewportWidth(width), ScaleToViewportHeight(Height) }
+end
+
+function GetSizeFromViewport(control)
+    return { ScaleFromViewportWidth(control.Size[1]), ScaleFromViewportHeight(control.Size[2]) }
+end
+
+function GetWidthFromViewport(control)
+    local success, result = pcall(function()
+        if control.Size then
+            return ScaleFromViewportWidth(control.Size[1])
+        end
+    end)
+    if success then
+       return result
+    end
+    return ScaleFromViewportWidth(control.ItemWidth)
+end
+function GetHeightFromViewport(control)
+    return ScaleFromViewportHeight(control.Size[2])
+end
+
 --- The amount to modify alpha when enabling or disabling a control.
 local alphaFactor = 4
 
@@ -83,8 +130,8 @@ function AddTooltip(target, text)
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
     ClearChildren(tooltip)
     local textControl = tooltip:AddText(TidyDescription(text))
-    textControl.ItemWidth = 500
-    textControl.TextWrapPos = 500
+    textControl.ItemWidth = ScaleToViewportWidth(500)
+    textControl.TextWrapPos = textControl.ItemWidth
 end
 
 ---Adds a tooltip to the target with a title and text.
@@ -121,7 +168,7 @@ function CreateCenteredControlCell(parent, uniqueName, tableWidth)
     local columnCount = 3
     local halfColumnCount = (columnCount - 1) / 2
     local table = parent:AddTable(uniqueName, columnCount)
-    table.ItemWidth = tableWidth
+    table.ItemWidth = ScaleToViewportWidth(tableWidth)
     for i = 1, halfColumnCount do
         table:AddColumn(uniqueName .. "_" .. tostring(i), Ext.Enums.GuiTableColumnFlags.WidthStretch)
     end
@@ -146,7 +193,7 @@ end
 ---@return ExtuiText The cell that contains the title.
 function AddLocaTitle(parent, titleId)
     local title = Ext.Loca.GetTranslatedString(titleId)
-    local centeredCell = CreateCenteredControlCell(parent, titleId .. "_Title", parent.Size[1] - 60)
+    local centeredCell = CreateCenteredControlCell(parent, titleId .. "_Title", GetWidthFromViewport(parent) - 60)
     return centeredCell:AddText(title)
 end
 

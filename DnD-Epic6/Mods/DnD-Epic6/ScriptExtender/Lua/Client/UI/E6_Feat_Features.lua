@@ -10,7 +10,7 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
     local function AddPassiveIcon(displayNameId, descriptionId, iconId)
         local key = displayNameId .. "|" .. descriptionId .. "|" .. iconId
         if not avoidDupes[key] then
-            local icon = centeredCell:AddImage(iconId)
+            local icon = centeredCell:AddImage(iconId, DefaultIconSize)
             AddLocaTooltipTitled(icon, displayNameId, descriptionId)
             icon.SameLine = true
             avoidDupes[key] = true
@@ -20,7 +20,7 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
     local firstSectionCount = #feat.PassivesAdded + #extraPassives
     if firstSectionCount > 0 then
         AddLocaTitle(parent, "hffc72a17g6934g42f8ga935g447764ee6f43") -- Features
-        centeredCell = CreateCenteredControlCell(parent, "Features", parent.Size[1] - 60)
+        centeredCell = CreateCenteredControlCell(parent, "Features", GetWidthFromViewport(parent) - 60)
     end
 
     for _,passive in ipairs(feat.PassivesAdded) do
@@ -37,8 +37,8 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
             parent:AddSpacing()
         end
 
-        AddLocaTitle(parent, "h00c4820cgf31bg4b3agab92g7058ba3c44e5") -- New Spells
-        centeredCell = CreateCenteredControlCell(parent, "AddedSpells", parent.Size[1] - 60)
+        AddLocaTitle(parent, "h23fb3bb3gd957g433fgbdfag862d70a20649") -- New Spells
+        centeredCell = CreateCenteredControlCell(parent, "AddedSpells", GetWidthFromViewport(parent) - 60)
 
         for _,addSpells in ipairs(feat.AddSpells) do
             local spells = Ext.StaticData.Get(addSpells.SpellsId, Ext.Enums.ExtResourceManagerType.SpellList)

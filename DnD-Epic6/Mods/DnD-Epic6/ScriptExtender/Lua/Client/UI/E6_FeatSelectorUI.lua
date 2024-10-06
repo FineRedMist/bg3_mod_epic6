@@ -19,8 +19,8 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
 
     featDetailUI.Label = feat.DisplayName
     -- When the label changes, I need to reset the size and position of the window as it ends up moving.
-    featDetailUI:SetSize(windowDimensions)
-    featDetailUI:SetPos({1400, 100})
+    featDetailUI:SetSize(ScaleToViewport(windowDimensions))
+    featDetailUI:SetPos(ScaleToViewport({1400, 100}))
     featDetailUI.Closeable = true
     featDetailUI.NoMove = true
     featDetailUI.NoResize = true
@@ -32,12 +32,12 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     ClearChildren(featDetailUI)
 
     local childWin = featDetailUI:AddChildWindow("Selection")
-    childWin.Size = {windowDimensions[1] - 30, windowDimensions[2] - 130}
+    SetSizeToViewport(childWin, windowDimensions[1] - 30, windowDimensions[2] - 130)
     childWin.PositionOffset = {0, 0}
     childWin.NoTitleBar = true
     local description = childWin:AddText(TidyDescription(feat.Description))
-    description.ItemWidth = windowDimensions[1] - 60
-    description.TextWrapPos = windowDimensions[1] - 60
+    description.ItemWidth = ScaleToViewportWidth(windowDimensions[1] - 60)
+    description.TextWrapPos = description.ItemWidth
 
     local extraPassives = {}
     local abilityResources = {}
@@ -120,7 +120,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             }
         }
         local payloadStr = Ext.Json.Stringify(payload)
-        _E6P("Sending selected feat: " .. payloadStr)
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC, payloadStr)
     end
 
@@ -135,7 +134,7 @@ end
 ---@return ExtuiButton The button created.
 local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
     local featButton = win:AddButton(feat.DisplayName)
-    featButton.Size = {buttonWidth-30, 48}
+    SetSizeToViewport(featButton, buttonWidth - 30, 48)
     featButton:SetStyle("ButtonTextAlign", 0.5, 0.5)
     AddTooltip(featButton, TidyDescription(feat.Description))
     featButton.OnClick = function()
@@ -199,8 +198,8 @@ local function ConfigureFeatSelectorUI(windowDimensions)
     win.NoMove = true
     win.NoResize = true
     win.NoCollapse = true
-    win:SetSize(windowDimensions)
-    win:SetPos({800, 100})
+    win:SetSize(ScaleToViewport(windowDimensions))
+    win:SetPos(ScaleToViewport({800, 100}))
     win.OnClose = function()
         if featDetailUI then
             featDetailUI.Open = false

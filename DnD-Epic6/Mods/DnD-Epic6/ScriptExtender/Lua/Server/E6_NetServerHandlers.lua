@@ -2,7 +2,6 @@ NetServerHandlers = {}
 
 
 function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
-    --_E6P("Selected feat specification: peer=" .. tostring(peerId) .. ", payload=" .. payload)
     local message = Ext.Json.Parse(payload)
     local entity = Ext.Entity.Get(message.PlayerId)
 

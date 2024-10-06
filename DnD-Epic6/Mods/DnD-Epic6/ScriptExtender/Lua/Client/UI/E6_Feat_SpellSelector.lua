@@ -16,7 +16,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
     parent:AddSpacing()
 
     local locString = Ext.Loca.GetTranslatedString("h00c4820cgf31bg4b3agab92g7058ba3c44e5") -- Select Spells {Count}/{Max}
-    local centeredCell = CreateCenteredControlCell(parent, "SelectSpells_TitleTable_" .. id, parent.Size[1] - 60)
+    local centeredCell = CreateCenteredControlCell(parent, "SelectSpells_TitleTable_" .. id, GetWidthFromViewport(parent) - 60)
     local title = centeredCell:AddText("SelectSpells_Title_" .. id)
     local function updateTitle(_,_)
         title.Label = SubstituteParameters(locString, {Count = sharedResource.count, Max = sharedResource.capacity})
@@ -42,10 +42,10 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
         end
     end
 
-    local centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_1", parent.Size[1] - 60)
+    local centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_1", GetWidthFromViewport(parent) - 60)
 
     local function AddSpellButton(unlockSpell)
-        local icon = centeredCell:AddImageButton("", unlockSpell.Icon)
+        local icon = centeredCell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
         AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description)
         icon.SameLine = true
 
@@ -86,7 +86,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
         spellsInRow = spellsInRow + 1
         if spellsInRow >= spellsPerRow then
             rowNumber = rowNumber + 1
-            centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_" .. tostring(rowNumber), parent.Size[1] - 60)
+            centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_" .. tostring(rowNumber), GetWidthFromViewport(parent) - 60)
             spellsInRow = 0
         end
     end

@@ -6,13 +6,11 @@
 ---@param expertise boolean
 local function GatherSkillsToShow(feat, skillsToShow, skillColumns, skillsFromFeat, expertise)
     for _, skill in ipairs(skillsFromFeat) do
-        --_E6P("Skill ID (" .. feat.ShortName .. "): " .. skill.SourceId)
         local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
         local skillGroup = {}
         if skillList then
             for _,skillEnum in ipairs(skillList.Skills) do
                 local skillName = skillEnum.Label
-                --_E6P("--Skill Name: " .. skillName)
                 table.insert(skillGroup, skillName)
                 skillsToShow[skillName] = true
             end
@@ -28,10 +26,9 @@ local imageLookup = {
 ---Adds the given image by name to the parent container.
 ---@param parent ExtuiTreeParent The parent to add the image to.
 ---@param name string The name of the image in the lookup table that has the tooltip information as well.
----@param size table[2]? The size of the image to render. Optional. Defaults to {48, 48}.
-local function AddSkillImage(parent, name, size)
+local function AddSkillImage(parent, name)
     local imageInfo = imageLookup[name]
-    local image = parent:AddImage(imageInfo.ImageName, size or {48, 48})
+    local image = parent:AddImage(imageInfo.ImageName, DefaultIconSize)
     AddLocaTooltipTitled(image, imageInfo.Title, imageInfo.Description)
 end
 
@@ -72,7 +69,7 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
     parent:AddSpacing()
 
     local uniquingName = feat.ShortName .. "_Skills"
-    local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", parent.Size[1] - 60)
+    local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", GetWidthFromViewport(parent) - 60)
     skillTitleCell:AddText(Ext.Loca.GetTranslatedString("h03cd984dg2334g4bb7g86bfg0b9419b803cf")) -- Skills
 
     -- The layout is (with a column before and after to center):
@@ -186,11 +183,9 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
         for _, column in ipairs(skillColumns) do
             local cell = row:AddCell()
             local addCheckbox = false
-            local checkBoxType = "proficiency"
             -- Don't add checkboxes for proficiences or expertise that I already possess.
             if column.IsExpertise then
                 if not isExpert then
-                    checkBoxType = "expertise"
                     addCheckbox = true
                 end
             else
@@ -199,7 +194,6 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
                 end
             end
             if addCheckbox then
-                _E6P("Adding " .. checkBoxType .. " checkbox for " .. skillName)
                 local checkBox = SpicyCheckbox(cell)
                 local skillInstance = {Name = skillName, Checkbox = checkBox, PointResource = column.Resource, IsExpertise = column.IsExpertise}
                 table.insert(rowSkillWiring, skillInstance)
