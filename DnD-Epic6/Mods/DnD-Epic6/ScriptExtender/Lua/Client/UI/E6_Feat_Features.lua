@@ -48,6 +48,7 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
                     if spellStat then
                         local unlockSpell = DeepCopy(addSpells)
                         unlockSpell.SpellId = spellId
+                        unlockSpell.Level = spellStat.Level
                         table.insert(extraPassives, { Boost = MakeBoost_UnlockSpell(unlockSpell, false) })
                         AddPassiveIcon(spellStat.DisplayName, spellStat.Description, spellStat.Icon)
                     end

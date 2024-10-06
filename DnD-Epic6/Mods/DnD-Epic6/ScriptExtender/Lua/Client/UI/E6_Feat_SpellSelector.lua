@@ -31,6 +31,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
         if spellStat then
             spellCount = spellCount + 1
             local unlockSpell = DeepCopy(selectSpells)
+            unlockSpell.Level = spellStat.Level
             unlockSpell.IsCantrip = spellStat.Level == 0
             unlockSpell.SpellId = spellId
             unlockSpell.IsEnabled = false

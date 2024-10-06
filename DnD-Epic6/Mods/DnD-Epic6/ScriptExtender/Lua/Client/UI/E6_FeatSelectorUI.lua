@@ -97,8 +97,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         for _, spellGroup in ipairs(selectedSpells) do
             for _, spell in ipairs(spellGroup) do
                 if spell.IsEnabled then
-                    _E6P("Adding spell: " .. MakeBoost_UnlockSpell(spell, not spell.IsCantrip))
-                    --table.insert(boosts, MakeBoost_UnlockSpell(spell.Boost, not spell.IsCantrip))
+                    table.insert(boosts, MakeBoost_UnlockSpell(spell, not spell.IsCantrip))
                 end
             end
         end

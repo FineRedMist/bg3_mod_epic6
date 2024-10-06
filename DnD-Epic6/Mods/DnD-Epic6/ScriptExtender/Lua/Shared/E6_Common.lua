@@ -6,6 +6,16 @@ function IsValidGuid(guid)
     return guid ~= nil and string.len(guid) == string.len(GuidZero) and guid ~= GuidZero
 end
 
+---Helper function to convert an argument to a string. Nil becomes an empty string.
+---@param arg any
+---@return string
+local function ArgString(arg)
+    if arg == nil then
+        return ""
+    end
+    return tostring(arg)
+end
+
 ---Joins multiple terms together as a string for various functions.
 ---@param args table The list of arguments to join. Must be amenable to tostring. nil is converted to the empty string
 ---@param separator string? The separator to join the terms with. Defaults to comma if unspecified.
@@ -15,15 +25,12 @@ function JoinArgs(args, separator)
         separator = ","
     end
     local result = ""
-    for i,v in ipairs(args) do
-        local cur = v
+    local count = #args
+    for i=1, count do
         if i > 1 then
             result = result .. separator
         end
-        if cur == nil then
-            cur = ""
-        end
-        result = result .. tostring(cur)
+        result = result .. ArgString(args[i])
     end
     return result
 end
