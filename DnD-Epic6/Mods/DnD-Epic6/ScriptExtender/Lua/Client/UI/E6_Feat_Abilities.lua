@@ -50,19 +50,19 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
     local maxPoints = pointInfo.Max
 
     local win = parent:AddChildWindow(abilityName .. id .. "_Window")
-    win.Size = {100, 180}
+    SetSizeToViewport(win, 100, 180)
     win.SameLine = true
     local passiveInfo = AbilityPassives[abilityName]
     AddLocaTooltipTitled(win, passiveInfo.DisplayName, passiveInfo.Description)
     AddLocaTitle(win, AbilityPassives[abilityName].ShortName)
 
-    local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", win.Size[1] - 40)
+    local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", GetWidthFromViewport(win) - 40)
     local addButton = addButtonCell:AddImageButton("", "ico_plus_h")
 
-    local currentScoreCell = CreateCenteredControlCell(win, abilityName .. id .. "_Current", win.Size[1] - 40)
+    local currentScoreCell = CreateCenteredControlCell(win, abilityName .. id .. "_Current", GetWidthFromViewport(win) - 40)
     local currentScore = currentScoreCell:AddText(tostring(state.Current))
 
-    local minButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_-", win.Size[1] - 40)
+    local minButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_-", GetWidthFromViewport(win) - 40)
     local minButton = minButtonCell:AddImageButton("", "ico_min_h")
 
     local updateButtons = function()
@@ -126,7 +126,7 @@ function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo, abilityResources
             text = SubstituteParameters(text, { Count = pointCount.count, Max = abilityListSelector.PointCount })
             pointText.Label = text
         end)
-        local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.ID, parent.Size[1] - 60)
+        local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.ID, GetWidthFromViewport(parent) - 60)
 
         for _,ability in ipairs(abilityListSelector.State) do
             AddAbilityControl(abilitiesCell, pointCount, abilityListSelector, ability, abilityResources)

@@ -70,7 +70,7 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
     parent:AddSpacing()
 
     local uniquingName = feat.ShortName .. "_Skills"
-    local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", parent.Size[1] - 60)
+    local skillTitleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title", GetWidthFromViewport(parent) - 60)
     skillTitleCell:AddText(Ext.Loca.GetTranslatedString("h03cd984dg2334g4bb7g86bfg0b9419b803cf")) -- Skills
 
     -- The layout is (with a column before and after to center):
