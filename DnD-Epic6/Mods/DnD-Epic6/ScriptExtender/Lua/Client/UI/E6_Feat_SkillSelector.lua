@@ -318,7 +318,7 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
                 if not hasResources and not isChecked then
                     checkboxEnabled = false
                 end
-                wiring.Checkbox.Enabled = checkboxEnabled
+                UI_SetEnable(wiring.Checkbox, checkboxEnabled)
             end
         end
 

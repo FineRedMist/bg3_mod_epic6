@@ -1,5 +1,40 @@
 EpicSpellContainerName = "E6_Shout_EpicFeats"
 
+GuidZero = "00000000-0000-0000-0000-000000000000"
+
+function IsValidGuid(guid)
+    return guid ~= nil and string.len(guid) == string.len(GuidZero) and guid ~= GuidZero
+end
+
+---Helper function to convert an argument to a string. Nil becomes an empty string.
+---@param arg any
+---@return string
+local function ArgString(arg)
+    if arg == nil then
+        return ""
+    end
+    return tostring(arg)
+end
+
+---Joins multiple terms together as a string for various functions.
+---@param args table The list of arguments to join. Must be amenable to tostring. nil is converted to the empty string
+---@param separator string? The separator to join the terms with. Defaults to comma if unspecified.
+---@return unknown
+function JoinArgs(args, separator)
+    if not separator then
+        separator = ","
+    end
+    local result = ""
+    local count = #args
+    for i=1, count do
+        if i > 1 then
+            result = result .. separator
+        end
+        result = result .. ArgString(args[i])
+    end
+    return result
+end
+
 ---Splits a string based on the separator, which defaults to whitspace
 ---@param inputstr string The string to split
 ---@param separator any The separator to split the string with
@@ -156,3 +191,27 @@ function GetUserCharacter(userId)
     end
     return nil
 end
+
+---Creates a deep copy of an object.
+---@param o any The object to generate a deep copy of.
+---@param seen table? A table to track which objects have been visited.
+---@return any The deep copy of the object.
+function DeepCopy(o, seen)
+    seen = seen or {}
+    if o == nil then return nil end
+    if seen[o] then return seen[o] end
+  
+    local no
+    if type(o) == 'table' then
+      no = {}
+      seen[o] = no
+  
+      for k, v in next, o, nil do
+        no[DeepCopy(k, seen)] = DeepCopy(v, seen)
+      end
+      setmetatable(no, DeepCopy(getmetatable(o), seen))
+    else -- number, string, boolean, etc
+      no = o
+    end
+    return no
+  end

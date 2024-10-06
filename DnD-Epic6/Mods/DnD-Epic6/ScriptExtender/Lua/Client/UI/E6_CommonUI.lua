@@ -33,6 +33,47 @@ function NormalizedRGBA(r, g, b, a)
     end
 end
 
+--- The amount to modify alpha when enabling or disabling a control.
+local alphaFactor = 4
+
+---Enables a UI element
+---@param control ExtuiStyledRenderable The control to enable.
+function UI_Enable(control)
+    if not control.Disabled then
+       return
+    end
+    control.Disabled = false
+    local curAlpha = control:GetStyle("Alpha")
+    if not curAlpha then
+        curAlpha = 1/alphaFactor
+    end
+    control:SetStyle("Alpha",  curAlpha * alphaFactor)
+end
+
+---Disables a UI element
+---@param control ExtuiStyledRenderable The control to disable.
+function UI_Disable(control)
+    if control.Disabled then
+        return
+     end
+     control.Disabled = true
+     local curAlpha = control:GetStyle("Alpha")
+     if not curAlpha then
+        curAlpha = 1
+    end
+     control:SetStyle("Alpha",  curAlpha / alphaFactor)
+ end
+
+---Sets whether the control is enabled or disabled based on isEnabled.
+---@param control ExtuiStyledRenderable The control to enable or disable.
+---@param isEnabled boolean Whether the control should be enabled or disabled.
+function UI_SetEnable(control, isEnabled)
+    if isEnabled then
+        UI_Enable(control)
+    else
+        UI_Disable(control)
+    end
+end
 
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
@@ -115,11 +156,11 @@ end
 local function EnableOnAllResourcesAllocated(control, sharedResources)
     for _, resource in pairs(sharedResources) do
         if resource.count > 0 then
-            control.Enabled = false
+            UI_Disable(control)
             return
         end
     end
-    control.Enabled = true;
+    UI_Enable(control)
 end
 
 ---Configures the control to enable the control when all resources are allocated and disable when any are not.
@@ -136,6 +177,7 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
 end
 
 local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
+local selectedColors = {Border = NormalizedRGBA(255, 215, 0, 0.76), BorderShadow = NormalizedRGBA(192, 159, 106, 0.76)}
 local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
 local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
 
@@ -143,6 +185,17 @@ local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
 ---@param target ExtuiStyledRenderable The object to add a border to.
 function MakeSpicy(target)
     for k, v in pairs(checkBoxColors) do
+        target:SetColor(k, v)
+    end
+    for k, v in pairs(checkBoxBorder) do
+        target:SetStyle(k, v)
+    end
+end
+
+---Adds a selected border around the target object.
+---@param target ExtuiStyledRenderable The object to add a border to.
+function MakeSelected(target)
+    for k, v in pairs(selectedColors) do
         target:SetColor(k, v)
     end
     for k, v in pairs(checkBoxBorder) do

@@ -46,7 +46,7 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
     local passiveID = passive.ID
     local checkBoxControl = renderState.CenterCell:AddCheckbox(passive.DisplayName)
     if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
-        checkBoxControl.Enabled = false
+        UI_Disable(checkBoxControl)
     else
         checkBoxControl.OnChange = function()
             if checkBoxControl.Checked then
@@ -59,9 +59,9 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
         end
         sharedResource:add(function(hasResources, _)
             if hasResources then
-                checkBoxControl.Enabled = true
+                UI_Enable(checkBoxControl)
             else
-                checkBoxControl.Enabled = selectedPassives[passiveID] ~= nil
+                UI_SetEnable(checkBoxControl, selectedPassives[passiveID] ~= nil)
             end
         end)
     end
@@ -88,7 +88,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
     local IconControl = nil
     if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
         IconControl = renderState.PassiveCell:AddImage(iconId)
-        IconControl.Enabled = false
+        UI_Disable(IconControl)
     else
         IconControl = renderState.PassiveCell:AddImageButton("", iconId)
         IconControl.OnClick = function()
@@ -104,9 +104,9 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
         end
         sharedResource:add(function(hasResources, _)
             if hasResources then
-                IconControl.Enabled = true
+                UI_Enable(IconControl)
             else
-                IconControl.Enabled = selectedPassives[passiveID] ~= nil
+                UI_SetEnable(IconControl, selectedPassives[passiveID] ~= nil)
             end
         end)
     end

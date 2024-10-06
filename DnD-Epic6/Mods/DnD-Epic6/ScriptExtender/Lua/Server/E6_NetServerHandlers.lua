@@ -17,4 +17,11 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     Osi.ApplyStatus(message.PlayerId, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, message.PlayerId)
 end
 
+function NetServerHandlers.ExportCharacter(_, payload, peerId)
+    local entity = Ext.Entity.Get(payload)
+    if entity ~= nil then
+        E6_ToFile(entity, "E6_Character.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+    end
+end
+
 return NetServerHandlers

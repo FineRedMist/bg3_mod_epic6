@@ -12,7 +12,7 @@ local function GatherPlayerFeats(entity)
         return feats
     end
     local function AddFeat(feat)
-        if feat ~= nil and feat ~= "00000000-0000-0000-0000-000000000000" then
+        if IsValidGuid(feat) then
             --_E6P("Adding feat: " .. feat)
             local curCount = feats[feat]
             if curCount == nil then
@@ -142,7 +142,7 @@ local function IsValidCause(entity, boost, boostInfo)
     end
     local causeInfo = boostInfo.Cause
     local cause = causeInfo.Type.Label
-    if cause == "Character" or cause == "Progression" or causeInfo.Cause == "E6_Feat" then
+    if cause == "CharacterCreation" or cause == "Progression" or causeInfo.Cause == "E6_Feat" then
         return true
     end
     if cause ~= "Passive" then
@@ -220,7 +220,7 @@ local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
     end
     local abilityLabel = ability.Ability.Label
     local value = ability.Value
-    local max = ability.field_8 -- TODO: This field will likely get renamed in the future
+    local max = ability.ValueCap
     local cause = boostInfo.Cause.Type.Label
     return abilityLabel, cause, value, max
 end
@@ -335,7 +335,6 @@ local function GatherOtherProficiencesFromBoosts(entity, boosts, proficiencies)
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
         if IsValidCause(entity, boost, boostInfo) and boost.ProficiencyBoost then
-            --_E6P("Processing boost: " .. E6_ToJson(boost, {"Owner", "Entity", "Dependency"}))
             local proficiencyFlags = boost.ProficiencyBoost.Flags
             for _,proficiency in ipairs(proficiencyFlags) do
                 proficiencies.Equipment[string.lower(proficiency)] = true
@@ -390,8 +389,155 @@ local function GatherProficiencies(entity)
     return proficiencies
 end
 
-local function SaveCharacterData(ent)
-    --E6_ToFile(ent, "E6_Character.json", {"ProgressionContainer", "Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+local function GatherSpells(entity)
+    local result = { Added = {}, Selected = {} }
+    local cc = entity.CCLevelUp
+    if not cc then
+        return result
+    end
+    local levelUps = cc.LevelUps
+    if not levelUps then
+        return result
+    end
+
+    local function GetSpellResultList(listId)
+        local spellResults = result.Selected[listId]
+        if not spellResults then
+            spellResults = {}
+            result.Selected[listId] = spellResults
+        end
+        return spellResults
+    end
+
+    local function RemoveSpellFromList(resultList, spellName)
+        resultList[spellName] = nil
+    end
+
+    local function AddSpellToList(resultList, spellName)
+        resultList[spellName] = true
+    end
+
+    ---Adds the spell to the spellList, mapping class -> {classID, spells[]}
+    ---@param levelup LevelUpData
+    local function AddSpell(levelup)
+        local upgrades = levelup.Upgrades
+        if not upgrades then
+            return
+        end
+        local upgradeSpells = upgrades.Spells
+        if not upgradeSpells then
+            return
+        end
+        for _,spellData in ipairs(upgradeSpells) do
+            local list = spellData.SpellList
+            if IsValidGuid(list) then
+                local spells = spellData.Spells
+                local replaceSpells = spellData.ReplaceSpells
+                if replaceSpells then
+                    local spellResults = GetSpellResultList(list)
+                    for _,spell in ipairs(replaceSpells) do
+                        RemoveSpellFromList(spellResults, spell)
+                    end
+                end
+                if spells then
+                    local spellResults = GetSpellResultList(list)
+                    for _,spell in ipairs(spells) do
+                        AddSpellToList(spellResults, spell)
+                    end
+                end
+            end
+        end
+    end
+
+    local classInfos = {}
+    ---@param levelup LevelUpData
+    local function AddClassLevelUp(levelup)
+        local classId = levelup.Class
+        local subClassId = levelup.SubClass
+        if not classInfos[classId] then
+            classInfos[classId] = { Class = classId, Level = 0 }
+        end
+        local class = classInfos[classId]
+        class.Level = class.Level + 1
+        if IsValidGuid(subClassId) then
+            class.SubClass = subClassId
+        end
+    end
+
+    for _,levelup in ipairs(levelUps) do
+        -- Gather class info to check progressions for granted spell categories
+        AddClassLevelUp(levelup)
+        -- Add the spells explicitly chosen
+        AddSpell(levelup)
+    end
+
+    -- Gather progression data to compare against the classes
+    -- Group by TableUUID
+    local progressions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
+    local progressionTables = {}
+    for _,progressionId in ipairs(progressions) do
+        local progression = Ext.StaticData.Get(progressionId, Ext.Enums.ExtResourceManagerType.Progression)
+        local pTable = progressionTables[progression.TableUUID]
+        if not pTable then
+            pTable = {}
+            progressionTables[progression.TableUUID] = pTable
+        end
+        local progressionInfo = {Level = progression.Level, Added = {}}
+        local addedSpells = progression.AddSpells
+        local hasAdds = false
+        for _, addSpell in ipairs(addedSpells) do
+            progressionInfo.Added[addSpell.SpellUUID] = true
+            hasAdds = true
+        end
+        if hasAdds then
+            table.insert(pTable, progressionInfo)
+        end
+    end
+
+    -- Now go through the classes and compare against the progression data.
+    for classId, classInfo in pairs(classInfos) do
+        local ids = { classId, classInfo.SubClass}
+        for _, id in ipairs(ids) do
+            if id and IsValidGuid(id) then
+                local class = Ext.StaticData.Get(classId, Ext.Enums.ExtResourceManagerType.ClassDescription)
+                local progressionId = class.ProgressionTableUUID
+                if IsValidGuid(progressionId) then
+                    local pTable = progressionTables[progressionId]
+                    for _, progressionInfo in ipairs(pTable) do
+                        if progressionInfo.Level <= classInfo.Level then
+                            for spellId,_ in pairs(progressionInfo.Added) do
+                                result.Added[spellId] = true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Add information from the E6 Feats
+    local e6Feats = entity.Vars.E6_Feats
+    if e6Feats ~= nil then
+        for _, feat in ipairs(e6Feats) do
+            local addedSpells = feat.AddedSpells
+            if addedSpells then
+                for _, listId in ipairs(addedSpells) do
+                    result.Added[listId] = true
+                end
+            end
+            local selectedSpells = feat.SelectedSpells
+            if selectedSpells then
+                for listId, spells in pairs(selectedSpells) do
+                    local spellResults = GetSpellResultList(listId)
+                    for _,spell in ipairs(spells) do
+                        AddSpellToList(spellResults, spell)
+                    end
+                end
+            end
+        end
+    end
+
+    return result
 end
 
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
@@ -400,13 +546,13 @@ local function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
-    SaveCharacterData(ent)
-
     --_E6P(EpicSpellContainerName .. " was cast by " .. charname .. " (" .. caster .. ")")
 
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
+    local spells = GatherSpells(ent)
+
     local message = {
         PlayerId = caster,
         PlayerName = charname,
@@ -415,6 +561,7 @@ local function OnEpic6FeatSelectorSpell(caster)
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
+        Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus -- to show skill bonuses
     }
 

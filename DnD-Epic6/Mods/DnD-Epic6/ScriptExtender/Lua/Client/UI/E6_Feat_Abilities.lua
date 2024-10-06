@@ -12,7 +12,7 @@ function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
             local result = { ID = abilityListSelector.SourceId, PointCount = pointCount, Max = abilityListSelector.Max, State = {} }
             table.insert(results, result)
 
-            for _,abilityEnum in ipairs(abilityList.Spells) do -- TODO: Will likely get renamed in the future
+            for _,abilityEnum in ipairs(abilityList.Abilities) do
                 local abilityName = abilityEnum.Label
                 local abilityInfo = playerInfo.Abilities[abilityName]
                 if abilityInfo.Current < abilityInfo.Maximum then
@@ -28,7 +28,7 @@ function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
                     DisplayName = AbilityPassives[abilityName].DisplayName,
                     Description = AbilityPassives[abilityName].Description,
                     Icon = AbilityPassives[abilityName].Icon,
-                    Boost = "Ability(" .. abilityName .. "," .. tostring(pointCount) .. ")",
+                    Boost = "Ability(" .. JoinArgs({abilityName, tostring(pointCount)}) .. ")",
                 })
                 table.remove(results, #results) -- Remove the entry so it doesn't show up in the selector
             end
@@ -66,8 +66,8 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
     local minButton = minButtonCell:AddImageButton("", "ico_min_h")
 
     local updateButtons = function()
-        addButton.Enabled = sharedResource.count > 0 and state.Current < state.Maximum and state.Current - state.Initial < maxPoints
-        minButton.Enabled = state.Current > state.Initial and sharedResource.count < sharedResource.capacity
+        UI_SetEnable(addButton, sharedResource.count > 0 and state.Current < state.Maximum and state.Current - state.Initial < maxPoints)
+        UI_SetEnable(minButton, state.Current > state.Initial and sharedResource.count < sharedResource.capacity)
     end
 
     -- In case there is more than one selection that is possible for an ability (haven't found any yet, but paranoid).
@@ -128,7 +128,7 @@ function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo, abilityResources
         end)
         local abilitiesCell = CreateCenteredControlCell(parent, abilityListSelector.ID, parent.Size[1] - 60)
 
-        for _,ability in ipairs(abilityListSelector.State) do -- TODO: Will likely get renamed in the future
+        for _,ability in ipairs(abilityListSelector.State) do
             AddAbilityControl(abilitiesCell, pointCount, abilityListSelector, ability, abilityResources)
         end
 
