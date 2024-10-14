@@ -14,11 +14,8 @@
 ---@field Source string The source of the skill.
 ---@field SourceId GUIDSTRING The GUID that maps to the selector list.
 
----@class SelectSkillExpertiseType
----@field Count integer The number of passive skills to select.
+---@class SelectSkillExpertiseType : SelectSkillsType
 ---@field Arg3 any The third argument to pass when selecting a passive.
----@field Source string The source of the skill.
----@field SourceId GUIDSTRING The GUID that maps to the selector list.
 
 ---@class SelectPassiveType
 ---@field Count integer The number of passive abilities to select.

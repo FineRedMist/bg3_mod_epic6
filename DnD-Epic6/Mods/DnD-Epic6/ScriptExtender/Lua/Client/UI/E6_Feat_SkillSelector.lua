@@ -1,10 +1,16 @@
 
----@param feat table
----@param skillsToShow table
----@param skillColumns table
----@param skillsFromFeat table
----@param expertise boolean
-local function GatherSkillsToShow(feat, skillsToShow, skillColumns, skillsFromFeat, expertise)
+---@class SkillColumnInfoType Information about the column for tracking point usage.
+---@field Points integer The number of points available to spend on skills in this column.
+---@field Info SelectSkillsType The information about the skills to select from.
+---@field IsExpertise boolean Whether these are expertise skills or not.
+---@field Group string[] The group of skills that are available to select from.
+---@field Resource SharedResource The shared resource to track the number of points spent on skills.
+
+---@param skillsToShow table<string, boolean> The collection of skills to show in the UI.
+---@param skillColumns SkillColumnInfoType[] The collection of columns to show in the UI.
+---@param skillsFromFeat SelectSkillsType[] The collection of skills to gather.
+---@param expertise boolean Whether these are expertise skills or not.
+local function GatherSkillsToShow(skillsToShow, skillColumns, skillsFromFeat, expertise)
     for _, skill in ipairs(skillsFromFeat) do
         ---@type ResourceSkillList
         local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
@@ -54,12 +60,14 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
         return {}
     end
 
+    ---@type SharedResource[]
     local resources = {}
 
     local skillsToShow = {}
+    ---@type SkillColumnInfoType[]
     local skillColumns = {}
-    GatherSkillsToShow(feat, skillsToShow, skillColumns, feat.SelectSkills, false)
-    GatherSkillsToShow(feat, skillsToShow, skillColumns, feat.SelectSkillsExpertise, true)
+    GatherSkillsToShow(skillsToShow, skillColumns, feat.SelectSkills, false)
+    GatherSkillsToShow(skillsToShow, skillColumns, feat.SelectSkillsExpertise, true)
 
     for _, column in ipairs(skillColumns) do
         table.insert(resources, column.Resource)
