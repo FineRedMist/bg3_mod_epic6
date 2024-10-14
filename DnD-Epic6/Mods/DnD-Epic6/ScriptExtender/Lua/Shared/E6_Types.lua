@@ -52,7 +52,7 @@
 ---@field PassivesAdded string[] The passives added by the feat.
 ---@field SelectAbilities SelectAbilitiesType[] The abilities to select from the feat. May be empty (but not nil).
 ---@field SelectSkills SelectSkillsType[] The skills to select from the feat. May be empty (but not nil).
----@field SelectSkillExpertise SelectSkillExpertiseType[] The skill expertise to select from the feat. May be empty (but not nil).
+---@field SelectSkillsExpertise SelectSkillExpertiseType[] The skill expertise to select from the feat. May be empty (but not nil).
 ---@field SelectPassives SelectPassiveType[] The passives to select from the feat. May be empty (but not nil).
 ---@field AddSpells AddSpellsType[] The spells to add from the feat. May be empty (but not nil).
 ---@field SelectSpells SelectSpellsType[] The spells to select from the feat. May be empty (but not nil).

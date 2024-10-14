@@ -378,25 +378,27 @@ end
 ---@param desc table The description of the feat.
 ---@return FeatType The feat information object.
 local function E6_MakeFeatInfo(featId, spec, desc)
+    local passivesAdded = {}
+    if spec.PassivesAdded then
+        passivesAdded = SplitString(spec.PassivesAdded, ";")
+    end
+
+    ---@type FeatType
     local feat = {
         ID = featId,
         ShortName = spec.Name,
         DisplayName = Ext.Loca.GetTranslatedString(desc.DisplayName.Handle.Handle, desc.DisplayName.Handle.Version),
         Description = Ext.Loca.GetTranslatedString(desc.Description.Handle.Handle, desc.Description.Handle.Version),
         CanBeTakenMultipleTimes = spec.CanBeTakenMultipleTimes,
+        HasRequirements = {},
+        PassivesAdded = passivesAdded,
+        SelectAbilities = ProcessAbilities(spec.SelectAbilities),
+        SelectSkills = ProcessSkills(spec.SelectSkills),
+        SelectSkillsExpertise = ProcessSkillExpertise(spec.SelectSkillsExpertise),
+        SelectPassives = ProcessPassives(spec.SelectPassives),
+        AddSpells = ProcessAddSpells(spec.AddSpells),
+        SelectSpells = ProcessSelectSpells(spec.SelectSpells)
     }
-    if spec.PassivesAdded then
-        feat.PassivesAdded = SplitString(spec.PassivesAdded, ";")
-    else
-        feat.PassivesAdded = {}
-    end
-
-    feat.SelectAbilities = ProcessAbilities(spec.SelectAbilities)
-    feat.SelectSkills = ProcessSkills(spec.SelectSkills)
-    feat.SelectSkillsExpertise = ProcessSkillExpertise(spec.SelectSkillsExpertise)
-    feat.SelectPassives = ProcessPassives(spec.SelectPassives)
-    feat.AddSpells = ProcessAddSpells(spec.AddSpells)
-    feat.SelectSpells = ProcessSelectSpells(spec.SelectSpells)
 
     E6_ApplyFeatOverrides(feat, spec)
     return feat

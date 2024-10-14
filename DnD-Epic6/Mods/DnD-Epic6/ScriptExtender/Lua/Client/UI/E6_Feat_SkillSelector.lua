@@ -44,8 +44,8 @@ end
 
 ---Adds the ability selector to the feat details, if ability selection is present.
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
----@param feat table
----@param playerInfo table The ability information to render
+---@param feat FeatType
+---@param playerInfo PlayerInformationType The ability information to render
 ---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
 ---@param skillStates table<string, table> The skill states to update when the feat is committed.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
