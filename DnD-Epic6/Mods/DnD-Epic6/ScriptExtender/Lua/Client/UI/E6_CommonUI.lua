@@ -33,38 +33,66 @@ function NormalizedRGBA(r, g, b, a)
     end
 end
 
+---The UI is scaled based on 3840x2160, so we need to scale the UI to the current viewport.
 local viewportWidth = Ext.IMGUI.GetViewportSize()[1]
 local viewportHeight = Ext.IMGUI.GetViewportSize()[2]
 
+---Scale from 3840 width to the current viewport width.
+---@param width integer The source control width to scale.
+---@return integer The scaled width to render with.
 function ScaleToViewportWidth(width)
     return (width * viewportWidth) // 3840
 end
+
+---Scale from 2160 height to the current viewport height.
+---@param height integer The source control height to scale.
+---@return integer The scaled height to render with.
 function ScaleToViewportHeight(height)
     return (height * viewportHeight) // 2160
 end
 
+---Scale from 3840x2160 to the current viewport dimensions.
+---@param dimensions integer[] The source control dimensions to scale.
+---@return integer The scaled dimensions to render with.
 function ScaleToViewport(dimensions)
     return { ScaleToViewportWidth(dimensions[1]), ScaleToViewportHeight(dimensions[2]) }
 end
 
+---The default icon size to use for UI elements at 3840x2160.
 DefaultIconSize = ScaleToViewport({48, 48})
 
+---Scale from viewport width to the 3840 width for doing adjustments.
+---@param width integer The source control width to scale.
+---@return integer The scaled width to computed size.
 function ScaleFromViewportWidth(width)
     return (width * 3840) // viewportWidth
 end
 
+---Scale from viewport height to the 2160 height for doing adjustments.
+---@param height integer The source control height to scale.
+---@return integer The scaled height to computed size.
 function ScaleFromViewportHeight(height)
     return (height * 2160) // viewportHeight
 end
 
+---Sets the size of the control to the width and height based on 3840x2160.
+---@param control ExtuiTable|ExtuiButton|ExtuiChildWindow|ExtuiImageReference|ExtuiProgressBar The control to set the size of.
+---@param width integer The width based on 3840x2160.
+---@param Height integer The height based on 3840x2160.
 function SetSizeToViewport(control, width, Height)
     control.Size = { ScaleToViewportWidth(width), ScaleToViewportHeight(Height) }
 end
 
+---Retrieves the size from the control and scales it to 3840x2160.
+---@param control ExtuiTable|ExtuiButton|ExtuiChildWindow|ExtuiImageReference|ExtuiProgressBar The control to get the size of.
+---@return integer[] The scaled size based on 3840x2160.
 function GetSizeFromViewport(control)
     return { ScaleFromViewportWidth(control.Size[1]), ScaleFromViewportHeight(control.Size[2]) }
 end
 
+---Uses a couple of different methods to get the width of the control, which could be based on the Size or ItemWidth.
+---@param control ExtuiRenderable The control to get the width of.
+---@return integer The width of the control based on 3840x2160.
 function GetWidthFromViewport(control)
     local success, result = pcall(function()
         if control.Size then
@@ -76,6 +104,10 @@ function GetWidthFromViewport(control)
     end
     return ScaleFromViewportWidth(control.ItemWidth)
 end
+
+---Retrieves the size from the control and scales it to 3840x2160.
+---@param control ExtuiTable|ExtuiButton|ExtuiChildWindow|ExtuiImageReference|ExtuiProgressBar The control to get the size of.
+---@return integer The height scaled to 3840x2160.
 function GetHeightFromViewport(control)
     return ScaleFromViewportHeight(control.Size[2])
 end
