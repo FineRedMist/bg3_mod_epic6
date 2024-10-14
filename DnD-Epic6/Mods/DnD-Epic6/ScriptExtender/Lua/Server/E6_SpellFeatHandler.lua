@@ -174,6 +174,7 @@ local function IsValidCause(entity, boost, boostInfo)
     ---@type BackgroundComponent
     local backgroundComponent = entity.Background
     local backgroundId = backgroundComponent.Background
+    ---@type ResourceBackground
     local background = Ext.StaticData.Get(backgroundId, Ext.Enums.ExtResourceManagerType.Background)
     if background then
         if background.Passives == passiveId then
@@ -473,6 +474,7 @@ local function GatherSpells(entity)
     local progressions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
     local progressionTables = {}
     for _,progressionId in ipairs(progressions) do
+        ---@type ResourceProgression
         local progression = Ext.StaticData.Get(progressionId, Ext.Enums.ExtResourceManagerType.Progression)
         local pTable = progressionTables[progression.TableUUID]
         if not pTable then
@@ -496,6 +498,7 @@ local function GatherSpells(entity)
         local ids = { classId, classInfo.SubClass}
         for _, id in ipairs(ids) do
             if id and IsValidGuid(id) then
+                ---@type ResourceClassDescription
                 local class = Ext.StaticData.Get(classId, Ext.Enums.ExtResourceManagerType.ClassDescription)
                 local progressionId = class.ProgressionTableUUID
                 if IsValidGuid(progressionId) then

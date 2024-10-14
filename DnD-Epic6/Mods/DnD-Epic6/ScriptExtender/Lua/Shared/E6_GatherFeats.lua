@@ -189,6 +189,7 @@ end
 ---@return table<string,number> A mapping of ability name to delta value.
 local function GatherPassiveAbilityModifiers(passiveName)
     local result = {}
+    ---@type PassiveData Data for the passive
     local passive = Ext.Stats.Get(passiveName, -1, true, true)
     if passive and passive.Boosts then
         local boosts = SplitString(passive.Boosts, ";")
@@ -413,7 +414,6 @@ function E6_GatherFeats()
     local featSet = {}
     E6_FeatSet = featSet
 
-    ---@type GUIDSTRING[] The collection of feats ids from the game.
     local feats = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Feat)
     for _, featid in ipairs(feats) do
         ---@type ResourceFeat The feat specification from the game.
@@ -425,7 +425,7 @@ function E6_GatherFeats()
             _E6Warn("Skipping unsupported feat " .. feat.Name .. ": " .. featRejectReason)
         end
     end
-    ---@type GUIDSTRING[] The collection of feats ids from the game.
+
     local featDescriptions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.FeatDescription)
     for _, descriptionid in ipairs(featDescriptions) do
         ---@type ResourceFeatDescription The feat specification from the game.

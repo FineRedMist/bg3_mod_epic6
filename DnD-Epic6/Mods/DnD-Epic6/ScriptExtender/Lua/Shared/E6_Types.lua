@@ -36,6 +36,10 @@
 ---@class SelectSpellsType : SelectSpellBaseType
 ---@field Count integer The number of spells to select.
 
+---@class SelectSpellInfoType : SelectSpellBaseType
+---@field SpellId GUIDSTRING The GUID of the spell.
+---@field Level integer The level of the spell.
+
 ---@class FeatType
 ---@field ID GUIDSTRING The GUID of the feat.
 ---@field ShortName string The short name of the feat.

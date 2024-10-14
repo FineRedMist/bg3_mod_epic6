@@ -6,6 +6,7 @@
 ---@param selectedSpells table The spells selected by the player.
 ---@return SharedResource? The shared resource for selecting spells
 local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSpells)
+    ---@type ResourceSpellList
     local spells = Ext.StaticData.Get(selectSpells.SpellsId, Ext.Enums.ExtResourceManagerType.SpellList)
     if not spells then
         return nil
@@ -27,6 +28,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
 
     local spellCount = 0
     for _,spellId in pairs(spells.Spells) do -- not ipairs intentionally, it doesn't handle Array_FixedString for some reason.
+        ---@type SpellData The spell data.
         local spellStat = Ext.Stats.Get(spellId, -1, true, true)
         if spellStat then
             spellCount = spellCount + 1

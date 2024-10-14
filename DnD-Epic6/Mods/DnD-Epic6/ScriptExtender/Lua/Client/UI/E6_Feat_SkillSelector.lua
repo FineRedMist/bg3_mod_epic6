@@ -6,6 +6,7 @@
 ---@param expertise boolean
 local function GatherSkillsToShow(feat, skillsToShow, skillColumns, skillsFromFeat, expertise)
     for _, skill in ipairs(skillsFromFeat) do
+        ---@type ResourceSkillList
         local skillList = Ext.StaticData.Get(skill.SourceId, Ext.Enums.ExtResourceManagerType.SkillList)
         local skillGroup = {}
         if skillList then

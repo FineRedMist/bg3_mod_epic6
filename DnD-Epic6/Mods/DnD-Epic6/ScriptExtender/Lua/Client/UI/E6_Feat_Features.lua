@@ -1,10 +1,11 @@
 ---Adds the list of passives to the cell.
----@param cell ExtuiTreeParent
+---@param parent ExtuiTreeParent
 ---@param feat table
 ---@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
 local function AddFeaturesToCell(parent, feat, extraPassives)
     local avoidDupes = {}
 
+    ---@type ExtuiTableCell The cell to add the passives to.
     local centeredCell = nil
 
     local function AddPassiveIcon(displayNameId, descriptionId, iconId)
@@ -24,6 +25,7 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
     end
 
     for _,passive in ipairs(feat.PassivesAdded) do
+        ---@type PassiveData Data for the passive
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
         AddPassiveIcon(passiveStat.DisplayName, passiveStat.Description, passiveStat.Icon)
     end
@@ -41,11 +43,14 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
         centeredCell = CreateCenteredControlCell(parent, "AddedSpells", GetWidthFromViewport(parent) - 60)
 
         for _,addSpells in ipairs(feat.AddSpells) do
+            ---@type ResourceSpellList
             local spells = Ext.StaticData.Get(addSpells.SpellsId, Ext.Enums.ExtResourceManagerType.SpellList)
             if spells then
                 for _,spellId in pairs(spells.Spells) do -- not ipairs intentionally, it doesn't handle Array_FixedString for some reason.
+                    ---@type SpellData The spell data.
                     local spellStat = Ext.Stats.Get(spellId, -1, true, true)
                     if spellStat then
+                        ---@type SelectSpellInfoType
                         local unlockSpell = DeepCopy(addSpells)
                         unlockSpell.SpellId = spellId
                         unlockSpell.Level = spellStat.Level

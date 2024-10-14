@@ -139,6 +139,7 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         local sharedResource = SharedResource:new(featPassiveInfo.Count)
         table.insert(sharedResources, sharedResource)
 
+        ---@type ResourcePassiveList
         local passiveList = Ext.StaticData.Get(featPassiveInfo.SourceId, Ext.Enums.ExtResourceManagerType.PassiveList)
 
         local titleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
@@ -162,6 +163,7 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         local sortedPassives = {}
         local isMissingIcons = false
         for _,passive in ipairs(passiveList.Passives) do
+            ---@type PassiveData Data for the passive
             local stat = Ext.Stats.Get(passive, -1, true, true)
             local iconId = stat.Icon
             if not iconId or string.len(iconId) == 0 then

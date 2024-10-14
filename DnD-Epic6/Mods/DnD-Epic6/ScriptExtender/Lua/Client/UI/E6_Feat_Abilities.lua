@@ -6,6 +6,7 @@
 function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     local results = {}
     for _,abilityListSelector in ipairs(feat.SelectAbilities) do
+        ---@type ResourceAbilityList
         local abilityList = Ext.StaticData.Get(abilityListSelector.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
         if abilityList then
             local pointCount = abilityListSelector.Count

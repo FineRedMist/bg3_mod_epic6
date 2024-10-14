@@ -5,13 +5,13 @@
 ---@param actionResourceUuid string? The uuid of the resource used, if any
 ---@param cooldownType string? OncePerTurn|OncePerCombat|UntilRest|OncePerTurnNoRealtime|UntilShortRest|UntilPerRestPerItem|OncePerShortRestPerItem cooldown type for the spell.
 ---@param ability string? Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma The ability to use the spell with.
-function MakeUnlockSpellBoost(spellId, learningStrategy, actionResourceUuid, cooldownType, ability)
+local function MakeUnlockSpellBoost(spellId, learningStrategy, actionResourceUuid, cooldownType, ability)
     return "UnlockSpell(" .. JoinArgs({spellId, learningStrategy, actionResourceUuid, cooldownType, ability}) .. ")"
 end
 
 
 ---Takes the AddSpells entry from a feat and generates the string for the boost to apply.
----@param spell table The entry from the gathering of feats.
+---@param spell SelectSpellInfoType The entry from the gathering of feats.
 ---@param makeMultiuseSpells boolean Whether the spell should be castable using spell slots
 ---@return string The boost string.
 function MakeBoost_UnlockSpell(spell, makeMultiuseSpells)
