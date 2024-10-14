@@ -5,8 +5,8 @@ local featUI = nil
 local featDetailUI = nil
 
 ---The details panel for the feat.
----@param feat table The feat to create the window for.
----@param playerInfo table The player id for the feat.
+---@param feat FeatType The feat to create the window for.
+---@param playerInfo PlayerInformationType The player id for the feat.
 local function ShowFeatDetailSelectUI(feat, playerInfo)
     local windowDimensions = {1000, 1450}
     if not featDetailUI then
@@ -111,6 +111,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             table.insert(passivesForFeat, passive)
         end
 
+        ---@type SelectedFeatPayloadType
         local payload = {
             PlayerId = playerInfo.ID,
             Feat = {
@@ -129,8 +130,8 @@ end
 ---Creates a button in the feat selection window for the feat.
 ---@param win ExtuiWindow The window to close on completion.
 ---@param buttonWidth number The width of the button.
----@param playerInfo table The player id for the feat.
----@param feat table The feat to create the button for.
+---@param playerInfo PlayerInformationType The player id for the feat.
+---@param feat FeatType The feat to create the button for.
 ---@return ExtuiButton The button created.
 local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
     local featButton = win:AddButton(feat.DisplayName)
@@ -144,9 +145,9 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
 end
 
 ---Generates the feat buttons to add to the window.
----@param win ExtuiWindow
----@param windowDimensions table
----@param message table
+---@param win ExtuiWindow The window to add the feat buttons to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param message PlayerInformationType The player information.
 local function AddFeatButtons(win, windowDimensions, message)
     local allFeats = E6_GatherFeats()
 
@@ -159,8 +160,6 @@ local function AddFeatButtons(win, windowDimensions, message)
         table.insert(featList, featName)
     end
 
-    message.FeatMap = featMap
-
     table.sort(featList, function(a, b)
         return string.lower(a) < string.lower(b)
     end)
@@ -170,11 +169,15 @@ local function AddFeatButtons(win, windowDimensions, message)
         if feat == nil then
             _E6Error("Failed to find feat for name: " .. featName)
         else
-            MakeFeatButton(win, windowDimensions[1], { ID = message.PlayerId, Name = message.PlayerName, Abilities = message.Abilities, PlayerPassives = message.PlayerPassives, Proficiencies = message.Proficiencies, ProficiencyBonus = message.ProficiencyBonus }, feat)
+            MakeFeatButton(win, windowDimensions[1], message, feat)
         end
     end
 end
 
+---Adds a button to export the character to the file system.
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param message PlayerInformationType The player information.
 local function AddExportCharacterButton(win, windowDimensions, message)
     win:AddSpacing()
     win:AddSeparator()
@@ -188,6 +191,9 @@ local function AddExportCharacterButton(win, windowDimensions, message)
     end
 end
 
+---Creates/Gets the Feat Selector UI
+---@param windowDimensions integer[] The dimensions of the window.
+---@return ExtuiWindow The window to display.
 local function ConfigureFeatSelectorUI(windowDimensions)
     if featUI then
         return featUI
@@ -208,8 +214,9 @@ local function ConfigureFeatSelectorUI(windowDimensions)
     featUI = win
     return win
 end
+
 ---Shows the Feat Selector UI
----@param message table
+---@param message PlayerInformationType
 function E6_FeatSelectorUI(message)
     local windowDimensions = {500, 1450}
     

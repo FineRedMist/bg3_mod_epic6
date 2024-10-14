@@ -32,6 +32,7 @@ local function GatherPlayerFeats(entity)
         end
     end
 
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
@@ -77,6 +78,7 @@ local function GatherPlayerPassives(entity)
         end
     end
 
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
@@ -183,6 +185,7 @@ local function IsValidCause(entity, boost, boostInfo)
     end
 
     -- Check if the passive was granted by an E6 feat, in which case we can include it.
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if not e6Feats then
         return false
@@ -518,6 +521,7 @@ local function GatherSpells(entity)
     end
 
     -- Add information from the E6 Feats
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
@@ -554,10 +558,10 @@ local function OnEpic6FeatSelectorSpell(caster)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
 
-    ---@type PlayerInformation
+    ---@type PlayerInformationType
     local message = {
-        PlayerId = caster,
-        PlayerName = charname,
+        ID = caster,
+        Name = charname,
         PlayerFeats = playerFeats,
         PlayerPassives = GatherPlayerPassives(ent),
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),

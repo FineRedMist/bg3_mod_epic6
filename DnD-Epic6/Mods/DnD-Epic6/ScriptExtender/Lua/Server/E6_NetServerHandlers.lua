@@ -5,9 +5,11 @@ NetServerHandlers = {}
 ---@param payload any The selected feat.
 ---@param peerId integer The peer ID of the player.
 function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
+    ---@type SelectedFeatPayloadType
     local message = Ext.Json.Parse(payload)
     local entity = Ext.Entity.Get(message.PlayerId)
 
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats == nil then
         e6Feats = {}

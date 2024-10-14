@@ -79,9 +79,9 @@
 ---@field Added table<string, boolean> The mapping of spell list ID to whether the spell group has been added.
 ---@field Selected table<string, string[]> The mapping of spell list ID to the selected spells from that list.
 
----@class PlayerInformation Information about the player for determine what is legal to select for the feat.
----@field PlayerId string The unique id of the player
----@field PlayerName string? The name of the character the player is playing
+---@class PlayerInformationType Information about the player for determine what is legal to select for the feat.
+---@field ID string The unique id of the player
+---@field Name string? The name of the character the player is playing
 ---@field PlayerFeats table<string, number> The mapping of feat IDs to the number of times the feat has been taken by the player.
 ---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
 ---@field SelectableFeats string[] The list of feat IDs that the player can select from.
@@ -90,3 +90,15 @@
 ---@field ProficiencyBonus integer The proficiency bonus for the player.
 ---@field Spells SelectedSpellsType The selected spells for the player.
 
+-----------------------------------------------------------------------------------------------------------------------
+-- Selected Feat Information
+-----------------------------------------------------------------------------------------------------------------------
+
+---@class SelectedFeatType The selected feat information to send to the server.
+---@field FeatId GUIDSTRING The GUID of the feat.
+---@field PassivesAdded string[] The passives added by the feat.
+---@field Boosts string[] The boosts added by the feat.
+
+---@class SelectedFeatPayloadType The selected feat payload to send to the server.
+---@field PlayerId string The player id for the feat.
+---@field Feat SelectedFeatType The feat to send to the server.
