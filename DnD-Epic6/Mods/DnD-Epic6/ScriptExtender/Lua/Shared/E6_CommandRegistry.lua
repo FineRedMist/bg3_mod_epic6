@@ -1,7 +1,7 @@
 -- Cribbed from the Mod Configuration Menu
 
 ---@class CommandRegistry A mapping of network channels to commands to execute.
----@field commands table<string,function> A mapping of the network channel to the command to execute.
+---@field commands table<string,NetCommand> A mapping of the network channel to the command to execute.
 -- Command registry, used to register and execute commands over network channels.
 CommandRegistry = {}
 CommandRegistry.__index = CommandRegistry
@@ -15,7 +15,7 @@ end
 
 ---Registers a command function to apply when on a given channel is received.
 ---@param channel string The channel to listen for.
----@param command function The function to call when the channel receives a message.
+---@param command NetCommand The function to call when the channel receives a message.
 function CommandRegistry:register(channel, command)
     self.commands[channel] = command
 end
