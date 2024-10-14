@@ -1,4 +1,7 @@
 
+-----------------------------------------------------------------------------------------------------------------------
+-- Feat Information
+-----------------------------------------------------------------------------------------------------------------------
 
 ---@class SelectAbilitiesType
 ---@field Count integer The number of passive abilities to select.
@@ -40,7 +43,7 @@
 ---@field SpellId GUIDSTRING The GUID of the spell.
 ---@field Level integer The level of the spell.
 
----@class FeatType
+---@class FeatType A feat, with a lot of information transformed into something more usable.
 ---@field ID GUIDSTRING The GUID of the feat.
 ---@field ShortName string The short name of the feat.
 ---@field DisplayName string The display name of the feat.
@@ -54,3 +57,36 @@
 ---@field AddSpells AddSpellsType[] The spells to add from the feat. May be empty (but not nil).
 ---@field SelectSpells SelectSpellsType[] The spells to select from the feat. May be empty (but not nil).
 ---@field HasRequirements function[] The requirements to take the feat. May be empty (but not nil). The function takes two arguments, the EntityHandle of the character, and the derived player information.
+
+-----------------------------------------------------------------------------------------------------------------------
+-- Player Information
+-----------------------------------------------------------------------------------------------------------------------
+
+---@class AbilityScoreType The ability score type for the player.
+---@field Current integer The current value of the ability score.
+---@field Maximum integer The maximum value of the ability score.
+
+---@class ProficiencyType The ability score type for the player.
+---@field Proficient boolean? Whether the character is proficient in a skill, nil implies false.
+---@field Expertise boolean? Whether the character has expertise in a skill, nil implies false.
+
+---@class ProficiencyInformationType The proficiency information for the player.
+---@field Skills table<string, ProficiencyType> The mapping of skill names to the proficiency information.
+---@field SavingThrows table<string, boolean> The mapping of saving throw names to whether the character is proficient in the saving throw.
+---@field Equipment table<string, boolean> The mapping of equipment names to whether the character is proficient in the equipment.
+
+---@class SelectedSpellsType The selected spells for the player.
+---@field Added table<string, boolean> The mapping of spell list ID to whether the spell group has been added.
+---@field Selected table<string, string[]> The mapping of spell list ID to the selected spells from that list.
+
+---@class PlayerInformation Information about the player for determine what is legal to select for the feat.
+---@field PlayerId string The unique id of the player
+---@field PlayerName string? The name of the character the player is playing
+---@field PlayerFeats table<string, number> The mapping of feat IDs to the number of times the feat has been taken by the player.
+---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
+---@field SelectableFeats string[] The list of feat IDs that the player can select from.
+---@field Abilities table<string, AbilityScoreType>? The mapping of ability names to the ability score information.
+---@field Proficiencies ProficiencyInformationType? The proficiency information for the player.
+---@field ProficiencyBonus integer The proficiency bonus for the player.
+---@field Spells SelectedSpellsType The selected spells for the player.
+

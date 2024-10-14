@@ -111,7 +111,7 @@ end
 ---@param entity EntityHandle The player entity to test against.
 ---@param playerFeats table The feats the player already has.
 ---@param playerInfo table Information about what the player has for abilities, proficiencies, etc.
----@return table The collection of feats the player can actually select
+---@return string[] The collection of feats the player can actually select
 local function GatherSelectableFeatsForPlayer(entity, playerFeats, playerInfo)
     local allFeats = E6_GatherFeats()
 
@@ -227,12 +227,13 @@ end
 ---Gathers the ability scores from the ability boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@return table? The ability scores and their maximums, or nil if it could not be determined.
+---@return table<string, AbilityScoreType>? The ability scores and their maximums, or nil if it could not be determined.
 local function GatherAbilityScoresFromBoosts(entity, boosts)
     if boosts == nil then
         return nil
     end
 
+    ---@type table<string, AbilityScoreType>
     local scores = {}
     for boostIndex,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
@@ -251,7 +252,7 @@ end
 
 ---Gathers the ability scores for the given character, without magical modifications
 ---@param entity EntityHandle
----@return table?
+---@return table<string, AbilityScoreType>?
 local function GatherAbilityScores(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
@@ -272,7 +273,7 @@ end
 ---Gathers the proficiencies from the proficiency boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@param proficiencies table The proficiency table to update
+---@param proficiencies ProficiencyInformationType The proficiency table to update
 local function GatherProficienciesFromBoosts(entity, boosts, proficiencies)
     if boosts == nil then
         return
@@ -297,7 +298,7 @@ end
 ---Gathers the expertise from the expertise boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@param proficiencies table The proficiency table to update
+---@param proficiencies ProficiencyInformationType The proficiency table to update
 local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
     if boosts == nil then
         return
@@ -323,7 +324,7 @@ local EquipmentCategories = {
 ---Gathers proficiencies for equipment from the proficiency boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@param proficiencies table The proficiency table to update
+---@param proficiencies ProficiencyInformationType The proficiency table to update
 local function GatherOtherProficiencesFromBoosts(entity, boosts, proficiencies)
     if boosts == nil then
         return
@@ -350,7 +351,7 @@ end
 
 ---Gathers the ability scores for the given character, without magical modifications
 ---@param entity EntityHandle
----@return table?
+---@return ProficiencyInformationType?
 local function GatherProficiencies(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
@@ -434,7 +435,8 @@ local function GatherSpells(entity)
                 if replaceSpells then
                     local spellResults = GetSpellResultList(list)
                     for _,spell in ipairs(replaceSpells) do
-                        RemoveSpellFromList(spellResults, spell)
+                        RemoveSpellFromList(spellResults, spell.From)
+                        AddSpellToList(spellResults, spell.To)
                     end
                 end
                 if spells then
@@ -543,6 +545,7 @@ end
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
+    ---@type EntityHandle
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
@@ -551,6 +554,7 @@ local function OnEpic6FeatSelectorSpell(caster)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
 
+    ---@type PlayerInformation
     local message = {
         PlayerId = caster,
         PlayerName = charname,

@@ -1,6 +1,9 @@
 NetServerHandlers = {}
 
-
+---Handles applying the selected feat for the current player.
+---@param _ string The network message channel.
+---@param payload any The selected feat.
+---@param peerId integer The peer ID of the player.
 function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     local message = Ext.Json.Parse(payload)
     local entity = Ext.Entity.Get(message.PlayerId)
