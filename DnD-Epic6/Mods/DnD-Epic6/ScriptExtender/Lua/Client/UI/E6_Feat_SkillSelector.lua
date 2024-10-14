@@ -53,7 +53,7 @@ end
 ---@param feat FeatType
 ---@param playerInfo PlayerInformationType The ability information to render
 ---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
----@param skillStates table<string, table> The skill states to update when the feat is committed.
+---@param skillStates table<string, ProficiencyType> The skill states to update when the feat is committed.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
 function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResources, skillStates)
     if #feat.SelectSkills == 0 and #feat.SelectSkillsExpertise == 0 then

@@ -39,11 +39,15 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     description.ItemWidth = ScaleToViewportWidth(windowDimensions[1] - 60)
     description.TextWrapPos = description.ItemWidth
 
-    ---@type ExtraPassiveType[]
+    ---@type ExtraPassiveType[] Extra passives to apply as part of applying a feat.
     local extraPassives = {}
+    ---@type table<string, SharedResource> Mapping of ability name to the shared resource for the ability, to track ability value changes for UI elements.
     local abilityResources = {}
+    ---@type table<string, ProficiencyType> The skill states to apply when the feat is committed.
     local skillStates = {}
+    ---@type table<string, boolean> The collection of selected passives.
     local selectedPassives = {}
+    ---@type SelectSpellInfoUIType[][] The array of selected spells, for each spell group to select from.
     local selectedSpells = {}
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddFeaturesToFeatDetailsUI(childWin, feat, extraPassives)
@@ -97,7 +101,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
 
         for _, spellGroup in ipairs(selectedSpells) do
             for _, spell in ipairs(spellGroup) do
-                if spell.IsEnabled then
+                if spell.IsSelected then
                     table.insert(boosts, MakeBoost_UnlockSpell(spell, not spell.IsCantrip))
                 end
             end

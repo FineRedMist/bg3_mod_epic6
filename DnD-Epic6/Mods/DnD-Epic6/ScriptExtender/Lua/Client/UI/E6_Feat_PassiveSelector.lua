@@ -163,6 +163,7 @@ end
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
 ---@param feat FeatType
 ---@param playerInfo PlayerInformationType The ability information to render
+---@param selectedPassives table<string, boolean> The collection of selected passives.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
 function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPassives)
     if #feat.SelectPassives == 0 then
