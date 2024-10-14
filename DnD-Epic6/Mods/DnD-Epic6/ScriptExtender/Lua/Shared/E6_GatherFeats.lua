@@ -137,6 +137,19 @@ local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
     end
 end
 
+---Generates the function to test the character for meeting the proficiency requirement specified.
+---@param feat FeatType The feat entry for the ability requirement
+---@param proficiencyMatch string[] The matched requirement parameters from the requirement expression
+---@return function That evaluates to true if the character meets the requirement, false otherwise.
+local function E6_MakeCharacterLevelRequirement(feat, proficiencyMatch)
+    local levelRequirement = tonumber(proficiencyMatch[1])
+    ---@param entity EntityHandle The entity to test the requirement against.
+    ---@param playerInfo PlayerInformationType The player information to test the requirement against.
+    return function(entity, playerInfo)
+        return entity.EocLevel.Level > levelRequirement
+    end
+end
+
 local featRequirementRegexes = {
     {
         Regex = "FeatRequirementAbilityGreaterEqual%('(%w+)',(%d+)%)",
@@ -145,6 +158,10 @@ local featRequirementRegexes = {
     {
         Regex = "FeatRequirementProficiency%('(%w+)'%)",
         Func = E6_MakeProficiencyRequirement
+    },
+    {
+        Regex = "CharacterLevelGreaterThan%((%d+)%)",
+        Func = E6_MakeCharacterLevelRequirement
     },
     {
         Regex = "(.+)",
