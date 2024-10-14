@@ -39,6 +39,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     description.ItemWidth = ScaleToViewportWidth(windowDimensions[1] - 60)
     description.TextWrapPos = description.ItemWidth
 
+    ---@type ExtraPassiveType[]
     local extraPassives = {}
     local abilityResources = {}
     local skillStates = {}

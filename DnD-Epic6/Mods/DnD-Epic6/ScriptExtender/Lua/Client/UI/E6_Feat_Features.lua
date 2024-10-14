@@ -1,7 +1,7 @@
 ---Adds the list of passives to the cell.
 ---@param parent ExtuiTreeParent
 ---@param feat table
----@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
+---@param extraPassives ExtraPassiveType[] Passives to add to the passives list for when there is only one ability to select. 
 local function AddFeaturesToCell(parent, feat, extraPassives)
     local avoidDupes = {}
 
@@ -67,7 +67,7 @@ end
 ---Adds the passives to the feat details, if present.
 ---@param parent ExtuiTreeParent
 ---@param feat table
----@param extraPassives table Passives to add to the passives list for when there is only one ability to select. 
+---@param extraPassives ExtraPassiveType[] Passives to add to the passives list for when there is only one ability to select. 
 function AddFeaturesToFeatDetailsUI(parent, feat, extraPassives)
     if #feat.PassivesAdded > 0 or #extraPassives > 0 or #feat.AddSpells > 0 then
         parent:AddSpacing()

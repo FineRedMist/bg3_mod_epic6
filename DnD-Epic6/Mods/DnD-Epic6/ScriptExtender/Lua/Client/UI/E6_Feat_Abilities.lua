@@ -1,8 +1,8 @@
 
 ---Gather the abilities and map any single attribute increases to extraPassives
----@param feat table
----@param playerInfo table
----@param extraPassives table
+---@param feat FeatType
+---@param playerInfo PlayerInformationType
+---@param extraPassives ExtraPassiveType[]
 function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     local results = {}
     for _,abilityListSelector in ipairs(feat.SelectAbilities) do

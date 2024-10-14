@@ -102,3 +102,13 @@
 ---@class SelectedFeatPayloadType The selected feat payload to send to the server.
 ---@field PlayerId string The player id for the feat.
 ---@field Feat SelectedFeatType The feat to send to the server.
+
+-----------------------------------------------------------------------------------------------------------------------
+-- Gathered Passive Information (client side only)
+-----------------------------------------------------------------------------------------------------------------------
+
+---@class ExtraPassiveType The extra passive information to track on the client for UI
+---@field DisplayName string The display name of the passive.
+---@field Description string The description of the passive.
+---@field Icon string The icon of the passive.
+---@field Boost string The boost to apply for the passive.
