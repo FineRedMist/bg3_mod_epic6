@@ -198,13 +198,17 @@ end
 
 ---Creates/Gets the Feat Selector UI
 ---@param windowDimensions integer[] The dimensions of the window.
+---@param message PlayerInformationType The player information.
 ---@return ExtuiWindow The window to display.
-local function ConfigureFeatSelectorUI(windowDimensions)
+local function ConfigureFeatSelectorUI(windowDimensions, message)
     if featUI then
         return featUI
     end
     local win = Ext.IMGUI.NewWindow("FeatSelector")
-    win.Label = Ext.Loca.GetTranslatedString("h1a5184cdgaba1g432fga0d3g51ac15b8a0a8") -- Feats
+    local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}
+    local playerEntity = Ext.Entity.Get(message.ID)
+    local playerName = GetCharacterName(playerEntity, false)
+    win.Label = SubstituteParameters(windowTitle, {CharacterName = playerName})
     win.Closeable = true
     win.NoMove = true
     win.NoResize = true
@@ -226,7 +230,7 @@ function E6_FeatSelectorUI(message)
     local windowDimensions = {500, 1450}
     
     ---@type ExtuiWindow
-    local win = ConfigureFeatSelectorUI(windowDimensions)
+    local win = ConfigureFeatSelectorUI(windowDimensions, message)
 
     win.Open = true
     win:SetFocus()

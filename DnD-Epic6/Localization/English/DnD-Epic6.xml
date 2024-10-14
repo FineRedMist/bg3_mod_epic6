@@ -14,6 +14,7 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="h8cb5f019g91b8g4873ga7c4g2c79d5579a78" version="1">Ability Points: {Count}/{Max}</content>
 	<content contentuid="h0e02f114g1575g4fc2g97eeg27d8017fc2ee" version="1">Pending Epic feats to choose.</content>
 	<content contentuid="h1a5184cdgaba1g432fga0d3g51ac15b8a0a8" version="1">Feats</content>
+	<content contentuid="hb09763begcf50g4351gb1f1gd39ec792509b" version="1">Feats: {CharacterName}</content>
 	<content contentuid="h262bbb67gb8abg4d35g9822g854af550a474" version="1">Number of Epic feats chosen.</content>
 	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
 	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Export Character</content>
