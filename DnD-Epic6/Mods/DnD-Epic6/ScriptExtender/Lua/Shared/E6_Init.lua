@@ -1,3 +1,4 @@
+Ext.Require("Shared/E6_Logging.lua")
 Ext.Require("Shared/E6_Common.lua")
 Ext.Require("Shared/E6_Dequeue.lua")
 Ext.Require("Shared/E6_Jsonify.lua")
