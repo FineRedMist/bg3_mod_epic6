@@ -23,6 +23,7 @@ local function DnDEpic6Init()
     Ext.Events.StatsLoaded:Subscribe(OnStatsLoaded_RedirectXPFiles)
 
     Ext.Vars.RegisterUserVariable("E6_Feats", {})
+    Ext.Vars.RegisterUserVariable("E6_XPPerFeat", {})
 end
 
 DnDEpic6Init()

@@ -546,6 +546,19 @@ local function GatherSpells(entity)
     return result
 end
 
+---Whether the current player id is for the host.
+---@param playerId GUIDSTRING The player id to check if they are the host
+---@return boolean Whether the current character is the host
+local function IsHost(playerId)
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
+        if entity.UserReservedFor.UserID == 65537 and entity.Uuid.EntityUuid == playerId then
+            return true
+        end
+    end
+
+    return false
+end
+
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
@@ -568,7 +581,9 @@ local function OnEpic6FeatSelectorSpell(caster)
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
         Spells = spells, -- The mapping of class to spell list.
-        ProficiencyBonus = ent.Stats.ProficiencyBonus -- to show skill bonuses
+        ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
+        XPPerFeat = DE_GetEpicFeatXP(ent),
+        IsHost = IsHost(ent.Uuid.EntityUuid)
     }
 
     local str = Ext.Json.Stringify(message)

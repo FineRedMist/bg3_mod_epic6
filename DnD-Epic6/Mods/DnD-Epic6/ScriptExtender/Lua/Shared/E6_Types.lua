@@ -86,6 +86,8 @@
 ---@field Proficiencies ProficiencyInformationType? The proficiency information for the player.
 ---@field ProficiencyBonus integer The proficiency bonus for the player.
 ---@field Spells SelectedSpellsType The selected spells for the player.
+---@field XPPerFeat integer The amount of experience required per feat.
+---@field IsHost boolean Whether the current player is the host of the session.
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Selected Feat Information
@@ -109,3 +111,11 @@
 ---@field Description string The description of the passive.
 ---@field Icon string The icon of the passive.
 ---@field Boost string The boost to apply for the passive.
+
+-----------------------------------------------------------------------------------------------------------------------
+-- Setting XP Per Feat Messaging
+-----------------------------------------------------------------------------------------------------------------------
+
+---@class SetXPPerFeatPayloadType The payload for setting the XP per feat.
+---@field PlayerId string The player id for the feat.
+---@field XPPerFeat integer The XP per feat to set.

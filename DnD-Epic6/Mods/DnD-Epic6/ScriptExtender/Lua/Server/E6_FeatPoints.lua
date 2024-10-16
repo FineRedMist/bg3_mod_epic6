@@ -6,8 +6,14 @@ local function E6_GetLevel6XP()
     return extraData.Level1 + extraData.Level2 + extraData.Level3 + extraData.Level4 + extraData.Level5
 end
 
+---Retrieves the amount of experience required for the character to earn a feat.
+---@param char EntityHandle The character entity to retrieve the value or the default.
 ---@return number
-local function DE_GetEpicFeatXP()
+function DE_GetEpicFeatXP(char)
+    local setting = char.Vars.E6_XPPerFeat
+    if type(setting) == "number" and setting >= 100 and setting <= 20000 then
+        return setting
+    end
     return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
 end
 
@@ -30,6 +36,19 @@ end
 
 -- Maps the entity id to an object that tracks the last known feat count and the granted feat count.
 local actionResourceTracker = {}
+
+---Resets the feat points on all entities that have the Experience component.
+function ResetFeatPointsOnAll()
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("Experience")) do
+        if entity.Uuid then
+            local characterGuid = entity.Uuid.EntityUuid
+            Osi.RemoveStatus(characterGuid, "E6_FEAT_GRANTFEATPOINT", characterGuid)
+            Osi.RemoveStatus(characterGuid, "E6_FEAT_CONSUMEFEATPOINT", characterGuid)
+        end
+    end
+    -- Clear the tracker as all values on it are now invalid.
+    actionResourceTracker = {}
+end
 
 -- Determines if the character can update their feat count, and if so, does so.
 -- Only update if:
@@ -58,7 +77,7 @@ local function E6_UpdateEpic6FeatCount(ent)
     end
 
     local xpToNextLevel = ent.Experience.CurrentLevelExperience
-    local epic6FeatXP = DE_GetEpicFeatXP()
+    local epic6FeatXP = DE_GetEpicFeatXP(ent)
     totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
 
     local id = ent.Uuid.EntityUuid
@@ -91,6 +110,9 @@ local function E6_UpdateEpic6FeatCount(ent)
     _E6P(charName .. ": TotalFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatCount: " .. tostring(currentFeatCount) .. ", DeltaFeatCount: " .. tostring(deltaFeatCount))
     for i = 1, deltaFeatCount do
         Osi.ApplyStatus(id, "E6_FEAT_GRANTFEATPOINT", -1, -1, id)
+    end
+    for i = 1, -deltaFeatCount do
+        Osi.ApplyStatus(id, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, id)
     end
 
     if totalGrantedFeatCount == 0 and totalFeatCount > 0 then
@@ -209,6 +231,8 @@ local function E6_OnRespecComplete(characterGuid)
 
     -- Tick will handle updating the feat count so the player can select them again once the respect is complete.
     Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
+    Osi.RemoveStatus(characterGuid, "E6_FEAT_GRANTFEATPOINT", characterGuid)
+    Osi.RemoveStatus(characterGuid, "E6_FEAT_CONSUMEFEATPOINT", characterGuid)
     actionResourceTracker[characterGuid] = nil -- clear any data for points in flight.
     if char.Vars.E6_Feats then
         char.Vars.E6_Feats = nil

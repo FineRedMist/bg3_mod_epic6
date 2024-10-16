@@ -152,13 +152,13 @@ end
 ---Generates the feat buttons to add to the window.
 ---@param win ExtuiWindow The window to add the feat buttons to.
 ---@param windowDimensions integer[] The dimensions of the window.
----@param message PlayerInformationType The player information.
-local function AddFeatButtons(win, windowDimensions, message)
+---@param playerInfo PlayerInformationType The player information.
+local function AddFeatButtons(win, windowDimensions, playerInfo)
     local allFeats = E6_GatherFeats()
 
     local featList = {}
     local featMap = {}
-    for _,featId in ipairs(message.SelectableFeats) do
+    for _,featId in ipairs(playerInfo.SelectableFeats) do
         local feat = allFeats[featId]
         local featName = feat.DisplayName
         featMap[featName] = feat
@@ -174,7 +174,7 @@ local function AddFeatButtons(win, windowDimensions, message)
         if feat == nil then
             _E6Error("Failed to find feat for name: " .. featName)
         else
-            MakeFeatButton(win, windowDimensions[1], message, feat)
+            MakeFeatButton(win, windowDimensions[1], playerInfo, feat)
         end
     end
 end
@@ -182,62 +182,103 @@ end
 ---Adds a button to export the character to the file system.
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param windowDimensions integer[] The dimensions of the window.
----@param message PlayerInformationType The player information.
-local function AddExportCharacterButton(win, windowDimensions, message)
-    win:AddSpacing()
-    win:AddSeparator()
-    win:AddSpacing()
-
+---@param playerInfo PlayerInformationType The player information.
+local function AddExportCharacterButton(win, windowDimensions, playerInfo)
     local centerCell = CreateCenteredControlCell(win, "ExportCharacterCell", windowDimensions[1] - 30)
     local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
     AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
     exportButton.OnClick = function()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, message.PlayerId)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, playerInfo.PlayerId)
     end
+end
+
+---Adds configuration settings under a collapsible header.
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param playerInfo PlayerInformationType The player information.
+local function AddSettings(win, windowDimensions, playerInfo)
+    win:AddSpacing()
+    win:AddSeparator()
+    win:AddSpacing()
+
+    local settings = win:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h9945dd99g22e4g4111ga988g05974feeba28")) -- Settings
+    settings.Bullet = true
+    settings.DefaultOpen = false
+    settings.SpanFullWidth = true
+
+    local slider = settings:AddSliderInt("", playerInfo.XPPerFeat, 100, 20000)
+    AddLocaTooltip(slider, "hcbbf8d49g36fbg496bga9beg275c367f94c0")
+    slider.AlwaysClamp = true
+    slider.OnChange = function()
+        local rounded = 100 * math.floor(slider.Value[1]/100 + 0.5)
+        slider.Value = {rounded, rounded, rounded, rounded}
+    end
+
+    local saveSlider = settings:AddButton(Ext.Loca.GetTranslatedString("h21681079gab67g4ea5ga4dfg88f40d38818a")) -- Save
+    AddLocaTooltip(saveSlider, "hf2b3a061gbf90g48cbg8defg30ec6aef6159")
+    saveSlider.SameLine = true
+    saveSlider.OnClick = function()
+        local payload = {
+            PlayerId = playerInfo.ID,
+            XPPerFeat = slider.Value[1]
+        }
+        local payloadStr = Ext.Json.Stringify(payload)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
+    end
+
+    win:AddSpacing()
+    win:AddSpacing()
+    AddExportCharacterButton(settings, windowDimensions, playerInfo)
+end
+
+local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}
+local function SetWindowTitle(playerInfo)
+    local playerEntity = Ext.Entity.Get(playerInfo.ID)
+    local playerName = GetCharacterName(playerEntity, false)
+    featUI.Label = SubstituteParameters(windowTitle, {CharacterName = playerName})
 end
 
 ---Creates/Gets the Feat Selector UI
 ---@param windowDimensions integer[] The dimensions of the window.
----@param message PlayerInformationType The player information.
+---@param playerInfo PlayerInformationType The player information.
 ---@return ExtuiWindow The window to display.
-local function ConfigureFeatSelectorUI(windowDimensions, message)
+local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     if featUI then
+        SetWindowTitle(playerInfo)
         return featUI
     end
-    local win = Ext.IMGUI.NewWindow("FeatSelector")
-    local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}
-    local playerEntity = Ext.Entity.Get(message.ID)
-    local playerName = GetCharacterName(playerEntity, false)
-    win.Label = SubstituteParameters(windowTitle, {CharacterName = playerName})
-    win.Closeable = true
-    win.NoMove = true
-    win.NoResize = true
-    win.NoCollapse = true
-    win:SetSize(ScaleToViewport(windowDimensions))
-    win:SetPos(ScaleToViewport({800, 100}))
-    win.OnClose = function()
+    featUI = Ext.IMGUI.NewWindow("FeatSelector")
+    SetWindowTitle(playerInfo)
+    featUI.Closeable = true
+    featUI.NoMove = true
+    featUI.NoResize = true
+    featUI.NoCollapse = true
+    featUI:SetSize(ScaleToViewport(windowDimensions))
+    featUI:SetPos(ScaleToViewport({800, 100}))
+    featUI.OnClose = function()
         if featDetailUI then
             featDetailUI.Open = false
         end
     end
-    featUI = win
-    return win
+    return featUI
 end
 
 ---Shows the Feat Selector UI
----@param message PlayerInformationType
-function E6_FeatSelectorUI(message)
+---@param playerInfo PlayerInformationType
+function E6_FeatSelectorUI(playerInfo)
     local windowDimensions = {500, 1450}
     
     ---@type ExtuiWindow
-    local win = ConfigureFeatSelectorUI(windowDimensions, message)
+    local win = ConfigureFeatSelectorUI(windowDimensions, playerInfo)
 
     win.Open = true
     win:SetFocus()
 
     ClearChildren(win)
 
-    AddFeatButtons(win, windowDimensions, message)
+    AddFeatButtons(win, windowDimensions, playerInfo)
 
-    AddExportCharacterButton(win, windowDimensions, message)
+    if playerInfo.IsHost then
+        AddSettings(win, windowDimensions, playerInfo)
+    end
 end
