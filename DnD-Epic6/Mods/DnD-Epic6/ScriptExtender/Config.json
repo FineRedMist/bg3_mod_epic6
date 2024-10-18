@@ -1,5 +1,5 @@
 {
-    "RequiredVersion": 17,
+    "RequiredVersion": 20,
     "ModTable": "DnD-Epic6",
     "FeatureFlags": ["Osiris", "Lua"]
 }

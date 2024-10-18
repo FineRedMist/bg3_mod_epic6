@@ -154,3 +154,17 @@ function DeepCopy(o, seen)
     end
     return no
   end
+
+  ---Whether the current player id is for the host.
+---@param playerId GUIDSTRING The player id to check if they are the host
+---@return boolean Whether the current character is the host
+function IsHost(playerId)
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
+        if entity.UserReservedFor.UserID == 65537 and entity.Uuid.EntityUuid == playerId then
+            return true
+        end
+    end
+
+    return false
+end
+

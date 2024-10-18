@@ -546,17 +546,12 @@ local function GatherSpells(entity)
     return result
 end
 
----Whether the current player id is for the host.
----@param playerId GUIDSTRING The player id to check if they are the host
----@return boolean Whether the current character is the host
-local function IsHost(playerId)
-    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor.UserID == 65537 and entity.Uuid.EntityUuid == playerId then
-            return true
-        end
-    end
-
-    return false
+---comment
+---@param caster GUIDSTRING
+---@param playerInfo PlayerInformationType
+local function SendShowFeatSelector(caster, playerInfo)
+    local str = Ext.Json.Stringify(playerInfo)
+    Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
 end
 
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
@@ -565,6 +560,28 @@ local function OnEpic6FeatSelectorSpell(caster)
     ---@type EntityHandle
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
+
+    local isHost = IsHost(ent.Uuid.EntityUuid)
+    local featPoints = E6_GetFeatPointBoostAmount(caster)
+    -- Show the feat selector without any feats to show settings.
+    if featPoints == 0 and isHost then
+        ---@type PlayerInformationType
+        local playerInfoLite = {
+            ID = caster,
+            Name = charname,
+            PlayerFeats = {},
+            PlayerPassives = {},
+            SelectableFeats = {},
+            Abilities = {}, -- we need their current scores and maximums to display UI
+            Proficiencies = nil, -- gathered so we know what they are proficient in and what could be granted
+            Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
+            ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
+            XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
+            IsHost = isHost
+        }
+        SendShowFeatSelector(caster, playerInfoLite)
+        return
+    end
 
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
@@ -583,12 +600,10 @@ local function OnEpic6FeatSelectorSpell(caster)
         Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
         XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
-        IsHost = IsHost(ent.Uuid.EntityUuid)
+        IsHost = isHost
     }
 
-    local str = Ext.Json.Stringify(message)
-
-    Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
+    SendShowFeatSelector(caster, message)
 end
 
 function E6_SpellFeatHandlerInit()

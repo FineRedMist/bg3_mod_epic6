@@ -1,5 +1,11 @@
 
 
+---Closes the UI for the given character.
+---@param char string The character ID
+function E6_NetCloseUI(char)
+    Ext.Net.PostMessageToClient(char, NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI, "")
+end
+
 -- Given an array of character entities, update their feat count
 ---@param chars EntityHandle[]
 local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
@@ -137,6 +143,7 @@ local function E6_OnRespecStart(characterGuid)
         return
     end
 
+    E6_NetCloseUI(characterGuid)
     FeatPointTracker:OnRespecBegin(char)
 end
 
