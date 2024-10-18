@@ -7,4 +7,8 @@ function NetClientHandlers.ShowFeatSelectorUI(_, payload, peerId)
     E6_FeatSelectorUI(message)
 end
 
+function NetClientHandlers.CloseUI(_, payload, peerId)
+    E6_CloseUI()
+end
+
 return NetClientHandlers
