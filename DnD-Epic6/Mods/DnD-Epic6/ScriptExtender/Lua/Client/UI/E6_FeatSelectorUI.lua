@@ -245,6 +245,7 @@ end
 local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     if featUI then
         SetWindowTitle(playerInfo)
+        featDetailUI.Open = false -- Close the detail window if it's open so it doesn't get used.
         return featUI
     end
     featUI = Ext.IMGUI.NewWindow("FeatSelector")
