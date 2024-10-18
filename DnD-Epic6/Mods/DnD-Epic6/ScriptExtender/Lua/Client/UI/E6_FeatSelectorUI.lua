@@ -201,7 +201,7 @@ local function AddExportCharacterButton(win, windowDimensions, playerInfo)
     local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
     AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
     exportButton.OnClick = function()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, playerInfo.PlayerId)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, playerInfo.ID)
     end
 end
 
@@ -216,7 +216,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
 
     local settings = win:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h9945dd99g22e4g4111ga988g05974feeba28")) -- Settings
     settings.Bullet = true
-    settings.DefaultOpen = false
+    settings.DefaultOpen = #playerInfo.SelectableFeats == 0
     settings.SpanFullWidth = true
 
     local slider = settings:AddSliderInt("", playerInfo.XPPerFeat, 100, 20000)
@@ -238,9 +238,9 @@ local function AddSettings(win, windowDimensions, playerInfo)
         local payloadStr = Ext.Json.Stringify(payload)
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
 
-        -- If the slider value increases more than the XPPerFeat, the player may end up without
-        -- having enough XP for the next feat, so we should close, just in case.
-        if(slider.Value[1] > playerInfo.XPPerFeat) then
+        -- If the slider value increases more than the XPPerFeat, the player may end up without having enough
+        -- XP for the next feat, so we should close if there are feats to select, just in case.
+        if #playerInfo.SelectableFeats > 0 and slider.Value[1] > playerInfo.XPPerFeat then
             E6_CloseUI()
         end
     end

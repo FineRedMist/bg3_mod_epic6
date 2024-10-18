@@ -67,7 +67,7 @@ end
 ---Returns the number of feat points granted to the character.
 ---@param uuid GUIDSTRING The character ID.
 ---@return number The number of feat points the character has (may be negative)
-local function E6_GetFeatPointBoostAmount(uuid)
+function E6_GetFeatPointBoostAmount(uuid)
     local result = Osi.GetActionResourceValuePersonal(uuid, "FeatPoint", 0)
     if not result then
         return 0
@@ -187,11 +187,12 @@ end
 local function UpdateFeatGrantingSpell(id, charName, currentFeatPointCount)
     local hasSpell = HasFeatGrantingSpell(id)
     --_E6P("Character " .. charName .. " has feat granting spell: " .. tostring(hasSpell) .. ", target feat count: " .. tostring(targetFeatCount))
-    if currentFeatPointCount >= 1 and not hasSpell then
+    -- Allow the host to have the spell to set the initial XP Per Feat value.
+    if not hasSpell and (currentFeatPointCount >= 1 or IsHost(id)) then
         --_E6P("Character " .. charName .. ": adding spell " .. EpicSpellContainerName)
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
         SetPendingFeatCount(id)
-    elseif currentFeatPointCount < 1 and hasSpell then -- Remove the spell if we have no feats to grant.
+    elseif hasSpell and currentFeatPointCount < 1 and not IsHost(id) then -- Remove the spell if we have no feats to grant.
         --_E6P("Character " .. charName .. ": removing spell " .. EpicSpellContainerName)
         Osi.RemoveSpell(id, EpicSpellContainerName, 0)
         SetPendingFeatCount(id)
