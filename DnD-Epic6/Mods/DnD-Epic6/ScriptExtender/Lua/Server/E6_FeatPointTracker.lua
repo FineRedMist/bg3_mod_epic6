@@ -112,6 +112,8 @@ function FeatPointTracker:ResetAll()
     end
 end
 
+---When respecing a character, we need to track that the respec is in progress, and remove all the 
+---feats from the character so that they don't interfere with the respec process.
 function FeatPointTracker:OnRespecBegin(entity)
     local characterGuid = entity.Uuid.EntityUuid
     IsRespecing[characterGuid] = true
@@ -119,27 +121,30 @@ function FeatPointTracker:OnRespecBegin(entity)
     if entity.Vars.E6_Feats then
         E6_RemoveFeats(characterGuid, entity.Vars.E6_Feats)
     end
-    _E6P("Respec for " .. charName .. " started.")
+    --_E6P("Respec for " .. charName .. " started.")
 end
 
+---Restores feats for a character that cancelled a respec.
 function FeatPointTracker:OnRespecCancel(entity)
     local characterGuid = entity.Uuid.EntityUuid
     IsRespecing[characterGuid] = false
     local charName = GetCharacterName(entity, true)
-    _E6P("Respec for " .. charName .. " cancelled.")
+    --_E6P("Respec for " .. charName .. " cancelled.")
 
     if entity.Vars.E6_Feats then
         E6_ApplyFeats(characterGuid, entity.Vars.E6_Feats)
     end
 end
 
+---I've seen this fire without a start respec on level load. To be sure I don't accidentally
+---break a character, check that the respec was started before resetting the character.
 function FeatPointTracker:OnRespecComplete(entity)
     local characterGuid = entity.Uuid.EntityUuid
     local wasRespecStarted = IsRespecing[characterGuid]
     IsRespecing[characterGuid] = false
     local charName = GetCharacterName(entity, true)
 
-    _E6P("Respec for " .. charName .. " complete: wasRespecStarted=" .. tostring(wasRespecStarted))
+    --_E6P("Respec for " .. charName .. " complete: wasRespecStarted=" .. tostring(wasRespecStarted))
 
     if wasRespecStarted then
         self:Reset(entity, true)
@@ -183,11 +188,11 @@ local function UpdateFeatGrantingSpell(id, charName, currentFeatPointCount)
     local hasSpell = HasFeatGrantingSpell(id)
     --_E6P("Character " .. charName .. " has feat granting spell: " .. tostring(hasSpell) .. ", target feat count: " .. tostring(targetFeatCount))
     if currentFeatPointCount >= 1 and not hasSpell then
-        _E6P("Character " .. charName .. ": adding spell " .. EpicSpellContainerName)
+        --_E6P("Character " .. charName .. ": adding spell " .. EpicSpellContainerName)
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
         SetPendingFeatCount(id)
     elseif currentFeatPointCount < 1 and hasSpell then -- Remove the spell if we have no feats to grant.
-        _E6P("Character " .. charName .. ": removing spell " .. EpicSpellContainerName)
+        --_E6P("Character " .. charName .. ": removing spell " .. EpicSpellContainerName)
         Osi.RemoveSpell(id, EpicSpellContainerName, 0)
         SetPendingFeatCount(id)
     end
@@ -263,7 +268,7 @@ function FeatPointTracker:Update(ent)
         PendingFeatPoints[id] = nil
     elseif targetFeatPointCount <= 0 then
         -- If we have no feats to grant, we should remove all the feat points.
-        _E6P("Update for " .. charName .. ": removing all points")
+        --_E6P("Update for " .. charName .. ": removing all points")
         RemoveAllFeatPoints(id)
         SetPendingFeatCount(id)
     else
@@ -286,7 +291,7 @@ function FeatPointTracker:Update(ent)
         end
 
         if toAdjust ~= 0 then
-            _E6P("Update for " .. charName .. ": TargetFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatPointCount: " .. tostring(currentFeatPointCount) .. ", DeltaFeatPointCount: " .. tostring(deltaFeatCount) .. ", adjusting by: " .. tostring(toAdjust))
+            --_E6P("Update for " .. charName .. ": TargetFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatPointCount: " .. tostring(currentFeatPointCount) .. ", DeltaFeatPointCount: " .. tostring(deltaFeatCount) .. ", adjusting by: " .. tostring(toAdjust))
 
             AdjustFeatPoints(id, toAdjust)
             SetPendingFeatCount(id, {LastCount = currentFeatPointCount, Pending = toAdjust})

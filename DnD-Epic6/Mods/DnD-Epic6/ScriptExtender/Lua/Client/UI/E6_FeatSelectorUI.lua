@@ -4,6 +4,20 @@ local featUI = nil
 ---@type ExtuiWindow?
 local featDetailUI = nil
 
+local function E6_CloseFeatDetailsUI()
+    if featDetailUI then
+        featDetailUI.Open = false
+    end
+end
+
+---Closes the UI
+function E6_CloseUI()
+    if featUI then
+        featUI.Open = false
+    end
+    E6_CloseFeatDetailsUI()
+end
+
 ---The details panel for the feat.
 ---@param feat FeatType The feat to create the window for.
 ---@param playerInfo PlayerInformationType The player id for the feat.
@@ -72,8 +86,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
 
     select.OnClick = function()
-        featUI.Open = false
-        featDetailUI.Open = false
+        E6_CloseUI()
 
         -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
         local boosts = {}
@@ -224,6 +237,12 @@ local function AddSettings(win, windowDimensions, playerInfo)
         }
         local payloadStr = Ext.Json.Stringify(payload)
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
+
+        -- If the slider value increases more than the XPPerFeat, the player may end up without
+        -- having enough XP for the next feat, so we should close, just in case.
+        if(slider.Value[1] > playerInfo.XPPerFeat) then
+            E6_CloseUI()
+        end
     end
 
     win:AddSpacing()
@@ -245,7 +264,7 @@ end
 local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     if featUI then
         SetWindowTitle(playerInfo)
-        featDetailUI.Open = false -- Close the detail window if it's open so it doesn't get used.
+        E6_CloseFeatDetailsUI() -- Close the detail window if it's open so it doesn't get used.
         return featUI
     end
     featUI = Ext.IMGUI.NewWindow("FeatSelector")
@@ -256,17 +275,20 @@ local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     featUI.NoCollapse = true
     featUI:SetSize(ScaleToViewport(windowDimensions))
     featUI:SetPos(ScaleToViewport({800, 100}))
-    featUI.OnClose = function()
-        if featDetailUI then
-            featDetailUI.Open = false
-        end
-    end
+    featUI.OnClose = E6_CloseFeatDetailsUI
     return featUI
 end
+
+local registeredForCloseUI = false
 
 ---Shows the Feat Selector UI
 ---@param playerInfo PlayerInformationType
 function E6_FeatSelectorUI(playerInfo)
+    if not registeredForCloseUI then
+        --RegisterForCloseUIEvents(E6_CloseUI) -- Doesn't seem to work on the client to register for events.
+        registeredForCloseUI = true
+    end
+
     local windowDimensions = {500, 1450}
     
     ---@type ExtuiWindow
@@ -283,3 +305,12 @@ function E6_FeatSelectorUI(playerInfo)
         AddSettings(win, windowDimensions, playerInfo)
     end
 end
+
+---@param e EclLuaGameStateChangedEvent
+local function E6_ManageUI(e)
+    if e.ToState ~= Ext.Enums.ServerGameState.Running then
+        E6_CloseUI() -- Close the UI if we are changing state and not running.
+    end
+end
+
+Ext.Events.GameStateChanged:Subscribe(E6_ManageUI)
