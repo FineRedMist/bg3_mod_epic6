@@ -2,11 +2,72 @@
 ---@class SelectSpellInfoUIType : SelectSpellInfoType
 ---@field IsCantrip boolean Whether the spell is a cantrip.
 ---@field IsSelected boolean Whether the spell is enabled.
+---@field CanSelect boolean Whether the spell can be selected (if you already have it, you can't select it again).
 ---@field DisplayName string The display name of the spell.
 ---@field Description string The description of the spell.
 ---@field Icon string The icon of the spell.
 
----comment
+
+---@param unlockSpell SelectSpellInfoUIType
+---@param playerInfo PlayerInformationType Information about the player to alter the spell selector.
+local function CanSelectSpell(unlockSpell, playerInfo)
+    -- If the spells id group the spell is coming from comes from a set I have added, I can't select the spell again.
+    if playerInfo.Spells.Added[unlockSpell.SpellsId] then
+        return false
+    end
+    local playerSelected = playerInfo.Spells.Selected[unlockSpell.SpellsId]
+    if playerSelected then
+        for spellId,_ in pairs(playerSelected) do
+            if spellId == unlockSpell.SpellId then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+---@param cell ExtuiTableCell
+---@param sharedResource SharedResource
+---@param unlockSpell SelectSpellInfoUIType
+local function AddSpellButton(cell, sharedResource, unlockSpell)
+    local icon = cell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
+    AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description)
+    icon.SameLine = true
+
+    if not unlockSpell.CanSelect then
+        UI_Disable(icon)
+    else
+        icon.OnClick = function()
+            if unlockSpell.IsSelected then
+                unlockSpell.IsSelected = false
+                if sharedResource:ReleaseResource() then
+                    MakeBland(icon)
+                else
+                    unlockSpell.IsSelected = true
+                end
+            else
+                unlockSpell.IsSelected = true
+                if sharedResource:AcquireResource() then
+                    MakeSelected(icon)
+                else
+                    unlockSpell.IsSelected = false
+                end
+            end
+        end
+
+        sharedResource:add(function(hasResources,_)
+            if hasResources then
+                UI_Enable(icon)
+            else
+                if not unlockSpell.IsSelected then
+                    UI_Disable(icon)
+                end
+            end
+        end)
+    end
+end
+
+---Adds a spell selector block to the UI
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
 ---@param selectSpells SelectSpellsType Information about the spell selection to add.
 ---@param playerInfo PlayerInformationType Information about the player to alter the spell selector.
@@ -48,52 +109,18 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
             unlockSpell.DisplayName = spellStat.DisplayName
             unlockSpell.Description = spellStat.Description
             unlockSpell.Icon = spellStat.Icon
+            unlockSpell.CanSelect = CanSelectSpell(unlockSpell, playerInfo)
             table.insert(selectedSpells, unlockSpell)
         end
     end
 
     local centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_1", GetWidthFromViewport(parent) - 60)
 
-    ---@param unlockSpell SelectSpellInfoUIType
-    local function AddSpellButton(unlockSpell)
-        local icon = centeredCell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
-        AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description)
-        icon.SameLine = true
-
-        icon.OnClick = function()
-            if unlockSpell.IsSelected then
-                unlockSpell.IsSelected = false
-                if sharedResource:ReleaseResource() then
-                    MakeBland(icon)
-                else
-                    unlockSpell.IsSelected = true
-                end
-            else
-                unlockSpell.IsSelected = true
-                if sharedResource:AcquireResource() then
-                    MakeSelected(icon)
-                else
-                    unlockSpell.IsSelected = false
-                end
-            end
-        end
-
-        sharedResource:add(function(hasResources,_)
-            if hasResources then
-                UI_Enable(icon)
-            else
-                if not unlockSpell.IsSelected then
-                    UI_Disable(icon)
-                end
-            end
-        end)
-    end
-
     local rowNumber = 1
     local spellsPerRow = ComputeIconsPerRow(spellCount)
     local spellsInRow = 0
     for _,unlockSpell in ipairs(selectedSpells) do
-        AddSpellButton(unlockSpell)
+        AddSpellButton(centeredCell, sharedResource, unlockSpell)
         spellsInRow = spellsInRow + 1
         if spellsInRow >= spellsPerRow then
             rowNumber = rowNumber + 1
