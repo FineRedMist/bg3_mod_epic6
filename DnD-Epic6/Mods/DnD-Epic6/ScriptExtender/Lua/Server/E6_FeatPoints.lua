@@ -98,17 +98,6 @@ local function E6_IsPlayerEntity(ent)
     return false
 end
 
----A registered callback when an entity event is triggered.
----@param object GUIDSTRING The UUID of the entity that triggered the event.
----@param event string The event that was triggered.
-local function E6_OnEntityEvent(object, event)
-    local ent = Ext.Entity.Get(object)
-    if not E6_IsPlayerEntity(ent) then
-        return
-    end
-    FeatPointTracker:Update(ent)
-end
-
 ---@param characterGuid string
 local function E6_OnRespecComplete(characterGuid)
     -- When entering levels, the various creatures in the level trigger the respec, ignore them
@@ -135,10 +124,6 @@ local function E6_OnRespecCancelled(characterGuid)
     end
 
     FeatPointTracker:OnRespecCancel(char)
-
-    if char.Vars.E6_Feats then
-        E6_ApplyFeats(characterGuid, char.Vars.E6_Feats)
-    end
 end
 
 ---We need to remove the feat passives and boosts ahead of time as it may create erroneous behaviour during the respec itself.
@@ -153,25 +138,6 @@ local function E6_OnRespecStart(characterGuid)
     end
 
     FeatPointTracker:OnRespecBegin(char)
-
-    if char.Vars.E6_Feats then
-        E6_RemoveFeats(characterGuid, char.Vars.E6_Feats)
-    end
-end
-
----We need to remove the feat passives and boosts ahead of time as it may create erroneous behaviour during the respec itself.
----If the user cancels the respec, we reapply the feats.
----@param characterGuid string
-local function E6_OnRespecRequest(characterGuid)
-    -- When entering levels, the various creatures in the level trigger the respec, ignore them
-    -- by only focusing on those that have the IsPlayer flag.
-    local char = Ext.Entity.Get(characterGuid)
-    if not E6_IsPlayerEntity(char) then
-        return
-    end
-    if char.Vars.E6_Feats then
-        E6_RemoveFeats(characterGuid, char.Vars.E6_Feats)
-    end
 end
 
 function E6_FeatPointInit()
@@ -181,12 +147,10 @@ function E6_FeatPointInit()
 
     -- Checking every tick seems less than optimal, but not sure where to hook just for
     -- experience granted to perform the test to update the feat count.
-    --Ext.Events.Tick:Subscribe(E6_OnTick_UpdateEpic6FeatCount)
+    Ext.Events.Tick:Subscribe(E6_OnTick_UpdateEpic6FeatCount)
 
     --Ext.Osiris.RegisterListener("LeveledUp", 1, "after", E6_OnLevelUpComplete)
     Ext.Osiris.RegisterListener("RespecCompleted", 1, "after", E6_OnRespecComplete)
     Ext.Osiris.RegisterListener("RespecCancelled", 1, "after", E6_OnRespecCancelled)
     Ext.Osiris.RegisterListener("StartRespec", 1, "before", E6_OnRespecStart)
-    Ext.Osiris.RegisterListener("RequestRespec", 1, "before", E6_OnRespecRequest)
-    Ext.Osiris.RegisterListener("EntityEvent", 1, "after", E6_OnEntityEvent)
 end
