@@ -1,8 +1,22 @@
 
+---@class InternalPassiveSelectorType
+---@field ID GUIDSTRING The ID of the passive.
+---@field Stat PassiveData The stat data for the passive.
+---@field Icon string The Icon of the passive
+---@field DisplayName string The display name of the passive.
+---@field Description string The description of the passive.
+
+---@class RenderStateType Tracks render information for collections of passives spanning multiple rows.
+---@field CenterCell ExtuiTableCell The center cell to add the passives to.
+---@field IconsPerRow integer The number of icons to display per row.
+---@field IconRowCount integer The number of icons added to the current row.
+---@field Row integer The current index of the row for the passives.
+
+
 ---Returns true if selecting the passive won't cause the player to lose out on something important (like saving throw proficiency, stat increase, etc)
----@param playerInfo table The player info to query against
+---@param playerInfo PlayerInformationType The player info to query against
 ---@param passive string The name of the passive
----@param passiveStat table The stat retrieved for the passive
+---@param passiveStat PassiveData The stat retrieved for the passive
 local function IsPassiveSafe(playerInfo, passive, passiveStat)
     -- If we already have the passive, return false
     if playerInfo.PlayerPassives[passive] then
@@ -38,6 +52,15 @@ local function IsPassiveSafe(playerInfo, passive, passiveStat)
     return true
 end
 
+---@param parent ExtuiTreeParent The parent container to add the ability selector to.
+---@param playerInfo PlayerInformationType The ability information to render.
+---@param uniquingName string The unique name to use for the control names to avoid collisions.
+---@param passiveIndex integer The index of the passive in the feat (as there could be multiple sets of passives to select from).
+---@param passive InternalPassiveSelectorType The passive to render.
+---@param passiveList ResourcePassiveList The list of passives to select from.
+---@param sharedResource SharedResource The shared resource to bind the control to.
+---@param renderState RenderStateType The state of the rendering.
+---@param selectedPassives table<string, boolean> The collection of selected passives.
 local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
     if not renderState.CenterCell then
         renderState.CenterCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
@@ -68,6 +91,15 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
     AddTooltip(checkBoxControl, passive.Description)
 end
 
+---@param parent ExtuiTreeParent The parent container to add the ability selector to.
+---@param playerInfo PlayerInformationType The ability information to render.
+---@param uniquingName string The unique name to use for the control names to avoid collisions.
+---@param passiveIndex integer The index of the passive in the feat (as there could be multiple sets of passives to select from).
+---@param passive InternalPassiveSelectorType The passive to render.
+---@param passiveList ResourcePassiveList The list of passives to select from.
+---@param sharedResource SharedResource The shared resource to bind the control to.
+---@param renderState RenderStateType The state of the rendering.
+---@param selectedPassives table<string, boolean> The collection of selected passives.
 local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
     local function AddRow()
         renderState.IconRowCount = 0
@@ -79,17 +111,17 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
         renderState.IconsPerRow = ComputeIconsPerRow(#passiveList.Passives)
         renderState.IconRowCount = 0
         renderState.Row = 0
-        renderState.PassiveCell = AddRow()
+        renderState.CenterCell = AddRow()
     end
 
     local passiveID = passive.ID
     local iconId = passive.Icon
     local IconControl = nil
     if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
-        IconControl = renderState.PassiveCell:AddImage(iconId, DefaultIconSize)
+        IconControl = renderState.CenterCell:AddImage(iconId, DefaultIconSize)
         UI_Disable(IconControl)
     else
-        IconControl = renderState.PassiveCell:AddImageButton("", iconId, DefaultIconSize)
+        IconControl = renderState.CenterCell:AddImageButton("", iconId, DefaultIconSize)
         IconControl.OnClick = function()
             if selectedPassives[passiveID] then
                 selectedPassives[passiveID] = nil
@@ -114,14 +146,24 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
 
     renderState.IconRowCount = renderState.IconRowCount + 1
     if renderState.IconRowCount >= renderState.IconsPerRow then
-        renderState.PassiveCell = AddRow()
+        renderState.CenterCell = AddRow()
     end
+end
+
+---Converts the data to an internal passive selector type.
+---@param passive string The passive ID
+---@param iconId string? The icon ID
+---@param stat PassiveData The stat data for the passive
+---@return InternalPassiveSelectorType
+local function GetInternalPassiveData(passive, iconId, stat)
+    return { ID = passive, Stat = stat, Icon = iconId, DisplayName = Ext.Loca.GetTranslatedString(stat.DisplayName), Description = Ext.Loca.GetTranslatedString(stat.Description) }
 end
 
 ---Adds the ability selector to the feat details, if ability selection is present.
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
----@param feat table
----@param playerInfo table The ability information to render
+---@param feat FeatType
+---@param playerInfo PlayerInformationType The ability information to render
+---@param selectedPassives table<string, boolean> The collection of selected passives.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
 function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPassives)
     if #feat.SelectPassives == 0 then
@@ -139,6 +181,7 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         local sharedResource = SharedResource:new(featPassiveInfo.Count)
         table.insert(sharedResources, sharedResource)
 
+        ---@type ResourcePassiveList
         local passiveList = Ext.StaticData.Get(featPassiveInfo.SourceId, Ext.Enums.ExtResourceManagerType.PassiveList)
 
         local titleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
@@ -158,16 +201,17 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         updateTitle(nil, nil)
 
         local renderState = {}
-
+        ---@type InternalPassiveSelectorType[]
         local sortedPassives = {}
         local isMissingIcons = false
         for _,passive in ipairs(passiveList.Passives) do
+            ---@type PassiveData Data for the passive
             local stat = Ext.Stats.Get(passive, -1, true, true)
             local iconId = stat.Icon
             if not iconId or string.len(iconId) == 0 then
                 isMissingIcons = true
             end
-            table.insert(sortedPassives, { ID = passive, Stat = stat, Icon = iconId, DisplayName = Ext.Loca.GetTranslatedString(stat.DisplayName), Description = Ext.Loca.GetTranslatedString(stat.Description) })
+            table.insert(sortedPassives, GetInternalPassiveData(passive, iconId, stat))
         end
 
         -- Disable the sort as the specified order is assumed intentional.       

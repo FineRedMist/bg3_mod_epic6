@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="hf2b3a061gbf90g48cbg8defg30ec6aef6159" version="1">Saves the amount of XP per feat to the save game.</content>
+	<content contentuid="h21681079gab67g4ea5ga4dfg88f40d38818a" version="1">Save</content>
+	<content contentuid="hcbbf8d49g36fbg496bga9beg275c367f94c0" version="1">The amount of experience required to earn a feat. The change is not committed until Save is clicked.</content>
+	<content contentuid="h7b730e0dgb38bg4527g9762g880c4b778d76" version="1">XP Per Feat</content>
+	<content contentuid="h9945dd99g22e4g4111ga988g05974feeba28" version="1">Settings</content>
 	<content contentuid="h23fb3bb3gd957g433fgbdfag862d70a20649" version="1">New Spells</content>
 	<content contentuid="h00c4820cgf31bg4b3agab92g7058ba3c44e5" version="1">Select Spells: {Count}/{Max}</content>
 	<content contentuid="h522a98b0gd1b0g4bd8ga74dgb33b8cdaa8cb" version="1">{Ability} Modifier: {AbilityMod}
@@ -14,7 +19,8 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="h8cb5f019g91b8g4873ga7c4g2c79d5579a78" version="1">Ability Points: {Count}/{Max}</content>
 	<content contentuid="h0e02f114g1575g4fc2g97eeg27d8017fc2ee" version="1">Pending feats to choose.</content>
 	<content contentuid="h1a5184cdgaba1g432fga0d3g51ac15b8a0a8" version="1">Feats</content>
-	<content contentuid="h262bbb67gb8abg4d35g9822g854af550a474" version="1">Number of Epic feats chosen.</content>
+	<content contentuid="hb09763begcf50g4351gb1f1gd39ec792509b" version="1">Feats: {CharacterName}</content>
+	<content contentuid="h262bbb67gb8abg4d35g9822g854af550a474" version="1">Number of feats chosen.</content>
 	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
 	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Export Character</content>
 	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">The exported character can be found in %LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/Script Extender/E6_Character.json. Note: Exporting the character will generate a lot of spurious warnings and errors in the logs as it tests properties on objects.</content>

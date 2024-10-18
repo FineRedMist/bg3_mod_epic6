@@ -1,11 +1,12 @@
 
 ---Gather the abilities and map any single attribute increases to extraPassives
----@param feat table
----@param playerInfo table
----@param extraPassives table
+---@param feat FeatType
+---@param playerInfo PlayerInformationType
+---@param extraPassives ExtraPassiveType[]
 function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     local results = {}
     for _,abilityListSelector in ipairs(feat.SelectAbilities) do
+        ---@type ResourceAbilityList
         local abilityList = Ext.StaticData.Get(abilityListSelector.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
         if abilityList then
             local pointCount = abilityListSelector.Count

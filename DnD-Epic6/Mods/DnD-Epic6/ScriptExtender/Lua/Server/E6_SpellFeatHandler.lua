@@ -32,6 +32,7 @@ local function GatherPlayerFeats(entity)
         end
     end
 
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
@@ -77,6 +78,7 @@ local function GatherPlayerPassives(entity)
         end
     end
 
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
@@ -111,7 +113,7 @@ end
 ---@param entity EntityHandle The player entity to test against.
 ---@param playerFeats table The feats the player already has.
 ---@param playerInfo table Information about what the player has for abilities, proficiencies, etc.
----@return table The collection of feats the player can actually select
+---@return string[] The collection of feats the player can actually select
 local function GatherSelectableFeatsForPlayer(entity, playerFeats, playerInfo)
     local allFeats = E6_GatherFeats()
 
@@ -174,6 +176,7 @@ local function IsValidCause(entity, boost, boostInfo)
     ---@type BackgroundComponent
     local backgroundComponent = entity.Background
     local backgroundId = backgroundComponent.Background
+    ---@type ResourceBackground
     local background = Ext.StaticData.Get(backgroundId, Ext.Enums.ExtResourceManagerType.Background)
     if background then
         if background.Passives == passiveId then
@@ -182,6 +185,7 @@ local function IsValidCause(entity, boost, boostInfo)
     end
 
     -- Check if the passive was granted by an E6 feat, in which case we can include it.
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if not e6Feats then
         return false
@@ -226,12 +230,13 @@ end
 ---Gathers the ability scores from the ability boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@return table? The ability scores and their maximums, or nil if it could not be determined.
+---@return table<string, AbilityScoreType>? The ability scores and their maximums, or nil if it could not be determined.
 local function GatherAbilityScoresFromBoosts(entity, boosts)
     if boosts == nil then
         return nil
     end
 
+    ---@type table<string, AbilityScoreType>
     local scores = {}
     for boostIndex,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
@@ -250,7 +255,7 @@ end
 
 ---Gathers the ability scores for the given character, without magical modifications
 ---@param entity EntityHandle
----@return table?
+---@return table<string, AbilityScoreType>?
 local function GatherAbilityScores(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
@@ -271,7 +276,7 @@ end
 ---Gathers the proficiencies from the proficiency boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@param proficiencies table The proficiency table to update
+---@param proficiencies ProficiencyInformationType The proficiency table to update
 local function GatherProficienciesFromBoosts(entity, boosts, proficiencies)
     if boosts == nil then
         return
@@ -296,7 +301,7 @@ end
 ---Gathers the expertise from the expertise boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@param proficiencies table The proficiency table to update
+---@param proficiencies ProficiencyInformationType The proficiency table to update
 local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
     if boosts == nil then
         return
@@ -322,7 +327,7 @@ local EquipmentCategories = {
 ---Gathers proficiencies for equipment from the proficiency boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@param proficiencies table The proficiency table to update
+---@param proficiencies ProficiencyInformationType The proficiency table to update
 local function GatherOtherProficiencesFromBoosts(entity, boosts, proficiencies)
     if boosts == nil then
         return
@@ -349,7 +354,7 @@ end
 
 ---Gathers the ability scores for the given character, without magical modifications
 ---@param entity EntityHandle
----@return table?
+---@return ProficiencyInformationType?
 local function GatherProficiencies(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
@@ -433,7 +438,8 @@ local function GatherSpells(entity)
                 if replaceSpells then
                     local spellResults = GetSpellResultList(list)
                     for _,spell in ipairs(replaceSpells) do
-                        RemoveSpellFromList(spellResults, spell)
+                        RemoveSpellFromList(spellResults, spell.From)
+                        AddSpellToList(spellResults, spell.To)
                     end
                 end
                 if spells then
@@ -473,6 +479,7 @@ local function GatherSpells(entity)
     local progressions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
     local progressionTables = {}
     for _,progressionId in ipairs(progressions) do
+        ---@type ResourceProgression
         local progression = Ext.StaticData.Get(progressionId, Ext.Enums.ExtResourceManagerType.Progression)
         local pTable = progressionTables[progression.TableUUID]
         if not pTable then
@@ -496,6 +503,7 @@ local function GatherSpells(entity)
         local ids = { classId, classInfo.SubClass}
         for _, id in ipairs(ids) do
             if id and IsValidGuid(id) then
+                ---@type ResourceClassDescription
                 local class = Ext.StaticData.Get(classId, Ext.Enums.ExtResourceManagerType.ClassDescription)
                 local progressionId = class.ProgressionTableUUID
                 if IsValidGuid(progressionId) then
@@ -513,6 +521,7 @@ local function GatherSpells(entity)
     end
 
     -- Add information from the E6 Feats
+    ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats ~= nil then
         for _, feat in ipairs(e6Feats) do
@@ -537,9 +546,23 @@ local function GatherSpells(entity)
     return result
 end
 
+---Whether the current player id is for the host.
+---@param playerId GUIDSTRING The player id to check if they are the host
+---@return boolean Whether the current character is the host
+local function IsHost(playerId)
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
+        if entity.UserReservedFor.UserID == 65537 and entity.Uuid.EntityUuid == playerId then
+            return true
+        end
+    end
+
+    return false
+end
+
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
 local function OnEpic6FeatSelectorSpell(caster)
+    ---@type EntityHandle
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
@@ -548,16 +571,19 @@ local function OnEpic6FeatSelectorSpell(caster)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
 
+    ---@type PlayerInformationType
     local message = {
-        PlayerId = caster,
-        PlayerName = charname,
+        ID = caster,
+        Name = charname,
         PlayerFeats = playerFeats,
         PlayerPassives = GatherPlayerPassives(ent),
         SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
         Spells = spells, -- The mapping of class to spell list.
-        ProficiencyBonus = ent.Stats.ProficiencyBonus -- to show skill bonuses
+        ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
+        XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
+        IsHost = IsHost(ent.Uuid.EntityUuid)
     }
 
     local str = Ext.Json.Stringify(message)

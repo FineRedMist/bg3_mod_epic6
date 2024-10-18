@@ -19,9 +19,10 @@ local function ShouldSkipProperty(skipProperties, property)
 end
 
 ---Converts the passed in object such that all userdata is converted to a table of its members (best effort).
----@param obj any
----@return any
-function E6_ConvertUserData(obj, skipProperties)
+---@param obj any An object to convert to json.
+---@param skipProperties string[] The list of properties to skip
+---@return any The converted object or nil
+local function E6_ConvertUserData(obj, skipProperties)
     if obj == nil then
         return nil
     end
@@ -69,7 +70,7 @@ function E6_ConvertUserData(obj, skipProperties)
                 index = index + 1
             end
         end
-        
+
         local function ProcessMember(k, v)
             if v then
                 if ShouldSkipProperty(skipProperties, k) then
@@ -153,13 +154,15 @@ end
 ---@param skipProperties string[] -- Properties to skip
 ---@return string -- The converted object as a JSON string
 function E6_ToJson(obj, skipProperties)
-    _E6P("Converting character data!")
+    _E6P("Converting data to lua objects...")
     local userdata = E6_ConvertUserData(obj, skipProperties)
 	local opts = {
 		MaxDepth = 256
 	}
-    _E6P("Generating Json!")
-    return Ext.Json.Stringify(userdata, opts)
+    _E6P("Converting lua object to a json string...")
+    local result = Ext.Json.Stringify(userdata, opts)
+    _E6P("Json conversion complete.")
+    return result
 end
 
 ---Converts the passed in object such that all userdata is converted to a table of its members (best effort).
@@ -169,137 +172,7 @@ end
 function E6_ToFile(obj, filename, skipProperties)
     local json = E6_ToJson(obj, skipProperties)
     Ext.IO.SaveFile(filename, json)
-end
-
----Converts the passed in object such that all userdata is converted to a table of its members (best effort).
----@param obj any -- The object to convert
----@param filename string -- The filename to write the JSON to
----@param skipProperties string[] -- Properties to skip
-function E6_ToFile_Fast(obj, filename, skipProperties)
-    _E6P("Converting character data!")
-    local userdata = E6_ConvertUserData(obj, skipProperties)
-    _E6P("Writing character data!")
-    local fileWriter = Ext.IO.OpenWriter(filename)
-
-    local lastCharIsNewline = false
-
-    ---Writes a value to the file, and tracks if the last character was a newline
-    ---@param value string|number|boolean
-    local function fileWriterProxy(value)
-        if type(value) ~= "string" then
-            fileWriter(value)
-            lastCharIsNewline = false
-        end
-        if string.len(value) == 0 then
-            return
-        end
-        local first = string.sub(value, 1, 1)
-        while lastCharIsNewline and string.len(value) > 0 and first == "\n" do
-            value = string.sub(value, 2)
-            first = string.sub(value, 1, 1)
-        end
-        if string.len(value) > 0 then
-            fileWriter(value)
-            local last = string.sub(value, string.len(value), 1)
-            lastCharIsNewline = last == "\n"
-        end
-    end
-
-    local writeMap = {}
-
-    local write = function(indent, value)
-        local valueType = type(value)
-        local writeFunction = writeMap[valueType]
-        if writeFunction then
-            writeFunction(indent, value)
-        else
-            _E6Error("Unsupported type: " .. valueType)
-        end
-    end
-    local writeIndent = function(indent)
-        if indent > 0 then
-            fileWriterProxy(string.rep("\t", indent))
-        end
-    end
-
-    local writeNull = function(indent, value)
-        fileWriterProxy("null")
-    end
-    local writeRaw = function(indent, value)
-        fileWriterProxy(value)
-    end
-    local writeString = function(indent, value)
-        local newValue = string.gsub(value, "\\", "\\\\")
-        newValue = string.gsub(newValue, "\"", "\\\"")
-        fileWriterProxy("\"", newValue, "\"")
-    end
-
-    local writeTable = function(indent, value)
-        -- determine if we are empty, an array, or a map
-        local firstKey = next(value)
-        if firstKey == nil then
-            writeRaw(indent, "[]") -- default is to assume an array
-            return
-        end
-
-        if type(firstKey) == "number" then
-            writeRaw(0, "\n")
-            writeIndent(indent)
-            writeRaw(0, "[\n")
-            local len = #value
-            for i, v in ipairs(value) do
-                writeIndent(indent + 1)
-                write(indent + 1, v)
-                if i < len then
-                    fileWriterProxy(",\n")
-                else
-                    fileWriterProxy("\n")
-                end
-            end
-            writeIndent(indent)
-            writeRaw(indent, "]")
-        else
-            writeRaw(0, "\n")
-            writeIndent(indent)
-            writeRaw(0, "{\n")
-            -- get the keys, sort them, then iterate in order
-            local keys = {}
-            for k, _ in pairs(value) do
-                table.insert(keys, k)
-            end
-
-            table.sort(keys, function(a, b)
-                return string.lower(a) < string.lower(b)
-            end)
-
-            local len = #keys
-            for i, k in ipairs(keys) do
-                local v = value[k]
-                writeIndent(indent + 1)
-                write(indent + 1, k)
-                fileWriterProxy(" : ")
-                write(indent + 1, v)
-                if i < len then
-                    fileWriterProxy(",\n")
-                else
-                    fileWriterProxy("\n")
-                end
-            end
-            writeIndent(indent)
-            writeRaw(indent, "}")
-        end
-    end
-
-    writeMap = {
-        ["string"] = writeString,
-        ["number"] = writeRaw,
-        ["boolean"] = writeRaw,
-        ["nil"] = writeNull,
-        ["table"] = writeTable
-    }
-
-    write(0, userdata)
-    _E6P("Character saved!")
+    _E6P("Json data saved to " .. filename .. ".")
 end
 
 userdataMembers = {

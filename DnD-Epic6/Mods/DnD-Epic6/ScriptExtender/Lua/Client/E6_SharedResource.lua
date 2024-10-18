@@ -1,4 +1,4 @@
---- @class SharedResource
+--- @class SharedResource A resource shared between multiple options to determine when the resource still has pending choices or is completely consumed.
 --- @field count number The current count of the shared resource.
 --- @field capacity number The initial count of the shared resource.
 --- @field callbacks function[] The callbacks to be executed when the shared resource changes.
