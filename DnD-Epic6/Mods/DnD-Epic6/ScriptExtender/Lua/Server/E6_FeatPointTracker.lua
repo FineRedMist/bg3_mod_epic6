@@ -3,9 +3,13 @@
 FeatPointTracker = {}
 FeatPointTracker.__index = FeatPointTracker
 
+---@class CharacterFeatPoints The current tracking of adjusting feat points for a character.
+---@field LastCount integer The next target total for the feat points.
+---@field Pending integer The number of feat points pending to be granted.
+
 ---@type table<GUIDSTRING, boolean> The mapping of character ID to character point tracker.
 local IsRespecing = {}
----@type table<GUIDSTRING, integer> The mapping of character ID to how many feat points the character is expected to have been granted.
+---@type table<GUIDSTRING, CharacterFeatPoints> The mapping of character ID to how many feat points the character is expected to have been granted.
 local PendingFeatPoints = {}
 ---@type table<GUIDSTRING, integer> The mapping of character ID to tick wait to test pending points are granted.
 local PendingTickWait = {}
@@ -168,22 +172,22 @@ end
 
 ---comment
 ---@param id GUIDSTRING
----@param val number?
+---@param val CharacterFeatPoints?
 local function SetPendingFeatCount(id, val)
     PendingFeatPoints[id] = val
     PendingTickWait[id] = 5
 end
 
 
-local function UpdateFeatGrantingSpell(id, charName, targetFeatCount)
+local function UpdateFeatGrantingSpell(id, charName, currentFeatPointCount)
     local hasSpell = HasFeatGrantingSpell(id)
     --_E6P("Character " .. charName .. " has feat granting spell: " .. tostring(hasSpell) .. ", target feat count: " .. tostring(targetFeatCount))
-    if targetFeatCount >= 1 and not hasSpell then
-        _E6P("Character " .. charName .. " is adding spell " .. EpicSpellContainerName)
+    if currentFeatPointCount >= 1 and not hasSpell then
+        _E6P("Character " .. charName .. ": adding spell " .. EpicSpellContainerName)
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
         SetPendingFeatCount(id)
-    elseif targetFeatCount < 1 and hasSpell then -- Remove the spell if we have no feats to grant.
-        _E6P("Character " .. charName .. " is removing spell " .. EpicSpellContainerName)
+    elseif currentFeatPointCount < 1 and hasSpell then -- Remove the spell if we have no feats to grant.
+        _E6P("Character " .. charName .. ": removing spell " .. EpicSpellContainerName)
         Osi.RemoveSpell(id, EpicSpellContainerName, 0)
         SetPendingFeatCount(id)
     end
@@ -237,28 +241,43 @@ function FeatPointTracker:Update(ent)
     end
 
     local epic6FeatXP = self:GetEpicFeatXP()
-    local targetFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
+    -- Number of feats and feat points we should have.
+    local totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
 
+    -- Number of feat points used in feats.
     local usedFeatCount = E6_GetUsedFeatCount(ent)
+    -- Number of reat points we have.
     local currentFeatPointCount = E6_GetFeatPointBoostAmount(id)
-    local totalGrantedFeatCount = currentFeatPointCount + usedFeatCount
-    local deltaFeatCount = targetFeatCount - totalGrantedFeatCount
+    local currentFeatCount = currentFeatPointCount + usedFeatCount
+    local deltaFeatCount = totalFeatCount - currentFeatCount
+    local targetFeatPointCount = currentFeatPointCount + deltaFeatCount
+    if targetFeatPointCount < 0 then
+        targetFeatPointCount = 0
+    end
 
-    UpdateFeatGrantingSpell(id, charName, targetFeatCount)
+    UpdateFeatGrantingSpell(id, charName, targetFeatPointCount)
 
     -- If we have caught up from the total feat count expected to the amount granted, we are done.
-    if deltaFeatCount == 0 then
+    -- We can't bring the feat point count below zero, so don't bother.
+    if (deltaFeatCount < 0 and currentFeatPointCount == 0) or deltaFeatCount == 0 then
         PendingFeatPoints[id] = nil
-    elseif targetFeatCount == 0 then
+    elseif targetFeatPointCount <= 0 then
         -- If we have no feats to grant, we should remove all the feat points.
         _E6P("Update for " .. charName .. ": removing all points")
         RemoveAllFeatPoints(id)
         SetPendingFeatCount(id)
     else
-        local pending = PendingFeatPoints[id]
-        if pending == nil then
-            pending = 0
+        local pending = 0
+        if PendingFeatPoints[id] then
+            pending = PendingFeatPoints[id].Pending
+            -- If we got the expected amount of feat points (or something odd happened), then reset the pending count.
+            if currentFeatPointCount ~= PendingFeatPoints[id].LastCount then
+                pending = 0
+            end
+            -- Otherwise, we assume the previous grant was still pending, and just do some of the remaining amount.
+            PendingFeatPoints[id] = nil
         end
+
         -- Only grant half the remaining feats per tick.
         local difference = deltaFeatCount - pending
         local toAdjust = math.ceil(difference / 2)
@@ -266,10 +285,12 @@ function FeatPointTracker:Update(ent)
             toAdjust = difference
         end
 
-        _E6P("Update for " .. charName .. ": TargetFeatCount: " .. tostring(targetFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatPointCount: " .. tostring(currentFeatPointCount) .. ", DeltaFeatPointCount: " .. tostring(deltaFeatCount) .. ", adjusting by: " .. tostring(toAdjust))
+        if toAdjust ~= 0 then
+            _E6P("Update for " .. charName .. ": TargetFeatCount: " .. tostring(totalFeatCount) .. ", UsedFeatCount: " .. tostring(usedFeatCount) .. ", CurrentFeatPointCount: " .. tostring(currentFeatPointCount) .. ", DeltaFeatPointCount: " .. tostring(deltaFeatCount) .. ", adjusting by: " .. tostring(toAdjust))
 
-        AdjustFeatPoints(id, toAdjust)
-        SetPendingFeatCount(id, toAdjust)
+            AdjustFeatPoints(id, toAdjust)
+            SetPendingFeatCount(id, {LastCount = currentFeatPointCount, Pending = toAdjust})
+        end
     end
 end
 
