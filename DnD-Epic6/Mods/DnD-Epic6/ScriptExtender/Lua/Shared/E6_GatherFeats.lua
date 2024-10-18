@@ -54,7 +54,7 @@ local function E6_ApplySelectAbilityRequirement(feat)
         ---@type ResourceAbilityList
         local abilityList = Ext.StaticData.Get(ability.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
         if not abilityList then
-            _E6Error("Failed to retrieve the ability list for feat " .. feat.ShortName .. " from source " .. ability.SourceId)
+            _E6Error("Failed to retrieve the ability list for feat " .. feat.ShortName .. " from source " .. ability.SourceId .. ", it will be filtered.")
             E6_AddFeatRequirement(feat, E6_MatchFailure(feat, nil))
             return
         end
@@ -203,11 +203,16 @@ end
 ---Gathers any ability modifiers from the passive ability boosts.
 ---Note: This will be used for both feats and for passives listed in the passive list for selection. 
 ---@param passiveName string Name of the passive to gather the ability modifiers from. 
----@return table<string,number> A mapping of ability name to delta value.
+---@return table<string,number>? A mapping of ability name to delta value.
 local function GatherPassiveAbilityModifiers(passiveName)
     local result = {}
     ---@type PassiveData Data for the passive
     local passive = Ext.Stats.Get(passiveName, -1, true, true)
+    --There is a passive in the list we can't get data for, indicate it is invalid and filter it out.
+    if not passive then
+        _E6Error("Failed to retrieve the passive " .. passiveName .. " for the feat. It will be filtered.")
+        return nil
+    end
     if passive and passive.Boosts then
         local boosts = SplitString(passive.Boosts, ";")
         for _,boost in ipairs(boosts) do
@@ -241,9 +246,18 @@ end
 ---@param feat FeatType The feat to test against
 local function E6_ApplyFeatAbilityConstraints(feat)
     local abilityBoosts = {}
+    local isValid = true
     for _,passiveName in ipairs(feat.PassivesAdded) do
         local passiveBoosts = GatherPassiveAbilityModifiers(passiveName)
-        MergeAbilityBoosts(abilityBoosts, passiveBoosts)
+        if passiveBoosts then
+            MergeAbilityBoosts(abilityBoosts, passiveBoosts)
+        else
+            isValid = false
+        end
+    end
+    if not isValid then
+        E6_AddFeatRequirement(feat, E6_MatchFailure(feat, nil))
+        return
     end
     if next(abilityBoosts) ~= nil then
         local function validateAbilityBoosts(entity, playerInfo)
