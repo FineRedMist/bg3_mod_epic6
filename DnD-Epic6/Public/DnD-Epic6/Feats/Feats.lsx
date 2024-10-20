@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+  <version major="4" minor="0" revision="9" build="322"/>
+  <region id="Feats">
+    <node id="root">
+      <children>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_ProficiencyBonus"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_ProficiencyBonus_Passive"/>
+          <attribute id="UUID" type="guid" value="623a5c6f-71eb-46be-b253-8bc977faece9"/>
+          <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
+        </node>
+      </children>
+    </node>
+  </region>
+</save>

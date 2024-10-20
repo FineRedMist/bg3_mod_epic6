@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased to 4.</content>
+	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic Proficiency Bonus</content>
+	<content contentuid="h6f4a6e38g074eg4717g949cga847c9fa7cc2" version="1">You have reached max level and can select feats as you earn more experience!</content>
+	<content contentuid="h55b3cc22g6c3eg468dg807ag42e9300ff0f7" version="1">Epic Character</content>
 	<content contentuid="hf2b3a061gbf90g48cbg8defg30ec6aef6159" version="1">Saves the amount of XP per feat to the save game.</content>
 	<content contentuid="h21681079gab67g4ea5ga4dfg88f40d38818a" version="1">Save</content>
 	<content contentuid="hcbbf8d49g36fbg496bga9beg275c367f94c0" version="1">The amount of experience required to earn a feat. The change is not committed until Save is clicked.</content>
