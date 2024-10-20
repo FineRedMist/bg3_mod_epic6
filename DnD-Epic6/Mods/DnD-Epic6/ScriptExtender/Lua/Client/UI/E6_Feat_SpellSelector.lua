@@ -7,28 +7,74 @@
 ---@field Description string The description of the spell.
 ---@field Icon string The icon of the spell.
 
-
----@param unlockSpell SelectSpellInfoUIType
----@param playerInfo PlayerInformationType Information about the player to alter the spell selector.
-local function CanSelectSpell(unlockSpell, playerInfo)
-    -- If the spells id group the spell is coming from comes from a set I have added, I can't select the spell again.
-    if playerInfo.Spells.Added[unlockSpell.SpellsId] then
-        return false
+---Checks the player's grant map for either added or selected spells to determine if the spell can be selected.
+---To be denied granting, the spell must match the resource and ability of the spell grant.
+---@param grantMap SpellGrantMapType The mapping of added or selected spells to their grant information.
+---@param spell SelectSpellInfoUIType The spell to check for.
+local function CanSelectFromSpellGrant(grantMap, spell)
+    if not grantMap then
+        return true
     end
-    local playerSelected = playerInfo.Spells.Selected[unlockSpell.SpellsId]
-    if playerSelected then
-        for spellId,_ in pairs(playerSelected) do
-            if spellId == unlockSpell.SpellId then
-                return false
-            end
+    local grantInfo = grantMap[spell.SpellId]
+    if not grantInfo then
+        return true
+    end
+    for _,spellGrant in ipairs(grantInfo) do
+        if spellGrant.ResourceId == spell.ActionResource and spellGrant.AbilityId == spell.Ability then
+            return false
         end
     end
     return true
 end
 
----@param cell ExtuiTableCell
----@param sharedResource SharedResource
----@param unlockSpell SelectSpellInfoUIType
+---A mapping of spell list ids to the corresponding spells in the list.
+---@type table<GUIDSTRING,table<GUIDSTRING,boolean>>
+local spellListMap = {}
+
+---Determines if the spell list contains the given spell id.
+---@param spellList GUIDSTRING The ID of the list.
+---@param spellId GUIDSTRING The spell ID to query for.
+---@return boolean True if the spell list contains the spell, false otherwise.
+local function SpellListContainsSpell(spellList, spellId)
+    if not spellListMap[spellList] then
+        spellListMap[spellList] = {}
+        ---@type ResourceSpellList
+        local spells = Ext.StaticData.Get(spellList, Ext.Enums.ExtResourceManagerType.SpellList)
+        if spells then
+            for _,spell in ipairs(spells.Spells) do
+                spellListMap[spellList][spell] = true
+            end
+        end
+    end
+    return spellListMap[spellList][spellId]
+end
+
+---Determines if the player can select the spell.
+---@param unlockSpell SelectSpellInfoUIType The spell to unlock.
+---@param playerInfo PlayerInformationType Information about the player to alter the spell selector.
+local function CanSelectSpell(unlockSpell, playerInfo)
+    for spellsId,spellGrantInfo in pairs(playerInfo.Spells.Added) do
+        for _,spellGrant in ipairs(spellGrantInfo) do
+            if spellGrant.ResourceId == unlockSpell.ActionResource and spellGrant.AbilityId == unlockSpell.Ability then
+                if SpellListContainsSpell(spellsId, unlockSpell.SpellId) then
+                    return false
+                end
+            end
+        end
+    end
+
+    for _,spellGrant in pairs(playerInfo.Spells.Selected) do
+        if not CanSelectFromSpellGrant(spellGrant, unlockSpell) then
+            return false
+        end
+    end
+    return true
+end
+
+---Adds a spell button to the UI. The button will be disabled if the spell cannot be selected.
+---@param cell ExtuiTableCell The cell to add the button to.
+---@param sharedResource SharedResource The shared resource for selecting the spell.
+---@param unlockSpell SelectSpellInfoUIType The spell to unlock.
 local function AddSpellButton(cell, sharedResource, unlockSpell)
     local icon = cell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
     AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description)

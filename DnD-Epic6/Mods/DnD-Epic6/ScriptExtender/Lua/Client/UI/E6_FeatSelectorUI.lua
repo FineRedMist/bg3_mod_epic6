@@ -25,10 +25,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local windowDimensions = {1000, 1450}
     if not featDetailUI then
         featDetailUI = Ext.IMGUI.NewWindow("FeatDetailsWindow")
-        featDetailUI.Closeable = true
-        featDetailUI.NoMove = true
-        featDetailUI.NoResize = true
-        featDetailUI.NoCollapse = true
     end
 
     featDetailUI.Label = feat.DisplayName
@@ -112,10 +108,25 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             end
         end
 
+        ---@type SpellGrantMapType The added spells for the feat.
+        local featAddSpellInfo = {}
+        for _, addSpells in ipairs(feat.AddSpells) do
+            featAddSpellInfo[addSpells.SpellsId] = {SourceId = feat.ID, ResourceId = addSpells.ActionResource, AbilityId = addSpells.Ability}
+        end
+
+        ---A mapping of spell list id to the spells granted for that list.
+        ---@type table<string, SpellGrantMapType>
+        local featSelectedSpellInfo = {}
         for _, spellGroup in ipairs(selectedSpells) do
             for _, spell in ipairs(spellGroup) do
                 if spell.IsSelected then
-                    table.insert(boosts, MakeBoost_UnlockSpell(spell, not spell.IsCantrip))
+                    for _,unlock in ipairs(MakeBoost_UnlockSpell(spell, not spell.IsCantrip)) do
+                        table.insert(boosts, unlock)
+                    end
+                    if featSelectedSpellInfo[spell.SpellsId] == nil then
+                        featSelectedSpellInfo[spell.SpellsId] = {}
+                    end
+                    featSelectedSpellInfo[spell.SpellsId][spell.SpellId] = { SourceId = feat.ID, ResourceId = spell.ActionResource, AbilityId = spell.Ability }
                 end
             end
         end
@@ -135,7 +146,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             Feat = {
                 FeatId = feat.ID,
                 PassivesAdded = passivesForFeat,
-                Boosts = boosts
+                Boosts = boosts,
+                AddedSpells = featAddSpellInfo,
+                SelectedSpells = featSelectedSpellInfo
             }
         }
         local payloadStr = Ext.Json.Stringify(payload)
@@ -263,19 +276,21 @@ end
 ---@return ExtuiWindow The window to display.
 local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     if featUI then
-        SetWindowTitle(playerInfo)
         E6_CloseFeatDetailsUI() -- Close the detail window if it's open so it doesn't get used.
-        return featUI
+    else
+        featUI = Ext.IMGUI.NewWindow("FeatSelector")
+        featUI.OnClose = E6_CloseFeatDetailsUI
     end
-    featUI = Ext.IMGUI.NewWindow("FeatSelector")
+
     SetWindowTitle(playerInfo)
+
     featUI.Closeable = true
     featUI.NoMove = true
     featUI.NoResize = true
     featUI.NoCollapse = true
     featUI:SetSize(ScaleToViewport(windowDimensions))
     featUI:SetPos(ScaleToViewport({800, 100}))
-    featUI.OnClose = E6_CloseFeatDetailsUI
+
     return featUI
 end
 

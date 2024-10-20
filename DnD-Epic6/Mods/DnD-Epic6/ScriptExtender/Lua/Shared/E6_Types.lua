@@ -72,9 +72,16 @@
 ---@field SavingThrows table<string, boolean> The mapping of saving throw names to whether the character is proficient in the saving throw.
 ---@field Equipment table<string, boolean> The mapping of equipment names to whether the character is proficient in the equipment.
 
+---@class SpellGrantInformationType The spell grant information for the player.
+---@field SourceId GUIDSTRING Where the spell was provided from (sometimes race, sometimes class, etc).
+---@field ResourceId GUIDSTRING The spellcasting resource for this spell/collection.
+---@field AbilityId AbilityId The ability ID (e.g. "Intelligence") for the spell.
+
+---@alias SpellGrantMapType table<string, SpellGrantInformationType[]> The mapping of spell or spell list ID to whether the spell group has been added.
+
 ---@class SelectedSpellsType The selected spells for the player.
----@field Added table<string, boolean> The mapping of spell list ID to whether the spell group has been added.
----@field Selected table<string, string[]> The mapping of spell list ID to the selected spells from that list.
+---@field Added SpellGrantMapType The mapping of spell list ID to whether the spell group has been added.
+---@field Selected table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
 ---@class PlayerInformationType Information about the player for determine what is legal to select for the feat.
 ---@field ID string The unique id of the player
@@ -97,6 +104,8 @@
 ---@field FeatId GUIDSTRING The GUID of the feat.
 ---@field PassivesAdded string[] The passives added by the feat.
 ---@field Boosts string[] The boosts added by the feat.
+---@field AddedSpells SpellGrantMapType The mapping of spell list ID to spell grant information.
+---@field SelectedSpells table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
 ---@class SelectedFeatPayloadType The selected feat payload to send to the server.
 ---@field PlayerId string The player id for the feat.

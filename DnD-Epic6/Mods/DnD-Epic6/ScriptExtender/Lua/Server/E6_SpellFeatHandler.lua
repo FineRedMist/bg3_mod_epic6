@@ -391,7 +391,11 @@ local function GatherProficiencies(entity)
     return proficiencies
 end
 
+---Gathers spells for the player
+---@param entity EntityHandle
+---@return table
 local function GatherSpells(entity)
+    ---@type SelectedSpellsType
     local result = { Added = {}, Selected = {} }
     local cc = entity.CCLevelUp
     if not cc then
@@ -400,6 +404,17 @@ local function GatherSpells(entity)
     local levelUps = cc.LevelUps
     if not levelUps then
         return result
+    end
+
+    ---@type SpellGrantMapType -- Maps the source id to the grant info
+    local sourceGrantMap = {}
+
+    -- Gather the spell grant info
+    for _, spell in ipairs(entity.SpellContainer.Spells) do
+        local spellId = spell.SpellId
+        if spellId and not sourceGrantMap[spellId.ProgressionSource] then
+            sourceGrantMap[spellId.ProgressionSource] = {SourceId = spellId.ProgressionSource, ResourceId = spell.PreferredCastingResource, AbilityId =spell.SpellCastingAbility.Label}
+        end
     end
 
     local function GetSpellResultList(listId)
@@ -411,12 +426,43 @@ local function GatherSpells(entity)
         return spellResults
     end
 
-    local function RemoveSpellFromList(resultList, spellName)
-        resultList[spellName] = nil
+    local function GrantsEqual(a, b)
+        return a.SourceId == b.SourceId and a.ResourceId == b.ResourceId and a.AbilityId == b.AbilityId
     end
 
-    local function AddSpellToList(resultList, spellName)
-        resultList[spellName] = true
+    ---comment
+    ---@param resultList SpellGrantMapType
+    ---@param spellName string
+    ---@param sourceId GUIDSTRING
+    local function RemoveSpellFromList(resultList, spellName, sourceId)
+        local list = resultList[spellName]
+        local inGrant = sourceGrantMap[sourceId]
+        for i = #list, 1, -1 do
+            local curGrant = list[i]
+            if GrantsEqual(curGrant, inGrant) then
+                table.remove(list, i)
+                return
+            end
+        end
+    end
+
+    ---@param resultList SpellGrantMapType
+    ---@param spellName string
+    ---@param grantInfo SpellGrantInformationType
+    local function AddSpellGrantToList(resultList, spellName, grantInfo)
+        local list = resultList[spellName]
+        if not list then
+            list = {}
+            resultList[spellName] = list
+        end
+        list[#list+1] = grantInfo
+    end
+
+    ---@param resultList SpellGrantMapType
+    ---@param spellName string
+    ---@param sourceId GUIDSTRING
+    local function AddSpellToList(resultList, spellName, sourceId)
+        AddSpellGrantToList(resultList, spellName, sourceGrantMap[sourceId])
     end
 
     ---Adds the spell to the spellList, mapping class -> {classID, spells[]}
@@ -435,23 +481,25 @@ local function GatherSpells(entity)
             if IsValidGuid(list) then
                 local spells = spellData.Spells
                 local replaceSpells = spellData.ReplaceSpells
+                local sourceId = spellData.Class
                 if replaceSpells then
                     local spellResults = GetSpellResultList(list)
                     for _,spell in ipairs(replaceSpells) do
-                        RemoveSpellFromList(spellResults, spell.From)
-                        AddSpellToList(spellResults, spell.To)
+                        RemoveSpellFromList(spellResults, spell.From, sourceId)
+                        AddSpellToList(spellResults, spell.To, sourceId)
                     end
                 end
                 if spells then
                     local spellResults = GetSpellResultList(list)
                     for _,spell in ipairs(spells) do
-                        AddSpellToList(spellResults, spell)
+                        AddSpellToList(spellResults, spell, sourceId)
                     end
                 end
             end
         end
     end
 
+    -- Gather how many levels I have of each class
     local classInfos = {}
     ---@param levelup LevelUpData
     local function AddClassLevelUp(levelup)
@@ -477,6 +525,12 @@ local function GatherSpells(entity)
     -- Gather progression data to compare against the classes
     -- Group by TableUUID
     local progressions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
+
+    ---@class ProgressionSpellInfoType
+    ---@field Level integer The progression level
+    ---@field Added table<GUIDSTRING, SpellGrantInformationType> The spells added at this level
+
+    ---@type table<GUIDSTRING, ProgressionSpellInfoType[]>
     local progressionTables = {}
     for _,progressionId in ipairs(progressions) do
         ---@type ResourceProgression
@@ -486,11 +540,13 @@ local function GatherSpells(entity)
             pTable = {}
             progressionTables[progression.TableUUID] = pTable
         end
+
+        ---@type ProgressionSpellInfoType
         local progressionInfo = {Level = progression.Level, Added = {}}
         local addedSpells = progression.AddSpells
         local hasAdds = false
         for _, addSpell in ipairs(addedSpells) do
-            progressionInfo.Added[addSpell.SpellUUID] = true
+            progressionInfo.Added[addSpell.SpellUUID] = {SourceId = addSpell.ClassUUID, ResourceId = addSpell.ActionResource, AbilityId = addSpell.Ability.Label}
             hasAdds = true
         end
         if hasAdds then
@@ -502,7 +558,7 @@ local function GatherSpells(entity)
     for classId, classInfo in pairs(classInfos) do
         local ids = { classId, classInfo.SubClass}
         for _, id in ipairs(ids) do
-            if id and IsValidGuid(id) then
+            if IsValidGuid(id) then
                 ---@type ResourceClassDescription
                 local class = Ext.StaticData.Get(classId, Ext.Enums.ExtResourceManagerType.ClassDescription)
                 local progressionId = class.ProgressionTableUUID
@@ -510,8 +566,11 @@ local function GatherSpells(entity)
                     local pTable = progressionTables[progressionId]
                     for _, progressionInfo in ipairs(pTable) do
                         if progressionInfo.Level <= classInfo.Level then
-                            for spellId,_ in pairs(progressionInfo.Added) do
-                                result.Added[spellId] = true
+                            for spellId,grantInfo in pairs(progressionInfo.Added) do
+                                local grant = DeepCopy(grantInfo)
+                                result.Added[spellId] = grant
+                                grant.SourceId = classId
+                                grant.AbilityId = class.PrimaryAbility.Label
                             end
                         end
                     end
@@ -527,16 +586,16 @@ local function GatherSpells(entity)
         for _, feat in ipairs(e6Feats) do
             local addedSpells = feat.AddedSpells
             if addedSpells then
-                for _, listId in ipairs(addedSpells) do
-                    result.Added[listId] = true
+                for listId, grantInfo in pairs(addedSpells) do
+                    result.Added[listId] = grantInfo
                 end
             end
             local selectedSpells = feat.SelectedSpells
             if selectedSpells then
                 for listId, spells in pairs(selectedSpells) do
                     local spellResults = GetSpellResultList(listId)
-                    for _,spell in ipairs(spells) do
-                        AddSpellToList(spellResults, spell)
+                    for spellId,grantInfo in pairs(spells) do
+                        AddSpellGrantToList(spellResults, spellId, grantInfo)
                     end
                 end
             end
@@ -587,14 +646,15 @@ local function OnEpic6FeatSelectorSpell(caster)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
+    local passives = GatherPlayerPassives(ent)
 
     ---@type PlayerInformationType
     local message = {
         ID = caster,
         Name = charname,
         PlayerFeats = playerFeats,
-        PlayerPassives = GatherPlayerPassives(ent),
-        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies }),
+        PlayerPassives = passives,
+        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies, PlayerPassives = passives }),
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
         Spells = spells, -- The mapping of class to spell list.
