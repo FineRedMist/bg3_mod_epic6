@@ -43,6 +43,7 @@ end
 ---@param entityId string The UUID identity of the character.
 ---@param feats SelectedFeatType[] A list of feat blocks as stored in Vars.E6_Feats.
 function E6_RemoveFeats(entityId, feats)
+    _E6P("Removing feats from " .. entityId)
     for _,feat in ipairs(feats) do
         E6_RemoveFeat(entityId, feat)
     end
