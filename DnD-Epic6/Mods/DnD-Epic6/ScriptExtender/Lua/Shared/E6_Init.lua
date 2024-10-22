@@ -15,8 +15,6 @@ local function OnStatsLoaded_RedirectXPFiles()
 
     Ext.IO.AddPathOverride("Public/SharedDev/Stats/Generated/Data/Data.txt", "Public/DnD-Epic6/Stats/Generated/Data/Data.txt")
     Ext.IO.AddPathOverride("Public/SharedDev/Stats/Generated/Data/XPData.txt", "Public/DnD-Epic6/Stats/Generated/Data/XPData.txt")
-
-    E6_GatherFeats() -- Precache this--it takes a bit of time
 end
 
 local function DnDEpic6Init()
