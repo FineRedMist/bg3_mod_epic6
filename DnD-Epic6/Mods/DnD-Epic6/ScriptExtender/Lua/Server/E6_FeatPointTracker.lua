@@ -15,30 +15,23 @@ local PendingFeatPoints = {}
 local PendingTickWait = {}
 
 ---There are two ways to manipulate the feat points, by the ApplyStatus which lingers forever, or by boosts.
----I'm switching to boosts as it seems more straightforward to maintain, but I have to clear the old data.
----I do this on load from every save, once per character.
-local UseBoosts = true
-local FeatPointBoostName = "ActionResource(FeatPoint,1,0)"
+---With boosts, the bost itself disappears from the character on save/load, but the effect remains.
+---With passives, the passives stick, making them easier to remove. Using passives (but cleaning up any data)
+---from the boost system.
+local RemoveFeatPointBoostName = "ActionResource(FeatPoint,-1,0)"
 local EpicCharacterPassive = "E6_Epic_EpicCharacter_Passive"
+local FeatPointSourceId = "623a5c6f-71eb-46be-b253-8bc977faece9"
 
 ---Adds a feat point for the character
 ---@param id GUIDSTRING
 local function AddFeatPoint(id)
-    if UseBoosts then
-        Osi.AddBoosts(id, FeatPointBoostName, "E6_FeatPoints", id)
-    else
-        Osi.ApplyStatus(id, "E6_FEAT_GRANTFEATPOINT", -1, -1, id)
-    end
+    Osi.ApplyStatus(id, "E6_FEAT_GRANTFEATPOINT", -1, -1, FeatPointSourceId)
 end
 
 ---Removes a feat point for the character
 ---@param id GUIDSTRING
 local function RemoveFeatPoint(id)
-    if UseBoosts then
-        Osi.RemoveBoosts(id, FeatPointBoostName, 1, "E6_FeatPoints", id)
-    else
-        Osi.ApplyStatus(id, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, id)
-    end
+    Osi.ApplyStatus(id, "E6_FEAT_CONSUMEFEATPOINT", -1, -1, FeatPointSourceId)
 end
 
 ---Adjusts the feat points for the character by amount (negative or positive).
@@ -57,9 +50,17 @@ end
 ---@param id GUIDSTRING
 local function RemoveAllFeatPoints(id)
     -- We can do both paths without an issue.
-    Osi.RemoveBoosts(id, FeatPointBoostName, 0, "E6_FeatPoints", id)
+    Osi.RemoveStatus(id, "E6_FEAT_GRANTFEATPOINT", FeatPointSourceId)
+    Osi.RemoveStatus(id, "E6_FEAT_CONSUMEFEATPOINT", FeatPointSourceId)
+    -- We used to use the character id as the source, make sure any lingering points from that are removed, too.
     Osi.RemoveStatus(id, "E6_FEAT_GRANTFEATPOINT", id)
     Osi.RemoveStatus(id, "E6_FEAT_CONSUMEFEATPOINT", id)
+    -- Remove any that were granted using boosts.
+    for i = 1, E6_GetFeatPointBoostAmount(id) do
+        -- We do an add boosts with a negative to subtract the value in the boost.
+        -- The boost itself will disappear on save/load, but the change in action points remains.
+        Osi.AddBoosts(id, RemoveFeatPointBoostName, "E6_FeatPoints", FeatPointSourceId)
+    end
 end
 
 ---@type table<GUIDSTRING, boolean> The mapping of character ID to whether the character has had their feat points wiped.
@@ -67,6 +68,10 @@ local PointsWiped = {}
 local function InitialPointWipe(id)
     if not PointsWiped[id] then
         RemoveAllFeatPoints(id)
+        local entity = Ext.Entity.Get(id)
+        if entity.Vars.E6_Feats then
+            E6_VerifyFeats(id, entity.Vars.E6_Feats)
+        end
         PointsWiped[id] = true
         return true
     end
@@ -284,6 +289,11 @@ function FeatPointTracker:Update(ent)
     end
 
     local id = ent.Uuid.EntityUuid
+    
+    if IsRespecing[id] then
+        return
+    end
+    
     if ShouldWaitForLaterTick(id) then
         return
     end
