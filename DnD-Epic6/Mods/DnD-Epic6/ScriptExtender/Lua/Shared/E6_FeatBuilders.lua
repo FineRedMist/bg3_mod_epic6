@@ -26,3 +26,40 @@ function MakeBoost_UnlockSpell(spell, makeMultiuseSpells)
     end
     return list
 end
+
+---Generates the passive to add for a given ability.
+---@param ability AbilityId The ability to boost
+---@return string? The passive to add.
+function GetAbilityBoostPassive(ability)
+    if ~AbilitySkillMap[ability] then
+        _E6Error("Invalid ability passed to GetAbilityBoostPassive: " .. ability)
+        return nil
+    end
+    local upper = string.upper(ability)
+    return "E6_FEAT_ABILITY_" .. upper
+end
+
+---Generates the passive to grant proficiency for a skill.
+---@param skill SkillId The skill to grant proficiency
+---@return string? The passive to add.
+function GetProficiencyBoostPassive(skill)
+    if ~SkillLoca[skill] then
+        _E6Error("Invalid skill passed to GetProficiencyBoostPassive: " .. skill)
+        return nil
+    end
+    local upper = string.upper(skill)
+    return "E6_FEAT_SKILL_PROFICIENCY_" .. upper
+end
+
+---Generates the passive to grant expertise for a skill.
+---@param skill SkillId The skill to grant expertise
+---@return string? The passive to add.
+function GetExpertiseBoostPassive(skill)
+    if ~SkillLoca[skill] then
+        _E6Error("Invalid skill passed to GetExpertiseBoostPassive: " .. skill)
+        return nil
+    end
+    local upper = string.upper(skill)
+    return "E6_FEAT_SKILL_EXPERTISE_" .. upper
+end
+
