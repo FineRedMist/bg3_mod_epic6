@@ -413,7 +413,7 @@ local function GatherSpells(entity)
     for _, spell in ipairs(entity.SpellContainer.Spells) do
         local spellId = spell.SpellId
         if spellId and not sourceGrantMap[spellId.ProgressionSource] then
-            sourceGrantMap[spellId.ProgressionSource] = {SourceId = spellId.ProgressionSource, ResourceId = spell.PreferredCastingResource, AbilityId =spell.SpellCastingAbility.Label}
+            sourceGrantMap[spellId.ProgressionSource] = {SourceId = spellId.ProgressionSource, ResourceId = spell.PreferredCastingResource, AbilityId = spell.SpellCastingAbility.Label, PrepareType = spell.LearningStrategy, CooldownType = spell.CooldownType}
         end
     end
 
@@ -546,7 +546,7 @@ local function GatherSpells(entity)
         local addedSpells = progression.AddSpells
         local hasAdds = false
         for _, addSpell in ipairs(addedSpells) do
-            progressionInfo.Added[addSpell.SpellUUID] = {SourceId = addSpell.ClassUUID, ResourceId = addSpell.ActionResource, AbilityId = addSpell.Ability.Label}
+            progressionInfo.Added[addSpell.SpellUUID] = {SourceId = addSpell.ClassUUID, ResourceId = addSpell.ActionResource, AbilityId = addSpell.Ability.Label, CooldownType = addSpell.CooldownType, PrepareType = addSpell.PrepareType}
             hasAdds = true
         end
         if hasAdds then

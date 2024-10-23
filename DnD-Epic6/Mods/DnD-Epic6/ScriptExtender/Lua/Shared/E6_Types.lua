@@ -25,7 +25,6 @@
 
 ---@class SelectSpellBaseType
 ---@field SpellsId GUIDSTRING The GUID that maps to the selector list.
----@field SelectorId string? A string selector that provides information for the spell selection. I think it maps to the spellbook for listing details like Magic Initiate, but haven't figured it out yet.
 ---@field ActionResource string? The action resource to use for casting the spell.
 ---@field PrepareType SpellPrepareType? The type of preparation for the spell, may be blank.
 ---@field CooldownType SpellCooldownType? The cooldown type for the spell, may be blank.
@@ -76,6 +75,8 @@
 ---@field SourceId GUIDSTRING Where the spell was provided from (sometimes race, sometimes class, etc).
 ---@field ResourceId GUIDSTRING The spellcasting resource for this spell/collection.
 ---@field AbilityId AbilityId The ability ID (e.g. "Intelligence") for the spell.
+---@field PrepareType SpellPrepareType? The type of preparation for the spell, may be blank.
+---@field CooldownType SpellCooldownType? The cooldown type for the spell, may be blank.
 
 ---@alias SpellGrantMapType table<string, SpellGrantInformationType[]> The mapping of spell or spell list ID to whether the spell group has been added.
 
@@ -103,7 +104,6 @@
 ---@class SelectedFeatType The selected feat information to send to the server.
 ---@field FeatId GUIDSTRING The GUID of the feat.
 ---@field PassivesAdded string[] The passives added by the feat.
----@field Boosts string[] The boosts added by the feat.
 ---@field AddedSpells SpellGrantMapType The mapping of spell list ID to spell grant information.
 ---@field SelectedSpells table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
@@ -115,11 +115,15 @@
 -- Gathered Passive Information (client side only)
 -----------------------------------------------------------------------------------------------------------------------
 
+---@class ExtraPassivePassivesType The passives to apply as part of the extra passive.
+---@field Name string The name of the passive.
+---@field Count integer The number of times the passive needs to be applied.
+
 ---@class ExtraPassiveType The extra passive information to track on the client for UI
 ---@field DisplayName string The display name of the passive.
 ---@field Description string The description of the passive.
 ---@field Icon string The icon of the passive.
----@field Boost string The boost to apply for the passive.
+---@field Passive? ExtraPassivePassivesType[] The passives to apply as part of the extra passive.
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Setting XP Per Feat Messaging

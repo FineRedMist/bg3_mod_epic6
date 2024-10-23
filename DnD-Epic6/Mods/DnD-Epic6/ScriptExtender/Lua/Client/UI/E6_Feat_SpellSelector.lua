@@ -1,6 +1,5 @@
 
 ---@class SelectSpellInfoUIType : SelectSpellInfoType
----@field IsCantrip boolean Whether the spell is a cantrip.
 ---@field IsSelected boolean Whether the spell is enabled.
 ---@field CanSelect boolean Whether the spell can be selected (if you already have it, you can't select it again).
 ---@field DisplayName string The display name of the spell.
@@ -149,7 +148,6 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
             ---@type SelectSpellInfoUIType
             local unlockSpell = DeepCopy(selectSpells)
             unlockSpell.Level = spellStat.Level
-            unlockSpell.IsCantrip = spellStat.Level == 0
             unlockSpell.SpellId = spellId
             unlockSpell.IsSelected = false
             unlockSpell.DisplayName = spellStat.DisplayName

@@ -50,13 +50,6 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
                     ---@type SpellData The spell data.
                     local spellStat = Ext.Stats.Get(spellId, -1, true, true)
                     if spellStat then
-                        ---@type SelectSpellInfoType
-                        local unlockSpell = DeepCopy(addSpells)
-                        unlockSpell.SpellId = spellId
-                        unlockSpell.Level = spellStat.Level
-                        for _,spell in ipairs(MakeBoost_UnlockSpell(unlockSpell, false)) do
-                            table.insert(extraPassives, { Boost = spell })
-                        end
                         AddPassiveIcon(spellStat.DisplayName, spellStat.Description, spellStat.Icon)
                     end
                 end

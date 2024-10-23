@@ -388,7 +388,6 @@ end
 local function ProcessSpellBase(source)
     return {
         SpellsId = source.SpellUUID,
-        SelectorId = source.SelectorId,
         ActionResource = source.ActionResource,
         PrepareType = source.PrepareType.Label,
         CooldownType = source.CooldownType.Label

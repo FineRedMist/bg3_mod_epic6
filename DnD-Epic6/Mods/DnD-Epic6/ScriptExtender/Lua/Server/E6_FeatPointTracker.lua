@@ -14,11 +14,6 @@ local PendingFeatPoints = {}
 ---@type table<GUIDSTRING, integer> The mapping of character ID to tick wait to test pending points are granted.
 local PendingTickWait = {}
 
----There are two ways to manipulate the feat points, by the ApplyStatus which lingers forever, or by boosts.
----With boosts, the bost itself disappears from the character on save/load, but the effect remains.
----With passives, the passives stick, making them easier to remove. Using passives (but cleaning up any data)
----from the boost system.
-local RemoveFeatPointBoostName = "ActionResource(FeatPoint,-1,0)"
 local EpicCharacterPassive = "E6_Epic_EpicCharacter_Passive"
 local FeatPointSourceId = "623a5c6f-71eb-46be-b253-8bc977faece9"
 
@@ -55,24 +50,21 @@ local function RemoveAllFeatPoints(id)
     -- We used to use the character id as the source, make sure any lingering points from that are removed, too.
     Osi.RemoveStatus(id, "E6_FEAT_GRANTFEATPOINT", id)
     Osi.RemoveStatus(id, "E6_FEAT_CONSUMEFEATPOINT", id)
-    -- Remove any that were granted using boosts.
-    for i = 1, E6_GetFeatPointBoostAmount(id) do
-        -- We do an add boosts with a negative to subtract the value in the boost.
-        -- The boost itself will disappear on save/load, but the change in action points remains.
-        Osi.AddBoosts(id, RemoveFeatPointBoostName, "E6_FeatPoints", FeatPointSourceId)
-    end
 end
 
 ---@type table<GUIDSTRING, boolean> The mapping of character ID to whether the character has had their feat points wiped.
-local PointsWiped = {}
-local function InitialPointWipe(id)
-    if not PointsWiped[id] then
-        RemoveAllFeatPoints(id)
+local CharacterInitiated = {}
+---comment
+---@param id any
+---@return boolean Whether a wait is required for feat points to kick in.
+local function InitiateCharacter(id)
+    if not CharacterInitiated[id] then
+        --RemoveAllFeatPoints(id)
         local entity = Ext.Entity.Get(id)
         if entity.Vars.E6_Feats then
             E6_VerifyFeats(id, entity.Vars.E6_Feats)
         end
-        PointsWiped[id] = true
+        CharacterInitiated[id] = true
         return true
     end
     return false
@@ -213,14 +205,11 @@ end
 ---@param currentFeatPointCount integer The current feat point count for the character.
 local function UpdateFeatGrantingSpell(id, charName, currentFeatPointCount)
     local hasSpell = HasFeatGrantingSpell(id)
-    --_E6P("Character " .. charName .. " has feat granting spell: " .. tostring(hasSpell) .. ", target feat count: " .. tostring(targetFeatCount))
     -- Allow the host to have the spell to set the initial XP Per Feat value.
     if not hasSpell and (currentFeatPointCount >= 1 or IsHost(id)) then
-        --_E6P("Character " .. charName .. ": adding spell " .. EpicSpellContainerName)
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
         SetPendingFeatCount(id)
     elseif hasSpell and currentFeatPointCount < 1 and not IsHost(id) then -- Remove the spell if we have no feats to grant.
-        --_E6P("Character " .. charName .. ": removing spell " .. EpicSpellContainerName)
         Osi.RemoveSpell(id, EpicSpellContainerName, 0)
         SetPendingFeatCount(id)
     end
@@ -243,14 +232,11 @@ end
 ---@param level integer The level of the character.
 local function UpdateEpicCharacterPassive(id, charName, level)
     local hasPassive = HasPassiveEpicCharacter(id)
-    --_E6P("Character " .. charName .. " has feat granting spell: " .. tostring(hasSpell) .. ", target feat count: " .. tostring(targetFeatCount))
     -- Allow the host to have the spell to set the initial XP Per Feat value.
     if not hasPassive and level >= 6 then
-        --_E6P("Character " .. charName .. ": adding spell " .. EpicSpellContainerName)
         Osi.AddPassive(id, EpicCharacterPassive)
         SetPendingFeatCount(id)
     elseif hasPassive and level < 6 then -- Remove the spell if we have no feats to grant.
-        --_E6P("Character " .. charName .. ": removing spell " .. EpicSpellContainerName)
         Osi.RemovePassive(id, EpicCharacterPassive)
         SetPendingFeatCount(id)
     end
@@ -299,7 +285,7 @@ function FeatPointTracker:Update(ent)
     end
 
     -- Do a one time refresh of the points, as the method to track has changed between versions.
-    if InitialPointWipe(id) then
+    if InitiateCharacter(id) then
         SetPendingFeatCount(id)
         return
     end
@@ -338,7 +324,6 @@ function FeatPointTracker:Update(ent)
         PendingFeatPoints[id] = nil
     elseif targetFeatPointCount <= 0 then
         -- If we have no feats to grant, we should remove all the feat points.
-        --_E6P("Update for " .. charName .. ": removing all points")
         RemoveAllFeatPoints(id)
         SetPendingFeatCount(id)
     else

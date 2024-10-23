@@ -85,33 +85,42 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         E6_CloseUI()
 
         -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
-        local boosts = {}
+        local passivesForFeat = {}
         for _, passive in ipairs(extraPassives) do
-            table.insert(boosts, passive.Boost)
+            if passive.Passive then
+                for _,passiveToApply in ipairs(passive.Passive) do
+                    for _=1,passiveToApply.Count do
+                        table.insert(passivesForFeat, passiveToApply.Name)
+                    end
+                end
+            end
         end
         for _, abilitySelector in ipairs(abilityInfo) do
             for _, ability in ipairs(abilitySelector.State) do
                 if ability.Current > ability.Initial then
-                    local boost = "Ability(" .. JoinArgs({ability.Name, ability.Current - ability.Initial}) .. ")"
-                    table.insert(boosts, boost)
+                    for _=1,ability.Current - ability.Initial do
+                        table.insert(passivesForFeat, GetAbilityBoostPassive(ability.Name))
+                    end
                 end
             end
         end
 
-        -- Add the boosts for the skills
+        -- Add proficiency first, then expertise to ensure order.
         for skillName, skillState in pairs(skillStates) do
             if skillState.Proficient then
-                table.insert(boosts, "ProficiencyBonus(Skill," .. skillName .. ")")
+                table.insert(passivesForFeat, GetProficiencyBoostPassive(skillName))
             end
+        end
+        for skillName, skillState in pairs(skillStates) do
             if skillState.Expertise then
-                table.insert(boosts, "ExpertiseBonus(" .. skillName .. ")")
+                table.insert(passivesForFeat, GetExpertiseBoostPassive(skillName))
             end
         end
 
         ---@type SpellGrantMapType The added spells for the feat.
         local featAddSpellInfo = {}
         for _, addSpells in ipairs(feat.AddSpells) do
-            featAddSpellInfo[addSpells.SpellsId] = {SourceId = feat.ID, ResourceId = addSpells.ActionResource, AbilityId = addSpells.Ability}
+            featAddSpellInfo[addSpells.SpellsId] = {SourceId = feat.ID, ResourceId = addSpells.ActionResource, AbilityId = addSpells.Ability, CooldownType = addSpells.CooldownType, PrepareType = addSpells.PrepareType}
         end
 
         ---A mapping of spell list id to the spells granted for that list.
@@ -120,19 +129,15 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         for _, spellGroup in ipairs(selectedSpells) do
             for _, spell in ipairs(spellGroup) do
                 if spell.IsSelected then
-                    for _,unlock in ipairs(MakeBoost_UnlockSpell(spell, not spell.IsCantrip)) do
-                        table.insert(boosts, unlock)
-                    end
                     if featSelectedSpellInfo[spell.SpellsId] == nil then
                         featSelectedSpellInfo[spell.SpellsId] = {}
                     end
-                    featSelectedSpellInfo[spell.SpellsId][spell.SpellId] = { SourceId = feat.ID, ResourceId = spell.ActionResource, AbilityId = spell.Ability }
+                    featSelectedSpellInfo[spell.SpellsId][spell.SpellId] = { SourceId = feat.ID, ResourceId = spell.ActionResource, AbilityId = spell.Ability, CooldownType = spell.CooldownType, PrepareType = spell.PrepareType}
                 end
             end
         end
 
         -- Gather the passives selected and from the feat itself
-        local passivesForFeat = {}
         for _,passive in ipairs(feat.PassivesAdded) do
             table.insert(passivesForFeat, passive)
         end
@@ -146,7 +151,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             Feat = {
                 FeatId = feat.ID,
                 PassivesAdded = passivesForFeat,
-                Boosts = boosts,
                 AddedSpells = featAddSpellInfo,
                 SelectedSpells = featSelectedSpellInfo
             }
