@@ -133,7 +133,7 @@ function GetProficiencyBoostPassive(skill)
         _E6Error("Invalid skill passed to GetProficiencyBoostPassive: " .. skill)
         return nil
     end
-    return "ProficiencyBonus(" .. skill .. ")"
+    return "ProficiencyBonus(Skill," .. skill .. ")"
 end
 
 ---Generates the passive to grant expertise for a skill.
