@@ -54,8 +54,12 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
     SetSizeToViewport(win, 100, 200)
     win.SameLine = true
     local passiveInfo = AbilityPassives[abilityName]
-    AddLocaTooltipTitled(win, passiveInfo.DisplayName, passiveInfo.Description)
+    local passiveTooltip = AddLocaTooltipTitled(win, passiveInfo.DisplayName, passiveInfo.Description)
     AddLocaTitle(win, AbilityPassives[abilityName].ShortName)
+
+    passiveTooltip:AddSpacing()
+    local maximumText = Ext.Loca.GetTranslatedString("hf288edb6g7572g4963gb930ge36925049021") -- Maximum: {Maximum}
+    passiveTooltip:AddText(SubstituteParameters(maximumText, { Maximum = pointInfo.Max }))
 
     local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", GetWidthFromViewport(win) - 20)
     local addButton = addButtonCell:AddImageButton("", "ico_plus_h", ScaleToViewport({32, 32}))
