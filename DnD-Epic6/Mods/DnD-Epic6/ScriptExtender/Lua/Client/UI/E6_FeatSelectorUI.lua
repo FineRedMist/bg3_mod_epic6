@@ -85,22 +85,18 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         E6_CloseUI()
 
         -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
-        local passivesForFeat = {}
+        local boosts = {}
         for _, passive in ipairs(extraPassives) do
-            if passive.Passive then
-                for _,passiveToApply in ipairs(passive.Passive) do
-                    for _=1,passiveToApply.Count do
-                        table.insert(passivesForFeat, passiveToApply.Name)
-                    end
+            if passive.Boosts then
+                for _, boost in ipairs(passive.Boosts) do
+                    table.insert(boosts, boost)
                 end
             end
         end
         for _, abilitySelector in ipairs(abilityInfo) do
             for _, ability in ipairs(abilitySelector.State) do
                 if ability.Current > ability.Initial then
-                    for _=1,ability.Current - ability.Initial do
-                        table.insert(passivesForFeat, GetAbilityBoostPassive(ability.Name))
-                    end
+                    table.insert(boosts, GetAbilityBoostPassive(ability.Name, ability.Current - ability.Initial))
                 end
             end
         end
@@ -108,12 +104,12 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         -- Add proficiency first, then expertise to ensure order.
         for skillName, skillState in pairs(skillStates) do
             if skillState.Proficient then
-                table.insert(passivesForFeat, GetProficiencyBoostPassive(skillName))
+                table.insert(boosts, GetProficiencyBoostPassive(skillName))
             end
         end
         for skillName, skillState in pairs(skillStates) do
             if skillState.Expertise then
-                table.insert(passivesForFeat, GetExpertiseBoostPassive(skillName))
+                table.insert(boosts, GetExpertiseBoostPassive(skillName))
             end
         end
 
@@ -138,6 +134,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         end
 
         -- Gather the passives selected and from the feat itself
+        local passivesForFeat = {}
         for _,passive in ipairs(feat.PassivesAdded) do
             table.insert(passivesForFeat, passive)
         end
@@ -150,6 +147,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             PlayerId = playerInfo.ID,
             Feat = {
                 FeatId = feat.ID,
+                Boosts = boosts,
                 PassivesAdded = passivesForFeat,
                 AddedSpells = featAddSpellInfo,
                 SelectedSpells = featSelectedSpellInfo

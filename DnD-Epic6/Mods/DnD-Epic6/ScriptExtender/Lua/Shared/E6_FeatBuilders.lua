@@ -117,13 +117,12 @@ end
 ---Generates the passive to add for a given ability.
 ---@param ability AbilityId The ability to boost
 ---@return string? The passive to add.
-function GetAbilityBoostPassive(ability)
+function GetAbilityBoostPassive(ability, count)
     if not AbilitySkillMap[ability] then
         _E6Error("Invalid ability passed to GetAbilityBoostPassive: " .. ability)
         return nil
     end
-    local upper = string.upper(ability)
-    return "E6_FEAT_ABILITY_" .. upper
+    return "Ability(" .. ability .. "," .. tostring(count) .. ")"
 end
 
 ---Generates the passive to grant proficiency for a skill.
@@ -134,8 +133,7 @@ function GetProficiencyBoostPassive(skill)
         _E6Error("Invalid skill passed to GetProficiencyBoostPassive: " .. skill)
         return nil
     end
-    local upper = string.upper(skill)
-    return "E6_FEAT_SKILL_PROFICIENCY_" .. upper
+    return "ProficiencyBonus(" .. skill .. ")"
 end
 
 ---Generates the passive to grant expertise for a skill.
@@ -147,6 +145,6 @@ function GetExpertiseBoostPassive(skill)
         return nil
     end
     local upper = string.upper(skill)
-    return "E6_FEAT_SKILL_EXPERTISE_" .. upper
+    return "ExpertiseBonus(" .. skill .. ")"
 end
 
