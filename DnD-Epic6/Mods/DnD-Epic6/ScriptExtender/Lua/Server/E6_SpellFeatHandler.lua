@@ -238,7 +238,7 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
 
     ---@type table<string, AbilityScoreType>
     local scores = {}
-    for boostIndex,boost in ipairs(boosts) do
+    for _,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
         local abilityLabel, cause, value, max = IncludeAbilityScoreBoost(entity, boost, boostInfo)
@@ -248,6 +248,7 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
             end
             scores[abilityLabel].Current = scores[abilityLabel].Current + value
             scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + max
+            _E6P("Added " .. tostring(value) .. ", " .. tostring(max) ..  " to " .. abilityLabel .. " from " .. cause)
         end
     end
     return scores
@@ -437,6 +438,10 @@ local function GatherSpells(entity)
     local function RemoveSpellFromList(resultList, spellName, sourceId)
         local list = resultList[spellName]
         local inGrant = sourceGrantMap[sourceId]
+        if not list then
+            _E6Error("Could not remove the spell " .. spellName .. " from the list as it does not exist.")
+            return
+        end
         for i = #list, 1, -1 do
             local curGrant = list[i]
             if GrantsEqual(curGrant, inGrant) then
