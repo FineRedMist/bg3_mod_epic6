@@ -10,6 +10,15 @@
           <attribute id="UUID" type="guid" value="623a5c6f-71eb-46be-b253-8bc977faece9"/>
           <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
         </node>
+		    <node id="Feat">
+          <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
+          <attribute id="Name" type="FixedString" value="SkillExpert"/>
+          <attribute id="PassivesAdded" type="LSString" value="SkillExpert"/>
+          <attribute id="PassivesRemoved" type="LSString" value=""/>
+          <attribute id="Requirements" type="LSString" value=""/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(372c1167-b9ed-46ef-be41-f345d45a7e13,1,1,SkillExpert);SelectSkills(f974ebd6-3725-4b90-bb5c-2b647d41615d,1);SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,1)"/>
+          <attribute id="UUID" type="guid" value="d10c01e5-50f9-4ffa-b20d-ffbfb89ab554"/>
+        </node>
       </children>
     </node>
   </region>

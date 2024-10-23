@@ -15,3 +15,12 @@ data "Description" "h999efc53g8dabg4b1fgba4cgeceb9218c7ae;1"
 data "Icon" "E6_Logo"
 data "Properties" "Highlighted"
 data "Boosts" "ProficiencyBonusIncrease(1)"
+
+new entry "SkillExpert"
+type "PassiveData"
+data "DisplayName" "h3d607cc2g0131g477cgbd6bg89eb004a3640;1"
+data "Description" "h3d607cc2g0131g477cgbd6bg89eb004a3641;1"
+data "Boosts" ""
+data "Icon" "PassiveFeature_Skilled"
+data "Properties" "Highlighted"
+
