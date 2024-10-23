@@ -157,6 +157,7 @@ end
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
 ---@param text string The text of the tooltip
+---@return ExtuiTooltip The tooltip that was added.
 function AddTooltip(target, text)
     local tooltip = target:Tooltip()
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
@@ -164,32 +165,36 @@ function AddTooltip(target, text)
     local textControl = tooltip:AddText(TidyDescription(text))
     textControl.ItemWidth = ScaleToViewportWidth(500)
     textControl.TextWrapPos = textControl.ItemWidth
+    return tooltip
 end
 
 ---Adds a tooltip to the target with a title and text.
 ---@param target ExtuiStyledRenderable
 ---@param title string The title of the tooltip
 ---@param text string The text of the tooltip
+---@return ExtuiTooltip The tooltip that was added.
 function AddTooltipTitled(target, title, text)
-    AddTooltip(target, title .. "\n\n" .. text)
+    return AddTooltip(target, title .. "\n\n" .. text)
 end
 
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
 ---@param textId string The id of the text in the localization system to lookup.
+---@return ExtuiTooltip The tooltip that was added.
 function AddLocaTooltip(target, textId)
     local text = Ext.Loca.GetTranslatedString(textId)
-    AddTooltip(target, text)
+    return AddTooltip(target, text)
 end
 
 ---Adds a tooltip to the target with a title and text.
 ---@param target ExtuiStyledRenderable
 ---@param titleId string The title of the tooltip
 ---@param textId string The text of the tooltip
+---@return ExtuiTooltip The tooltip that was added.
 function AddLocaTooltipTitled(target, titleId, textId)
     local title = Ext.Loca.GetTranslatedString(titleId)
     local text = Ext.Loca.GetTranslatedString(textId)
-    AddTooltipTitled(target, title, text)
+    return AddTooltipTitled(target, title, text)
 end
 
 ---Creates a table that facilitates centering an object through brute force.
