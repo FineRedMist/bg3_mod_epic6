@@ -59,6 +59,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local selectedPassives = {}
     ---@type SelectSpellInfoUIType[][] The array of selected spells, for each spell group to select from.
     local selectedSpells = {}
+    ---@type AbilityInfoUIType[] The ability information to display in the UI.
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddFeaturesToFeatDetailsUI(childWin, feat, extraPassives)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)

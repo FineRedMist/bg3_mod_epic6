@@ -1,9 +1,23 @@
+---There theoretically be multiple sources for changing the ability at once. This tracks each of those.
+---@class AbilityInfoStateUIType Used to track what will be the new state of the ability
+---@field Name string The name of the ability
+---@field Initial integer The initial value of the ability
+---@field Current integer The current value of the ability
+---@field Maximum integer The maximum value of the ability
+
+---@class AbilityInfoUIType Information about the ability
+---@field ID string The GUID That maps to the selector list
+---@field PointCount integer The current ability value
+---@field Max integer The maximum ability value
+---@field State AbilityInfoStateUIType[] The current state of the ability
 
 ---Gather the abilities and map any single attribute increases to extraPassives
 ---@param feat FeatType
 ---@param playerInfo PlayerInformationType
 ---@param extraPassives ExtraPassiveType[]
+---@return AbilityInfoUIType[] The abilities to display in the UI
 function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
+    ---@type AbilityInfoUIType[]
     local results = {}
     for _,abilityListSelector in ipairs(feat.SelectAbilities) do
         ---@type ResourceAbilityList
@@ -41,14 +55,13 @@ end
 ---Creates a control for manipulating the ability scores
 ---@param parent ExtuiTreeParent
 ---@param sharedResource SharedResource
----@param pointInfo table
----@param state table
+---@param pointInfo AbilityInfoUIType
+---@param state AbilityInfoStateUIType
 ---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
----@return table?
 local function AddAbilityControl(parent, sharedResource, pointInfo, state, abilityResources)
     local abilityName = state.Name
     local id = pointInfo.ID
-    local maxPoints = pointInfo.Max
+    local maxPoints = state.Maximum
 
     local win = parent:AddChildWindow(abilityName .. id .. "_Window")
     SetSizeToViewport(win, 100, 200)
@@ -59,7 +72,7 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
 
     passiveTooltip:AddSpacing()
     local maximumText = Ext.Loca.GetTranslatedString("hf288edb6g7572g4963gb930ge36925049021") -- Maximum: {Maximum}
-    passiveTooltip:AddText(SubstituteParameters(maximumText, { Maximum = pointInfo.Max }))
+    passiveTooltip:AddText(SubstituteParameters(maximumText, { Maximum = maxPoints }))
 
     local addButtonCell = CreateCenteredControlCell(win, abilityName .. id .. "_+", GetWidthFromViewport(win) - 20)
     local addButton = addButtonCell:AddImageButton("", "ico_plus_h", ScaleToViewport({32, 32}))
@@ -112,7 +125,7 @@ end
 
 ---Adds the ability selector to the feat details, if ability selection is present.
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
----@param abilityInfo table The ability information to render
+---@param abilityInfo AbilityInfoUIType[] The ability information to render
 ---@param abilityResources table<string, SharedResource> The shared resources tracking ability scores to update skill levels.
 ---@return SharedResource[] The collection of shared resources to bind the Select button to disable when there are still resources available.
 function AddAbilitySelectorToFeatDetailsUI(parent, abilityInfo, abilityResources)
