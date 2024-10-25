@@ -137,6 +137,33 @@ local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
     end
 end
 
+---Generates the function to test the character for meeting the non-proficiency requirement specified.
+---@param feat FeatType The feat entry for the non-proficiency requirement
+---@param proficiencyMatch string[] The matched requirement parameters from the requirement expression
+---@return function That evaluates to true if the character meets the non-proficiency requirement, false otherwise.
+local function E6_MakeNonProficiencyRequirement(feat, proficiencyMatch)
+    local proficiency = proficiencyMatch[1]
+    return function(entity, playerInfo)
+        local name = GetCharacterName(entity)
+        local proficiencyComp = entity.Proficiency
+        if not proficiencyComp then
+            _E6Error("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): " .. name .. " is missing the Proficiency component")
+            return true
+        end
+        local proficiencyFlags = proficiencyComp.Flags
+        if proficiencyFlags == nil then
+            _E6Error("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): " .. name .. " is missing the Proficiency.Flags")
+            return true
+        end
+        for _,proficiencyFlag in ipairs(proficiencyFlags) do
+            if proficiencyFlag == proficiency then
+                return false
+            end
+        end
+        return true
+    end
+end
+
 ---Generates the function to test the character for meeting the proficiency requirement specified.
 ---@param feat FeatType The feat entry for the ability requirement
 ---@param proficiencyMatch string[] The matched requirement parameters from the requirement expression
@@ -172,6 +199,10 @@ local featRequirementRegexes = {
     {
         Regex = "FeatRequirementProficiency%('(%w+)'%)",
         Func = E6_MakeProficiencyRequirement
+    },
+    {
+        Regex = "FeatRequirementNonProficiency%('(%w+)'%)",
+        Func = E6_MakeNonProficiencyRequirement
     },
     {
         Regex = "CharacterLevelGreaterThan%((%d+)%)",
