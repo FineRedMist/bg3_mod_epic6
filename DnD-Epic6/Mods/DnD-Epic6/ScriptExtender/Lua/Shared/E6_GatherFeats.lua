@@ -137,6 +137,33 @@ local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
     end
 end
 
+---Generates the function to test the character for meeting the non-proficiency requirement specified.
+---@param feat FeatType The feat entry for the non-proficiency requirement
+---@param proficiencyMatch string[] The matched requirement parameters from the requirement expression
+---@return function That evaluates to true if the character meets the non-proficiency requirement, false otherwise.
+local function E6_MakeNonProficiencyRequirement(feat, proficiencyMatch)
+    local proficiency = proficiencyMatch[1]
+    return function(entity, playerInfo)
+        local name = GetCharacterName(entity)
+        local proficiencyComp = entity.Proficiency
+        if not proficiencyComp then
+            _E6Error("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): " .. name .. " is missing the Proficiency component")
+            return true
+        end
+        local proficiencyFlags = proficiencyComp.Flags
+        if proficiencyFlags == nil then
+            _E6Error("Proficiency Constraint(" .. feat.ShortName .. ": " .. proficiency .. "): " .. name .. " is missing the Proficiency.Flags")
+            return true
+        end
+        for _,proficiencyFlag in ipairs(proficiencyFlags) do
+            if proficiencyFlag == proficiency then
+                return false
+            end
+        end
+        return true
+    end
+end
+
 ---Generates the function to test the character for meeting the proficiency requirement specified.
 ---@param feat FeatType The feat entry for the ability requirement
 ---@param proficiencyMatch string[] The matched requirement parameters from the requirement expression
@@ -150,6 +177,20 @@ local function E6_MakeCharacterLevelRequirement(feat, proficiencyMatch)
     end
 end
 
+
+---Generates the function to test the character for meeting the passive requirement specified.
+---@param feat FeatType The feat entry for the ability requirement
+---@param proficiencyMatch string[] The matched requirement parameters from the requirement expression
+---@return function That evaluates to true if the character meets the requirement, false otherwise.
+local function E6_MakePassiveRequirement(feat, proficiencyMatch)
+    local passiveName = proficiencyMatch[1]
+    ---@param entity EntityHandle The entity to test the requirement against.
+    ---@param playerInfo PlayerInformationType The player information to test the requirement against.
+    return function(entity, playerInfo)
+        return playerInfo.PlayerPassives[passiveName] ~= nil
+    end
+end
+
 local featRequirementRegexes = {
     {
         Regex = "FeatRequirementAbilityGreaterEqual%('(%w+)',(%d+)%)",
@@ -160,8 +201,16 @@ local featRequirementRegexes = {
         Func = E6_MakeProficiencyRequirement
     },
     {
+        Regex = "FeatRequirementNonProficiency%('(%w+)'%)",
+        Func = E6_MakeNonProficiencyRequirement
+    },
+    {
         Regex = "CharacterLevelGreaterThan%((%d+)%)",
         Func = E6_MakeCharacterLevelRequirement
+    },
+    {
+        Regex = "HasPassive%('(.+)'%)",
+        Func = E6_MakePassiveRequirement
     },
     {
         Regex = "(.+)",
@@ -370,27 +419,29 @@ end
 local function ProcessSpellBase(source)
     return {
         SpellsId = source.SpellUUID,
-        SelectorId = source.SelectorId,
-        ActionResource = "",
+        ActionResource = source.ActionResource,
         PrepareType = source.PrepareType.Label,
         CooldownType = source.CooldownType.Label
     }
 end
 
 ---Processes a passive list into the passive options for the feat.
----@param sourceList any The source information to convert.
+---@param sourceList ResourceProgressionAddedSpell The source information to convert.
 ---@return AddSpellsType[] The list of passive options for the feat.
 local function ProcessAddSpells(sourceList)
     return ProcessProperty(sourceList, function(source)
         ---@type AddSpellsType
         local result = ProcessSpellBase(source)
         result.Ability = source.Ability.Label
+        if result.Ability == "None" then
+            result.Ability = "Intelligence"
+        end
         return result
     end)
 end
 
 ---Processes a passive list into the passive options for the feat.
----@param sourceList any The source information to convert.
+---@param sourceList ResourceProgressionSpell The source information to convert.
 ---@return SelectSpellsType[] The list of passive options for the feat.
 local function ProcessSelectSpells(sourceList)
     return ProcessProperty(sourceList, function(source)
@@ -398,6 +449,9 @@ local function ProcessSelectSpells(sourceList)
         local result = ProcessSpellBase(source)
         result.Ability = source.CastingAbility.Label
         result.Count = source.Amount
+        if result.Ability == "None" then
+            result.Ability = "Intelligence"
+        end
         return result
     end)
 end

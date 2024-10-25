@@ -1,0 +1,26 @@
+new entry "FEATS"
+type "PassiveData"
+
+new entry "E6_Epic_EpicCharacter_Passive"
+type "PassiveData"
+data "DisplayName" "h55b3cc22g6c3eg468dg807ag42e9300ff0f7;1"
+data "Description" "h6f4a6e38g074eg4717g949cga847c9fa7cc2;1"
+data "Icon" "E6_Logo"
+data "Properties" "Highlighted"
+
+new entry "E6_ProficiencyBonus_Passive"
+type "PassiveData"
+data "DisplayName" "hfb5da003gd8feg4566g822agc350331b6ebd;1"
+data "Description" "h999efc53g8dabg4b1fgba4cgeceb9218c7ae;1"
+data "Icon" "E6_Logo"
+data "Properties" "Highlighted"
+data "Boosts" "ProficiencyBonusIncrease(1)"
+
+new entry "SkillExpert"
+type "PassiveData"
+data "DisplayName" "h3d607cc2g0131g477cgbd6bg89eb004a3640;1"
+data "Description" "h3d607cc2g0131g477cgbd6bg89eb004a3641;1"
+data "Boosts" ""
+data "Icon" "PassiveFeature_Skilled"
+data "Properties" "Highlighted"
+

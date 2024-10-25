@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="hf288edb6g7572g4963gb930ge36925049021" version="1">Maximum: {Maximum}</content>
+	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased by 1.</content>
+	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic Feat: Heroic</content>
+	<content contentuid="h6f4a6e38g074eg4717g949cga847c9fa7cc2" version="1">You have reached maximum level and can select feats as you earn more experience!</content>
+	<content contentuid="h55b3cc22g6c3eg468dg807ag42e9300ff0f7" version="1">Epic Character</content>
 	<content contentuid="hf2b3a061gbf90g48cbg8defg30ec6aef6159" version="1">Saves the amount of XP per feat to the save game.</content>
 	<content contentuid="h21681079gab67g4ea5ga4dfg88f40d38818a" version="1">Save</content>
 	<content contentuid="hcbbf8d49g36fbg496bga9beg275c367f94c0" version="1">The amount of experience required to earn a feat. The change is not committed until Save is clicked.</content>
@@ -24,4 +29,8 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
 	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Export Character</content>
 	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">The exported character can be found in %LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/Script Extender/E6_Character.json. Note: Exporting the character will generate a lot of spurious warnings and errors in the logs as it tests properties on objects.</content>
+	<content contentuid="h3d607cc2g0131g477cgbd6bg89eb004a3640" version="1">Skill Expert</content>
+	<content contentuid="h3d607cc2g0131g477cgbd6bg89eb004a3641" version="1">Increase one &lt;LSTag Tooltip="AbilityScore"&gt;Ability Score&lt;/LSTag&gt; of your choice by 1, to a maximum of 20. You gain proficiency in one &lt;LSTag Tooltip="Skill"&gt;Skill&lt;/LSTag&gt; of your choice.
+
+Choose one skill in which you have proficiency. You gain &lt;LSTag Tooltip="Expertise"&gt;Expertise&lt;/LSTag&gt; with that skill. The skill you choose must be one that isn't already benefiting from a feature, such as Expertise, that doubles your proficiency bonus.</content>
 </contentList>

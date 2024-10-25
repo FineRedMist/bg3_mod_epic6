@@ -25,7 +25,6 @@
 
 ---@class SelectSpellBaseType
 ---@field SpellsId GUIDSTRING The GUID that maps to the selector list.
----@field SelectorId string? A string selector that provides information for the spell selection. I think it maps to the spellbook for listing details like Magic Initiate, but haven't figured it out yet.
 ---@field ActionResource string? The action resource to use for casting the spell.
 ---@field PrepareType SpellPrepareType? The type of preparation for the spell, may be blank.
 ---@field CooldownType SpellCooldownType? The cooldown type for the spell, may be blank.
@@ -72,9 +71,18 @@
 ---@field SavingThrows table<string, boolean> The mapping of saving throw names to whether the character is proficient in the saving throw.
 ---@field Equipment table<string, boolean> The mapping of equipment names to whether the character is proficient in the equipment.
 
+---@class SpellGrantInformationType The spell grant information for the player.
+---@field SourceId GUIDSTRING Where the spell was provided from (sometimes race, sometimes class, etc).
+---@field ResourceId GUIDSTRING The spellcasting resource for this spell/collection.
+---@field AbilityId AbilityId The ability ID (e.g. "Intelligence") for the spell.
+---@field PrepareType SpellPrepareType? The type of preparation for the spell, may be blank.
+---@field CooldownType SpellCooldownType? The cooldown type for the spell, may be blank.
+
+---@alias SpellGrantMapType table<string, SpellGrantInformationType[]> The mapping of spell or spell list ID to whether the spell group has been added.
+
 ---@class SelectedSpellsType The selected spells for the player.
----@field Added table<string, boolean> The mapping of spell list ID to whether the spell group has been added.
----@field Selected table<string, string[]> The mapping of spell list ID to the selected spells from that list.
+---@field Added SpellGrantMapType The mapping of spell list ID to whether the spell group has been added.
+---@field Selected table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
 ---@class PlayerInformationType Information about the player for determine what is legal to select for the feat.
 ---@field ID string The unique id of the player
@@ -95,8 +103,10 @@
 
 ---@class SelectedFeatType The selected feat information to send to the server.
 ---@field FeatId GUIDSTRING The GUID of the feat.
+---@field Boosts string[] The boosts to apply for the feat.
 ---@field PassivesAdded string[] The passives added by the feat.
----@field Boosts string[] The boosts added by the feat.
+---@field AddedSpells SpellGrantMapType The mapping of spell list ID to spell grant information.
+---@field SelectedSpells table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
 ---@class SelectedFeatPayloadType The selected feat payload to send to the server.
 ---@field PlayerId string The player id for the feat.
@@ -110,7 +120,7 @@
 ---@field DisplayName string The display name of the passive.
 ---@field Description string The description of the passive.
 ---@field Icon string The icon of the passive.
----@field Boost string The boost to apply for the passive.
+---@field Boosts? string[] The boosts to apply as part of the extra passive.
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Setting XP Per Feat Messaging

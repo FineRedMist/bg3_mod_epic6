@@ -25,10 +25,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local windowDimensions = {1000, 1450}
     if not featDetailUI then
         featDetailUI = Ext.IMGUI.NewWindow("FeatDetailsWindow")
-        featDetailUI.Closeable = true
-        featDetailUI.NoMove = true
-        featDetailUI.NoResize = true
-        featDetailUI.NoCollapse = true
     end
 
     featDetailUI.Label = feat.DisplayName
@@ -63,6 +59,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local selectedPassives = {}
     ---@type SelectSpellInfoUIType[][] The array of selected spells, for each spell group to select from.
     local selectedSpells = {}
+    ---@type AbilityInfoUIType[] The ability information to display in the UI.
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddFeaturesToFeatDetailsUI(childWin, feat, extraPassives)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
@@ -91,31 +88,48 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
         local boosts = {}
         for _, passive in ipairs(extraPassives) do
-            table.insert(boosts, passive.Boost)
-        end
-        for _, abilitySelector in ipairs(abilityInfo) do
-            for _, ability in ipairs(abilitySelector.State) do
-                if ability.Current > ability.Initial then
-                    local boost = "Ability(" .. JoinArgs({ability.Name, ability.Current - ability.Initial}) .. ")"
+            if passive.Boosts then
+                for _, boost in ipairs(passive.Boosts) do
                     table.insert(boosts, boost)
                 end
             end
         end
-
-        -- Add the boosts for the skills
-        for skillName, skillState in pairs(skillStates) do
-            if skillState.Proficient then
-                table.insert(boosts, "ProficiencyBonus(Skill," .. skillName .. ")")
-            end
-            if skillState.Expertise then
-                table.insert(boosts, "ExpertiseBonus(" .. skillName .. ")")
+        for _, abilitySelector in ipairs(abilityInfo) do
+            for _, ability in ipairs(abilitySelector.State) do
+                if ability.Current > ability.Initial then
+                    table.insert(boosts, GetAbilityBoostPassive(ability.Name, ability.Current - ability.Initial))
+                end
             end
         end
 
+        -- Add proficiency first, then expertise to ensure order.
+        for skillName, skillState in pairs(skillStates) do
+            if skillState.Proficient then
+                table.insert(boosts, GetProficiencyBoostPassive(skillName))
+            end
+        end
+        for skillName, skillState in pairs(skillStates) do
+            if skillState.Expertise then
+                table.insert(boosts, GetExpertiseBoostPassive(skillName))
+            end
+        end
+
+        ---@type SpellGrantMapType The added spells for the feat.
+        local featAddSpellInfo = {}
+        for _, addSpells in ipairs(feat.AddSpells) do
+            featAddSpellInfo[addSpells.SpellsId] = {SourceId = feat.ID, ResourceId = addSpells.ActionResource, AbilityId = addSpells.Ability, CooldownType = addSpells.CooldownType, PrepareType = addSpells.PrepareType}
+        end
+
+        ---A mapping of spell list id to the spells granted for that list.
+        ---@type table<string, SpellGrantMapType>
+        local featSelectedSpellInfo = {}
         for _, spellGroup in ipairs(selectedSpells) do
             for _, spell in ipairs(spellGroup) do
                 if spell.IsSelected then
-                    table.insert(boosts, MakeBoost_UnlockSpell(spell, not spell.IsCantrip))
+                    if featSelectedSpellInfo[spell.SpellsId] == nil then
+                        featSelectedSpellInfo[spell.SpellsId] = {}
+                    end
+                    featSelectedSpellInfo[spell.SpellsId][spell.SpellId] = { SourceId = feat.ID, ResourceId = spell.ActionResource, AbilityId = spell.Ability, CooldownType = spell.CooldownType, PrepareType = spell.PrepareType}
                 end
             end
         end
@@ -134,8 +148,10 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
             PlayerId = playerInfo.ID,
             Feat = {
                 FeatId = feat.ID,
+                Boosts = boosts,
                 PassivesAdded = passivesForFeat,
-                Boosts = boosts
+                AddedSpells = featAddSpellInfo,
+                SelectedSpells = featSelectedSpellInfo
             }
         }
         local payloadStr = Ext.Json.Stringify(payload)
@@ -263,19 +279,21 @@ end
 ---@return ExtuiWindow The window to display.
 local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     if featUI then
-        SetWindowTitle(playerInfo)
         E6_CloseFeatDetailsUI() -- Close the detail window if it's open so it doesn't get used.
-        return featUI
+    else
+        featUI = Ext.IMGUI.NewWindow("FeatSelector")
+        featUI.OnClose = E6_CloseFeatDetailsUI
     end
-    featUI = Ext.IMGUI.NewWindow("FeatSelector")
+
     SetWindowTitle(playerInfo)
+
     featUI.Closeable = true
     featUI.NoMove = true
     featUI.NoResize = true
     featUI.NoCollapse = true
     featUI:SetSize(ScaleToViewport(windowDimensions))
     featUI:SetPos(ScaleToViewport({800, 100}))
-    featUI.OnClose = E6_CloseFeatDetailsUI
+
     return featUI
 end
 

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+  <version major="4" minor="0" revision="9" build="322"/>
+  <region id="Feats">
+    <node id="root">
+      <children>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_ProficiencyBonus"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_ProficiencyBonus_Passive"/>
+          <attribute id="UUID" type="guid" value="623a5c6f-71eb-46be-b253-8bc977faece9"/>
+          <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
+        </node>
+		    <node id="Feat">
+          <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
+          <attribute id="Name" type="FixedString" value="SkillExpert"/>
+          <attribute id="PassivesAdded" type="LSString" value="SkillExpert"/>
+          <attribute id="PassivesRemoved" type="LSString" value=""/>
+          <attribute id="Requirements" type="LSString" value=""/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(372c1167-b9ed-46ef-be41-f345d45a7e13,1,1,SkillExpert);SelectSkills(f974ebd6-3725-4b90-bb5c-2b647d41615d,1);SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,1)"/>
+          <attribute id="UUID" type="guid" value="d10c01e5-50f9-4ffa-b20d-ffbfb89ab554"/>
+        </node>
+    		<node id="Feat">
+          <attribute id="Name" type="FixedString" value="LightlyArmored"/>
+          <attribute id="PassivesAdded" type="LSString" value="LightlyArmored"/>
+          <attribute id="Requirements" type="LSString" value="FeatRequirementNonProficiency(&apos;LightArmor&apos;)"/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(499230af-5946-4680-a7ee-4d76d421f2ef,1,1,LightlyArmoredASI)"/>
+          <attribute id="UUID" type="guid" value="b441c722-e4d4-4702-861a-039bfd77c124"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="ModeratelyArmored"/>
+          <attribute id="PassivesAdded" type="LSString" value="ModeratelyArmored"/>
+          <attribute id="Requirements" type="LSString" value="FeatRequirementProficiency(&apos;LightArmor&apos;);FeatRequirementNonProficiency(&apos;MediumArmor&apos;)"/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(499230af-5946-4680-a7ee-4d76d421f2ef,1,1,LightlyArmoredASI)"/>
+          <attribute id="UUID" type="guid" value="681d5307-f0ed-4c94-8cf0-db0c51116f56"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="HeavilyArmored"/>
+          <attribute id="PassivesAdded" type="LSString" value="HeavilyArmored"/>
+          <attribute id="Requirements" type="LSString" value="FeatRequirementProficiency(&apos;MediumArmor&apos;);FeatRequirementNonProficiency(&apos;HeavyArmor&apos;)"/>
+          <attribute id="UUID" type="guid" value="7bc235ac-7eeb-49d3-8249-c3313d87af75"/>
+        </node>
+      </children>
+    </node>
+  </region>
+</save>
