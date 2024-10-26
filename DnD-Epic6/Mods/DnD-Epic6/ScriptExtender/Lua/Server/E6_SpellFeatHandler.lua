@@ -399,6 +399,9 @@ local function GatherSpells(entity)
     ---@param spellName string
     ---@param sourceId GUIDSTRING
     local function RemoveSpellFromList(resultList, spellName, sourceId)
+        if not spellName or string.len(spellName) == 0 then
+            return
+        end
         local list = resultList[spellName]
         local inGrant = sourceGrantMap[sourceId]
         if not list then
@@ -418,6 +421,9 @@ local function GatherSpells(entity)
     ---@param spellName string
     ---@param grantInfo SpellGrantInformationType
     local function AddSpellGrantToList(resultList, spellName, grantInfo)
+        if not spellName or string.len(spellName) == 0 then
+            return
+        end
         local list = resultList[spellName]
         if not list then
             list = {}
