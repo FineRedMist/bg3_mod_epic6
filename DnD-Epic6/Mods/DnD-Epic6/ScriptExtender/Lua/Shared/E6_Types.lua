@@ -55,6 +55,14 @@
 ---@field HasRequirements function[] The requirements to take the feat. May be empty (but not nil). The function takes two arguments, the EntityHandle of the character, and the derived player information.
 
 -----------------------------------------------------------------------------------------------------------------------
+-- Feat Message
+-----------------------------------------------------------------------------------------------------------------------
+
+---@class FeatMessageType Information about a feat, which could be a warning (you already have a bonus from this feat), to an error (why you can't take this feat).
+---@field MessageLoca string The localized message to display.
+---@field Args any[] The arguments to pass to the localized message.
+
+-----------------------------------------------------------------------------------------------------------------------
 -- Player Information
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -84,14 +92,18 @@
 ---@field Added SpellGrantMapType The mapping of spell list ID to whether the spell group has been added.
 ---@field Selected table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
----@class PlayerInformationType Information about the player for determine what is legal to select for the feat.
+---@class PlayerFeatRequirementInformationType The minimum information required to evaluate feat requirements for the player.
+---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
+---@field PlayerFeats table<string, number> The mapping of feat IDs to the number of times the feat has been taken by the player.
+---@field Proficiencies ProficiencyInformationType? The proficiency information for the player.
+---@field Abilities table<string, AbilityScoreType>? The mapping of ability names to the ability score information.
+
+---@class PlayerInformationType : PlayerFeatRequirementInformationType Information about the player for determine what is legal to select for the feat.
 ---@field ID string The unique id of the player
 ---@field Name string? The name of the character the player is playing
----@field PlayerFeats table<string, number> The mapping of feat IDs to the number of times the feat has been taken by the player.
 ---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
 ---@field SelectableFeats string[] The list of feat IDs that the player can select from.
----@field Abilities table<string, AbilityScoreType>? The mapping of ability names to the ability score information.
----@field Proficiencies ProficiencyInformationType? The proficiency information for the player.
+---@field FilteredFeats string[] The feats that have been filtered out for the player due to requirements.
 ---@field ProficiencyBonus integer The proficiency bonus for the player.
 ---@field Spells SelectedSpellsType The selected spells for the player.
 ---@field XPPerFeat integer The amount of experience required per feat.
