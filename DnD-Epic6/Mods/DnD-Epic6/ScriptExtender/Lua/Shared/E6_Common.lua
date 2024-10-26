@@ -128,9 +128,13 @@ end
 ---It will call functions to get values if provided as substitutes, then try loca lookups for strings,
 ---then convert the value to a string.
 ---@param loca string The localization string to start with for the parameterized loca
----@param ... any The parameters to substitute into the loca string
-function GetParameterizedLoca(loca, ...)
+---@param arg any[] The parameters to substitute into the loca string
+function GetParameterizedLoca(loca, arg)
     local message = Ext.Loca.GetTranslatedString(loca)
+    if arg == nil then
+        return message
+    end
+
     for i,v in ipairs(arg) do
         local keySubString = "%[" .. tostring(i) .. "%]"
         message = string.gsub(message, keySubString, GetParameterArgument(v))

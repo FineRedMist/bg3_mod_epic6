@@ -32,10 +32,10 @@ local function E6_AddFeatRequirement(feat, testFunc)
 end
 
 ---@param message string The error message about the failure
----@param ... any Additional arguments to pass to the error message.
+---@param args any[]? Additional arguments to pass to the error message.
 ---@return FeatMessageType The message to display to the player about why the requirement failed.
-local function ToMessageLoca(message, ...)
-    return { MessageLoca = message, Args = arg }
+local function ToMessageLoca(message, args)
+    return { MessageLoca = message, Args = args }
 end
 
 local RequirementsMet = ToMessageLoca("h35115c97g6f5bg4ba5gad35gfdba5e7e1d51")
@@ -49,21 +49,21 @@ local function MissingAbilityLoca(abilityName)
     if isAbility then
         param = AbilityPassives[abilityName].DisplayName
     end
-    return ToMessageLoca("hbc4fc044gb46fg47f2g9ff9g00af57de9fae", param) -- The ability [1] could not be found on the character
+    return ToMessageLoca("hbc4fc044gb46fg47f2g9ff9g00af57de9fae", {param}) -- The ability [1] could not be found on the character
 end
 
 ---Indicates a match failure
 ---@param feat table The feat entry for the ability requirement
 ---@param errorMessage string The error message about the failure
----@param ... any Additional arguments to pass to the error message.
+---@param args any[] Additional arguments to pass to the error message.
 ---@return function That always returns false for match failures against the requirements of the feat.
-local function E6_MatchFailure(feat, errorMessage, ...)
+local function E6_MatchFailure(feat, errorMessage, args)
     ---@param entity EntityHandle The entity to test the requirement against.
     ---@param playerInfo PlayerFeatRequirementInformationType Information about what the player has for abilities, proficiencies, etc.
     ---@return boolean Always false
     ---@return FeatMessageType The message to display to the player about why the requirement failed.
     return function(entity, playerInfo)
-        return false, { MessageLoca = errorMessage, Args = arg }
+        return false, { MessageLoca = errorMessage, Args = args }
     end
 end
 
@@ -78,7 +78,7 @@ local function E6_ApplySelectAbilityRequirement(feat)
         ---@type ResourceAbilityList
         local abilityList = Ext.StaticData.Get(ability.SourceId, Ext.Enums.ExtResourceManagerType.AbilityList)
         if not abilityList then
-            E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", "h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7", ability.SourceId)) -- Feat misconfiguration: [1], The ability list [2] wasn't found.
+            E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7", ability.SourceId})) -- Feat misconfiguration: [1], The ability list [2] wasn't found.
             return
         end
         ---@type string[] The list of abilities in the ability list.
@@ -133,7 +133,7 @@ local function E6_MakeAbilityRequirement(feat, abilityMatch)
         if abilityScore.Current >= value then
             return true, RequirementsMet
         end
-        return false, ToMessageLoca("h69b3c062g4965g4fbeg9446g901d37a06d72", AbilityPassives[ability].DisplayName, value, abilityScore.Current) -- [1] is less than [2]. It is currently [3].
+        return false, ToMessageLoca("h69b3c062g4965g4fbeg9446g901d37a06d72", {AbilityPassives[ability].DisplayName, value, abilityScore.Current}) -- [1] is less than [2]. It is currently [3].
     end
 end
 
@@ -149,7 +149,7 @@ local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
     ---@return FeatMessageType The message to display to the player about why the requirement failed.
     return function(entity, playerInfo)
         if not ProficiencyLoca[proficiency] then
-            return false, ToMessageLoca("h1c81aad6g23b0g4068ga108g3b4b0957050b", proficiency) -- Unknown proficiency: [1]
+            return false, ToMessageLoca("h1c81aad6g23b0g4068ga108g3b4b0957050b", {proficiency}) -- Unknown proficiency: [1]
         end
         local proficiencyComp = entity.Proficiency
         if not proficiencyComp then
@@ -164,7 +164,7 @@ local function E6_MakeProficiencyRequirement(feat, proficiencyMatch)
                 return true, RequirementsMet
             end
         end
-        return false, ToMessageLoca("h0772c666g159dg47eag857eg2c8bb25bc440", ProficiencyLoca[proficiency]) -- Missing proficiency: [1]
+        return false, ToMessageLoca("h0772c666g159dg47eag857eg2c8bb25bc440", {ProficiencyLoca[proficiency]}) -- Missing proficiency: [1]
     end
 end
 
@@ -180,7 +180,7 @@ local function E6_MakeNonProficiencyRequirement(feat, proficiencyMatch)
     ---@return FeatMessageType The message to display to the player about why the requirement failed.
     return function(entity, playerInfo)
         if not ProficiencyLoca[proficiency] then
-            return false, ToMessageLoca("h1c81aad6g23b0g4068ga108g3b4b0957050b", proficiency) -- Unknown proficiency: [1]
+            return false, ToMessageLoca("h1c81aad6g23b0g4068ga108g3b4b0957050b", {proficiency}) -- Unknown proficiency: [1]
         end
         local proficiencyComp = entity.Proficiency
         if not proficiencyComp then
@@ -192,7 +192,7 @@ local function E6_MakeNonProficiencyRequirement(feat, proficiencyMatch)
         end
         for _,proficiencyFlag in ipairs(proficiencyFlags) do
             if proficiencyFlag == proficiency then
-                return false, ToMessageLoca("h1d87338fgc5ddg4386gaf1eg83c82d9ca1a3", ProficiencyLoca[proficiency]) -- Already has proficiency: [1]
+                return false, ToMessageLoca("h1d87338fgc5ddg4386gaf1eg83c82d9ca1a3", {ProficiencyLoca[proficiency]}) -- Already has proficiency: [1]
             end
         end
         return true, RequirementsMet
@@ -210,7 +210,7 @@ local function E6_MakeCharacterLevelRequirement(feat, proficiencyMatch)
     ---@return boolean Whether the character level is strictly greater than the requirement.
     ---@return FeatMessageType The message to display to the player about why the requirement failed.
     return function(entity, playerInfo)
-        return entity.EocLevel.Level > levelRequirement, ToMessageLoca("h04fab965g7b1bg47fegad9bg69ae676c8cdf", levelRequirement) -- Character level must be greater than: [1]
+        return entity.EocLevel.Level > levelRequirement, ToMessageLoca("h04fab965g7b1bg47fegad9bg69ae676c8cdf", {levelRequirement}) -- Character level must be greater than: [1]
     end
 end
 
@@ -229,9 +229,9 @@ local function E6_MakePassiveRequirement(feat, proficiencyMatch)
         ---@type PassiveData Data for the passive
         local passiveStat = Ext.Stats.Get(passiveName,  -1, true, true)
         if not passiveStat then
-            return false, ToMessageLoca("h5a0ed75fg8a79g4481g90e3g318669d0a6e7", "h9d531312g1e6ag4dd9ga25ag405948ce70af", passiveName) -- Feat misconfiguration: [1], The passive [2] for the feat wasn't found.
+            return false, ToMessageLoca("h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", passiveName}) -- Feat misconfiguration: [1], The passive [2] for the feat wasn't found.
         end
-        return playerInfo.PlayerPassives[passiveName] ~= nil, ToMessageLoca("hd7005e0bgad9bg43afgabb9gd831f1708f49", passiveStat.DisplayName) -- Missing ability: [1]
+        return playerInfo.PlayerPassives[passiveName] ~= nil, ToMessageLoca("hd7005e0bgad9bg43afgabb9gd831f1708f49", {passiveStat.DisplayName}) -- Missing ability: [1]
     end
 end
 
@@ -287,7 +287,7 @@ local function E6_ApplyFeatRequirements(feat, spec)
                 end
             end
             if not matched then
-                E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "hf5f71dc3g2cd6g40ddga2aeg167bdfe6d71e", req)) -- Unknown requirement (please report a bug on NexusMods for DnD-Epic6 to have it added): [1]
+                E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "hf5f71dc3g2cd6g40ddga2aeg167bdfe6d71e", {req})) -- Unknown requirement (please report a bug on NexusMods for DnD-Epic6 to have it added): [1]
             end
         end
     end
@@ -303,7 +303,6 @@ local function GatherPassiveAbilityModifiers(passiveName)
     local passive = Ext.Stats.Get(passiveName, -1, true, true)
     --There is a passive in the list we can't get data for, indicate it is invalid and filter it out.
     if not passive then
-        _E6Error("Failed to retrieve the passive " .. passiveName .. " for the feat. It will be filtered.")
         return nil
     end
     if passive and passive.Boosts then
@@ -351,7 +350,7 @@ local function E6_ApplyFeatAbilityConstraints(feat)
         end
     end
     if not isValid then
-        E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", "h9d531312g1e6ag4dd9ga25ag405948ce70af", failedPassiveName)) -- Feat misconfiguration: [1], The passive [2] for the feat wasn't found.
+        E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", failedPassiveName})) -- Feat misconfiguration: [1], The passive [2] for the feat wasn't found.
         return
     end
     if next(abilityBoosts) ~= nil then
@@ -576,21 +575,47 @@ function E6_GatherFeats()
     return featSet
 end
 
----Determines if the character meets the requirements for a feat.
----@param feat table The feat to test for
+---@param feat FeatType The feat to test for
 ---@param entity EntityHandle The entity to test against
 ---@param playerInfo PlayerFeatRequirementInformationType Information about what the player has for abilities, proficiencies, etc.
----@return boolean True if the entity meets the requirements, false otherwise.
-local function MeetsFeatRequirements(feat, entity, playerInfo)
-    if not feat.HasRequirements then
-        return true
+---@param onMet function The function to call if the requirement is met. Only called once.
+---@param onFilter function The function to call if the requirement is not met, which takes the FeatType and FeatMessageType. May be called multiple times.
+local function FeatRequirementTest(feat, entity, playerInfo, onMet, onFilter)
+    if not feat.CanBeTakenMultipleTimes and playerInfo.PlayerFeats[feat.ID] ~= nil then
+        onFilter(feat, ToMessageLoca("ha0a03263g1b55g40c2g8a7fg5313663ee3a5")) -- The feat has already been selected.
+        return
     end
+
+    if not feat.HasRequirements then
+        onMet(feat)
+        return
+    end
+
+    local isMet = true
     for _, req in ipairs(feat.HasRequirements) do
-        if not req(entity, playerInfo) then
-            return false
+        local met, message = req(entity, playerInfo)
+        if not met then
+            onFilter(feat, message)
+            isMet = false
         end
     end
-    return true
+    if isMet then
+        onMet(feat)
+    end
+end
+
+---Determines if the character meets the requirements for a feat.
+---@param feat FeatType The feat to test for
+---@param entity EntityHandle The entity to test against
+---@param playerInfo PlayerFeatRequirementInformationType Information about what the player has for abilities, proficiencies, etc.
+---@return FeatMessageType[] The reasons why the feat requirements were not met.
+function GatherFailedFeatRequirements(feat, entity, playerInfo)
+    local results = {}
+    FeatRequirementTest(feat, entity, playerInfo, function(feat)
+    end, function(feat, message)
+        table.insert(results, message)
+    end)
+    return results
 end
 
 ---Gathers the feats that the player can select. It checks constraints server side as client doesn't
@@ -604,14 +629,16 @@ function GatherSelectableFeatsForPlayer(entity, playerInfo)
 
     local featList = {}
     local filtered = {}
+    local visited = {}
     for featId, feat in pairs(allFeats) do
-        if feat.CanBeTakenMultipleTimes or playerInfo.PlayerFeats[featId] == nil then
-            if MeetsFeatRequirements(feat, entity, playerInfo) then
-                table.insert(featList, featId)
-            else
+        FeatRequirementTest(feat, entity, playerInfo, function(feat)
+            table.insert(featList, featId)
+        end, function(feat, message)
+            if not visited[featId] then
+                visited[featId] = true
                 table.insert(filtered, featId)
             end
-        end
+        end)
     end
     return featList, filtered
 end
