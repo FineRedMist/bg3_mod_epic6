@@ -212,7 +212,6 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
             end
             scores[abilityLabel].Current = scores[abilityLabel].Current + value
             scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + max
-            _E6P("Added " .. tostring(value) .. ", " .. tostring(max) ..  " to " .. abilityLabel .. " from " .. cause)
         end
     end
     return scores
