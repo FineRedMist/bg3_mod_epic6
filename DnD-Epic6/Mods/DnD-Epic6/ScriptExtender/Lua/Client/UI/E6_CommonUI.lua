@@ -161,7 +161,7 @@ end
 ---@return ExtuiText The text control that was added.
 function AddTooltipText(tooltip, text, width)
     if not width then
-        width = 800
+        width = 900
     end
     local textControl = tooltip:AddText(TidyDescription(text))
     textControl.ItemWidth = ScaleToViewportWidth(width)
