@@ -100,6 +100,44 @@ function TidyDescription(str)
     return str
 end
 
+---Converts an argument to a string.
+---@param arg any
+---@return string
+local function GetParameterArgument(arg)
+    if type(arg) == "function" then
+        return arg()
+    end
+    if type(arg) == "string" then
+        local loca = Ext.Loca.GetTranslatedString(arg)
+        if loca then
+            return loca
+        end
+        return arg
+    end
+    if type(arg) == "table" then
+        _E6Error("Unsupported table passed to GetParameterArgument: " .. Ext.Json.Stringify(arg))
+        return ""
+    end
+    if type(arg) == "nil" then
+        return ""
+    end
+    return tostring(arg)
+end
+
+---Substitutes parameters using the format [1], [2], etc, indexing into the parameters table.
+---It will call functions to get values if provided as substitutes, then try loca lookups for strings,
+---then convert the value to a string.
+---@param loca string The localization string to start with for the parameterized loca
+---@param ... any The parameters to substitute into the loca string
+function GetParameterizedLoca(loca, ...)
+    local message = Ext.Loca.GetTranslatedString(loca)
+    for i,v in ipairs(arg) do
+        local keySubString = "%[" .. tostring(i) .. "%]"
+        message = string.gsub(message, keySubString, GetParameterArgument(v))
+    end
+    return message
+end
+
 ---Retrieves the name for the character, either from the CharacterCreationStats or the Origin
 ---@param entity EntityHandle -- The entity to retrieve the name for
 ---@param[opt=false] returnNil boolean -- If true, return nil if the name is unknown, otherwise return <unknown>
