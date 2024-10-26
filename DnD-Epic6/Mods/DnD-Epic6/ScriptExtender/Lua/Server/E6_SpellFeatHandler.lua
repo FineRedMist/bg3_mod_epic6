@@ -73,7 +73,7 @@ local function GatherPlayerPassives(entity)
 
     for _, playerPassiveObject in ipairs(playerPassives) do
         local playerPassive = playerPassiveObject.Passive
-        if playerPassive and (not playerPassive.field_8 or playerPassive.field_8.ProgressionMeta) then
+        if playerPassive and (not playerPassive.Source or playerPassive.Source.ProgressionMeta) then
             AddPassive(playerPassive.PassiveId)
         end
     end
