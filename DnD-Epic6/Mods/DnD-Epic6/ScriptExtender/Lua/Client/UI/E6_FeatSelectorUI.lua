@@ -180,7 +180,7 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat, isFiltered)
         local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
         tooltip:AddSpacing()
         tooltip:AddSpacing()
-        local missingReqTitle = AddTooltipText(tooltip, Ext.Loca.GetTranslatedString("hc3a8865ageffcg4d60gabd8gccd4f828d6e9"))
+        local missingReqTitle = AddTooltipText(tooltip, Ext.Loca.GetTranslatedString("hc3a8865ageffcg4d60gabd8gccd4f828d6e9")) -- Requirements:
         MakeErrorText(missingReqTitle)
         for _, req in ipairs(reqs) do
             local missingReqText = AddTooltipText(tooltip, " - " .. GetParameterizedLoca(req.MessageLoca, req.Args))
