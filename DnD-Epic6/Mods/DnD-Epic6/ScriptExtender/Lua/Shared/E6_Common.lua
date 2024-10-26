@@ -109,7 +109,7 @@ local function GetParameterArgument(arg)
     end
     if type(arg) == "string" then
         local loca = Ext.Loca.GetTranslatedString(arg)
-        if loca and string.len(loca) then
+        if type(loca) == "string" and string.len(loca) > 0 then
             return loca
         end
         return arg
