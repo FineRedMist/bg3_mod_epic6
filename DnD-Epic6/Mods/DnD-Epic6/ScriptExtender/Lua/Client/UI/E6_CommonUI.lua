@@ -154,6 +154,21 @@ function UI_SetEnable(control, isEnabled)
     end
 end
 
+---Adds a text control to the given tooltip with text wrap.
+---@param tooltip ExtuiTooltip The tooltip to add the text to.
+---@param text string The text to add to the tooltip.
+---@param width integer? The width of the text control, in 3840x2160 units.
+---@return ExtuiText The text control that was added.
+function AddTooltipText(tooltip, text, width)
+    if not width then
+        width = 900
+    end
+    local textControl = tooltip:AddText(TidyDescription(text))
+    textControl.ItemWidth = ScaleToViewportWidth(width)
+    textControl.TextWrapPos = textControl.ItemWidth
+    return textControl
+end
+
 ---Adds a tooltip to the target with the given text.
 ---@param target ExtuiStyledRenderable
 ---@param text string The text of the tooltip
@@ -162,9 +177,7 @@ function AddTooltip(target, text)
     local tooltip = target:Tooltip()
     tooltip.IDContext = target.IDContext .. "_TOOLTIP"
     ClearChildren(tooltip)
-    local textControl = tooltip:AddText(TidyDescription(text))
-    textControl.ItemWidth = ScaleToViewportWidth(500)
-    textControl.TextWrapPos = textControl.ItemWidth
+    AddTooltipText(tooltip, text)
     return tooltip
 end
 
@@ -260,10 +273,19 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
     EnableOnAllResourcesAllocated(control, sharedResources)
 end
 
+local textRedColor = {Text = NormalizedRGBA(198, 56, 74, 0.76)}
 local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
 local selectedColors = {Border = NormalizedRGBA(255, 215, 0, 0.76), BorderShadow = NormalizedRGBA(192, 159, 106, 0.76)}
 local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
 local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
+
+---Sets the text color to red to indicate an error
+---@param target ExtuiStyledRenderable The object with text to make red.
+function MakeErrorText(target)
+    for k, v in pairs(textRedColor) do
+        target:SetColor(k, v)
+    end
+end
 
 ---Adds a border around the target object.
 ---@param target ExtuiStyledRenderable The object to add a border to.
@@ -297,9 +319,13 @@ end
 
 ---Adds a checkbox to the parent with a spicy border.
 ---@param parent ExtuiTreeParent The parent to add the checkbox to.
+---@param text string? The text to display next to the checkbox.
 ---@return ExtuiCheckbox The checkbox that was added.
-function SpicyCheckbox(parent)
-    local checkbox = parent:AddCheckbox("")
+function SpicyCheckbox(parent, text)
+    if text == nil then
+        text = ""
+    end
+    local checkbox = parent:AddCheckbox(text)
     MakeSpicy(checkbox)
     return checkbox
 end

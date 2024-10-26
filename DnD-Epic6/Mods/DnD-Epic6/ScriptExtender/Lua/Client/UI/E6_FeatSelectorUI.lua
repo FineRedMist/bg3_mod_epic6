@@ -1,8 +1,9 @@
-
 ---@type ExtuiWindow?
 local featUI = nil
 ---@type ExtuiWindow?
 local featDetailUI = nil
+---@type boolean Whether to show the filtered feats.
+local ShowFilteredFeats = false
 
 local function E6_CloseFeatDetailsUI()
     if featDetailUI then
@@ -166,14 +167,29 @@ end
 ---@param buttonWidth number The width of the button.
 ---@param playerInfo PlayerInformationType The player id for the feat.
 ---@param feat FeatType The feat to create the button for.
+---@param isFiltered boolean Whether the feat is filtered.
 ---@return ExtuiButton The button created.
-local function MakeFeatButton(win, buttonWidth, playerInfo, feat)
+local function MakeFeatButton(win, buttonWidth, playerInfo, feat, isFiltered)
     local featButton = win:AddButton(feat.DisplayName)
     SetSizeToViewport(featButton, buttonWidth - 30, 48)
     featButton:SetStyle("ButtonTextAlign", 0.5, 0.5)
-    AddTooltip(featButton, TidyDescription(feat.Description))
-    featButton.OnClick = function()
-        ShowFeatDetailSelectUI(feat, playerInfo)
+    local tooltip = AddTooltip(featButton, TidyDescription(feat.Description))
+    if isFiltered then
+        UI_Disable(featButton)
+        local playerEntity = Ext.Entity.Get(playerInfo.ID)
+        local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
+        tooltip:AddSpacing()
+        tooltip:AddSpacing()
+        local missingReqTitle = AddTooltipText(tooltip, Ext.Loca.GetTranslatedString("hc3a8865ageffcg4d60gabd8gccd4f828d6e9")) -- Requirements:
+        MakeErrorText(missingReqTitle)
+        for _, req in ipairs(reqs) do
+            local missingReqText = AddTooltipText(tooltip, " - " .. GetParameterizedLoca(req.MessageLoca, req.Args))
+            MakeErrorText(missingReqText)
+        end
+    else
+        featButton.OnClick = function()
+            ShowFeatDetailSelectUI(feat, playerInfo)
+        end
     end
     return featButton
 end
@@ -187,7 +203,15 @@ local function AddFeatButtons(win, windowDimensions, playerInfo)
 
     local featList = {}
     local featMap = {}
-    for _,featId in ipairs(playerInfo.SelectableFeats) do
+    local featsToShow = DeepCopy(playerInfo.SelectableFeats)
+    local isFiltered = {}
+    if ShowFilteredFeats then
+        for _, featId in ipairs(playerInfo.FilteredFeats) do
+            isFiltered[featId] = true
+            table.insert(featsToShow, featId)
+        end
+    end
+    for _,featId in ipairs(featsToShow) do
         local feat = allFeats[featId]
         local featName = feat.DisplayName
         featMap[featName] = feat
@@ -203,7 +227,7 @@ local function AddFeatButtons(win, windowDimensions, playerInfo)
         if feat == nil then
             _E6Error("Failed to find feat for name: " .. featName)
         else
-            MakeFeatButton(win, windowDimensions[1], playerInfo, feat)
+            MakeFeatButton(win, windowDimensions[1], playerInfo, feat, isFiltered[feat.ID])
         end
     end
 end
@@ -261,6 +285,15 @@ local function AddSettings(win, windowDimensions, playerInfo)
         end
     end
 
+    win:AddSpacing()
+    win:AddSpacing()
+    local showFilteredCheckbox = SpicyCheckbox(settings, Ext.Loca.GetTranslatedString("hbc9684d8gca58g4210gb373gb55e83cc0081")) -- Show filtered feats
+    AddLocaTooltip(showFilteredCheckbox, "ha087585cgc6beg407ega903g92b69efc6e9b") -- Show feats that were filtered because requirements were not met.
+    showFilteredCheckbox.Checked = ShowFilteredFeats
+    showFilteredCheckbox.OnChange = function()
+        ShowFilteredFeats = not ShowFilteredFeats
+        E6_FeatSelectorUI(playerInfo) -- Refresh the UI
+    end
     win:AddSpacing()
     win:AddSpacing()
     AddExportCharacterButton(settings, windowDimensions, playerInfo)

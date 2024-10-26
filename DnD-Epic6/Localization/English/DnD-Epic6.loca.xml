@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="hc3a8865ageffcg4d60gabd8gccd4f828d6e9" version="1">Exclusion reason(s):</content>
+	<content contentuid="ha0a03263g1b55g40c2g8a7fg5313663ee3a5" version="1">The feat has already been selected.</content>
+	<content contentuid="hbc9684d8gca58g4210gb373gb55e83cc0081" version="1">Show filtered feats</content>
+	<content contentuid="ha087585cgc6beg407ega903g92b69efc6e9b" version="1">Show feats that were filtered because requirements were not met.</content>
+	<content contentuid="h35115c97g6f5bg4ba5gad35gfdba5e7e1d51" version="1">Requirements met.</content>
+	<content contentuid="hf5f71dc3g2cd6g40ddga2aeg167bdfe6d71e" version="1">Unknown requirement (please report a bug on NexusMods for DnD-Epic6 to have it added): [1]</content>
+	<content contentuid="h5a0ed75fg8a79g4481g90e3g318669d0a6e7" version="1">Feat misconfiguration: [1]</content>
+	<content contentuid="hbc4fc044gb46fg47f2g9ff9g00af57de9fae" version="1">The ability [1] could not be found on the character.</content>
+	<content contentuid="h69b3c062g4965g4fbeg9446g901d37a06d72" version="1">[1] is less than [2]. It is currently [3].</content>
+	<content contentuid="h0772c666g159dg47eag857eg2c8bb25bc440" version="1">Missing proficiency: [1]</content>
+	<content contentuid="hd7005e0bgad9bg43afgabb9gd831f1708f49" version="1">Missing ability: [1]</content>
+	<content contentuid="h1216582dgb25ag4404ga05cg8fa1c1fd8f84" version="1">Missing: [1]</content>
+	<content contentuid="h04fab965g7b1bg47fegad9bg69ae676c8cdf" version="1">Character level must be greater than: [1]</content>
+	<content contentuid="h1d87338fgc5ddg4386gaf1eg83c82d9ca1a3" version="1">Already has proficiency: [1]</content>
+	<content contentuid="h1c81aad6g23b0g4068ga108g3b4b0957050b" version="1">Unknown proficiency: [1]</content>
+	<content contentuid="h3ee30c4bg920fg46fdga857g21d9a21b5bb5" version="1">An error occurred getting the player's ability scores.</content>
+	<content contentuid="h54868782g1a0bg4f36g8e13gc6f4adfccfc4" version="1">An error occurred getting the player's proficiencies.</content>
+	<content contentuid="h2e9bd450g5df3g4075ga81eg29eef9f9f4a4" version="1">The feat grants more points than can be applied to abilities.</content>
+	<content contentuid="h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7" version="1">The ability list [2] wasn't found.</content>
+	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>
 	<content contentuid="hf288edb6g7572g4963gb930ge36925049021" version="1">Maximum: {Maximum}</content>
 	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased by 1.</content>
 	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic Feat: Heroic</content>

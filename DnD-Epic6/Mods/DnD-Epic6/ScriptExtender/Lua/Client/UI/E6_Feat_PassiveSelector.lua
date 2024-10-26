@@ -67,7 +67,7 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
     end
 
     local passiveID = passive.ID
-    local checkBoxControl = renderState.CenterCell:AddCheckbox(passive.DisplayName)
+    local checkBoxControl = SpicyCheckbox(renderState.CenterCell, passive.DisplayName)
     if not IsPassiveSafe(playerInfo, passiveID, passive.Stat) then
         UI_Disable(checkBoxControl)
     else

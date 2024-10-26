@@ -39,6 +39,13 @@
           <attribute id="Requirements" type="LSString" value="FeatRequirementProficiency(&apos;MediumArmor&apos;);FeatRequirementNonProficiency(&apos;HeavyArmor&apos;)"/>
           <attribute id="UUID" type="guid" value="7bc235ac-7eeb-49d3-8249-c3313d87af75"/>
         </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="Performer"/>
+          <attribute id="PassivesAdded" type="LSString" value="Performer"/>
+          <attribute id="Requirements" type="LSString" value="FeatRequirementNonProficiency(&apos;MusicalInstrument&apos;)"/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(98acdfcb-3c74-4e1a-8707-5d6da747d430,1,1,PerformerASI)"/>
+          <attribute id="UUID" type="guid" value="60dfd716-3ba8-4611-90ee-018b59775b1d"/>
+        </node>
       </children>
     </node>
   </region>
