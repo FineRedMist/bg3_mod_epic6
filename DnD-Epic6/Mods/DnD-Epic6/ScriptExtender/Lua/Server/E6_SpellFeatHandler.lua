@@ -92,42 +92,6 @@ local function GatherPlayerPassives(entity)
     return passives
 end
 
----Determines if the character meets the requirements for a feat.
----@param feat table The feat to test for
----@param entity EntityHandle The entity to test against
----@return boolean True if the entity meets the requirements, false otherwise.
-local function MeetsFeatRequirements(feat, entity, playerInfo)
-    if not feat.HasRequirements then
-        return true
-    end
-    for _, req in ipairs(feat.HasRequirements) do
-        if not req(entity, playerInfo) then
-            return false
-        end
-    end
-    return true
-end
-
----Gathers the feats that the player can select. It checks constraints server side as client doesn't
----seem to have all the data to do so.
----@param entity EntityHandle The player entity to test against.
----@param playerFeats table The feats the player already has.
----@param playerInfo table Information about what the player has for abilities, proficiencies, etc.
----@return string[] The collection of feats the player can actually select
-local function GatherSelectableFeatsForPlayer(entity, playerFeats, playerInfo)
-    local allFeats = E6_GatherFeats()
-
-    local featList = {}
-    for featId, feat in pairs(allFeats) do
-        if feat.CanBeTakenMultipleTimes or playerFeats[featId] == nil then
-            if MeetsFeatRequirements(feat, entity, playerInfo) then
-                table.insert(featList, featId)
-            end
-        end
-    end
-    return featList
-end
-
 ---Determines if the boost should be included for the character.
 ---@param entity EntityHandle The character entity
 ---@param boost EntityHandle The boost instance
@@ -653,13 +617,24 @@ local function OnEpic6FeatSelectorSpell(caster)
     local spells = GatherSpells(ent)
     local passives = GatherPlayerPassives(ent)
 
+    ---@type PlayerFeatRequirementInformationType
+    local featRequirementInfo = {
+        PlayerPassives = passives,
+        PlayerFeats = playerFeats,
+        Proficiencies = proficiencies,
+        Abilities = abilityScores
+    }
+
+    local selectableFeats, filteredFeats = GatherSelectableFeatsForPlayer(ent, featRequirementInfo)
+
     ---@type PlayerInformationType
     local message = {
         ID = caster,
         Name = charname,
         PlayerFeats = playerFeats,
         PlayerPassives = passives,
-        SelectableFeats = GatherSelectableFeatsForPlayer(ent, playerFeats, { AbilityScores = abilityScores, Proficiencies = proficiencies, PlayerPassives = passives }),
+        SelectableFeats = selectableFeats,
+        FilteredFeats = filteredFeats,
         Abilities = abilityScores, -- we need their current scores and maximums to display UI
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
         Spells = spells, -- The mapping of class to spell list.
