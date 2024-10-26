@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="hc3a8865ageffcg4d60gabd8gccd4f828d6e9" version="1">Missing Requirements:</content>
+	<content contentuid="ha0a03263g1b55g40c2g8a7fg5313663ee3a5" version="1">The feat has already been selected.</content>
+	<content contentuid="hbc9684d8gca58g4210gb373gb55e83cc0081" version="1">Show filtered feats</content>
+	<content contentuid="ha087585cgc6beg407ega903g92b69efc6e9b" version="1">Show feats that were filtered because requirements were not met.</content>
 	<content contentuid="h35115c97g6f5bg4ba5gad35gfdba5e7e1d51" version="1">Requirements met.</content>
 	<content contentuid="hf5f71dc3g2cd6g40ddga2aeg167bdfe6d71e" version="1">Unknown requirement (please report a bug on NexusMods for DnD-Epic6 to have it added): [1]</content>
 	<content contentuid="h5a0ed75fg8a79g4481g90e3g318669d0a6e7" version="1">Feat misconfiguration: [1]</content>
