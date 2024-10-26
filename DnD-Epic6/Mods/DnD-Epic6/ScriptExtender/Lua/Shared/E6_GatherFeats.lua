@@ -229,7 +229,7 @@ local function E6_MakePassiveRequirement(feat, proficiencyMatch)
         ---@type PassiveData Data for the passive
         local passiveStat = Ext.Stats.Get(passiveName,  -1, true, true)
         if not passiveStat then
-            return false, ToMessageLoca("h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", passiveName}) -- Feat misconfiguration: [1], The passive [2] for the feat wasn't found.
+            return false, ToMessageLoca("h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", passiveName}) -- Feat misconfiguration: [1], The passive [2] wasn't found.
         end
         return playerInfo.PlayerPassives[passiveName] ~= nil, ToMessageLoca("hd7005e0bgad9bg43afgabb9gd831f1708f49", {passiveStat.DisplayName}) -- Missing ability: [1]
     end
@@ -350,7 +350,7 @@ local function E6_ApplyFeatAbilityConstraints(feat)
         end
     end
     if not isValid then
-        E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", failedPassiveName})) -- Feat misconfiguration: [1], The passive [2] for the feat wasn't found.
+        E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", failedPassiveName})) -- Feat misconfiguration: [1], The passive [2] wasn't found.
         return
     end
     if next(abilityBoosts) ~= nil then
