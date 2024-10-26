@@ -600,6 +600,7 @@ local function OnEpic6FeatSelectorSpell(caster)
             PlayerFeats = {},
             PlayerPassives = {},
             SelectableFeats = {},
+            FilteredFeats = {},
             Abilities = {}, -- we need their current scores and maximums to display UI
             Proficiencies = nil, -- gathered so we know what they are proficient in and what could be granted
             Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
