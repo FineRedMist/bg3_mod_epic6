@@ -242,10 +242,20 @@ local function UpdateEpicCharacterPassive(id, charName, level)
     end
 end
 
+---Determines if there is a pending tick wait for the character.
+---@param id GUIDSTRING The id of the character
+---@return boolean Whether there is a pending tick wait for the character.
+local function HasPendingTickWait(id)
+    return PendingTickWait[id] ~= nil
+end
+
+---Determines whether the tick loop should wait for the next tick to process the feat points. Decrements the tick counter.
+---@param id GUIDSTRING The id of the character
+---@return boolean Whether to wait for a subsequent tick
 local function ShouldWaitForLaterTick(id)
     local pendingWait = PendingTickWait[id]
     if pendingWait then
-        pendingWait = pendingWait -1
+        pendingWait = pendingWait - 1
         PendingTickWait[id] = pendingWait
         if pendingWait > 0 then
             return true
@@ -254,6 +264,30 @@ local function ShouldWaitForLaterTick(id)
         end
     end
     return false
+end
+
+---@type table<GUIDSTRING, function[]> Callbacks to call for the character when the feat points are stable. Once called, removed. Passes the character ID to the function.
+local onStableCallbacks = {}
+
+---Adds a callback to be called when the character is stable pointwise.
+function FeatPointTracker:OnStableCallback(id, callback)
+    if not onStableCallbacks[id] then
+        onStableCallbacks[id] = {}
+    end
+    table.insert(onStableCallbacks[id], callback)
+end
+
+---Calls the callbacks now that the character is stable pointwise.
+---@param id GUIDSTRING
+local function CallOnStableCallbacks(id)
+    local callbacks = onStableCallbacks[id]
+    if callbacks then
+        for _, callback in ipairs(callbacks) do
+            _E6P("Calling callback for " .. id)
+            callback(id)
+        end
+        onStableCallbacks[id] = nil
+    end
 end
 
 ---Evaluates how many feat points an entity should have, based on the experience points per feat.
@@ -351,6 +385,12 @@ function FeatPointTracker:Update(ent)
             AdjustFeatPoints(id, toAdjust)
             SetPendingFeatCount(id, {LastCount = currentFeatPointCount, Pending = toAdjust})
         end
+    end
+
+    if not HasPendingTickWait(id) then
+        CallOnStableCallbacks(id)
+    else
+        _E6P("Waiting for later tick for: " .. charName)
     end
 end
 
