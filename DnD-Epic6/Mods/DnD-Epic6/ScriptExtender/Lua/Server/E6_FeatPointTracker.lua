@@ -283,7 +283,6 @@ local function CallOnStableCallbacks(id)
     local callbacks = onStableCallbacks[id]
     if callbacks then
         for _, callback in ipairs(callbacks) do
-            _E6P("Calling callback for " .. id)
             callback(id)
         end
         onStableCallbacks[id] = nil
@@ -389,8 +388,6 @@ function FeatPointTracker:Update(ent)
 
     if not HasPendingTickWait(id) then
         CallOnStableCallbacks(id)
-    else
-        _E6P("Waiting for later tick for: " .. charName)
     end
 end
 

@@ -23,7 +23,6 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     E6_ApplyFeat(message.PlayerId, message.Feat)
 
     if restoreFeatSelectorUI then
-        _E6P("Adding feat selector spell handler for player: " .. message.PlayerId)
         FeatPointTracker:OnStableCallback(entity.Uuid.EntityUuid, OnEpic6FeatSelectorSpell)
     end
 end
