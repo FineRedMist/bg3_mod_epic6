@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="4" minor="0" revision="9" build="307"/>
+    <region id="PassiveLists">
+        <node id="root">
+            <children>
+                <node id="PassiveList">
+                    <attribute id="Passives" type="LSString" value="E6_Tag_Barbarian_Passive,E6_Tag_Bard_Passive,E6_Tag_Cleric_Passive,E6_Tag_Druid_Passive,E6_Tag_Fighter_Passive,E6_Tag_Monk_Passive,E6_Tag_Paladin_Passive,E6_Tag_Ranger_Passive,E6_Tag_Rogue_Passive,E6_Tag_Sorcerer_Passive,E6_Tag_Warlock_Passive,E6_Tag_Wizard_Passive"/>
+                    <attribute id="UUID" type="guid" value="ad216bb8-16d1-4d95-ad5b-272e390e2bd7"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

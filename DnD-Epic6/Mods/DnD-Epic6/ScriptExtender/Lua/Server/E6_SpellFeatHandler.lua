@@ -42,10 +42,62 @@ local function GatherPlayerFeats(entity)
     return feats
 end
 
+---@type table<GUIDSTRING, string> Mapping of tag GUID to tag name.
+local tagNameCache = {}
+
+---Gathers class tags and converts them to the corresponding passives to filter from selection for the player.
+---@param entity EntityHandle The character
+---@param addPassive function Method to add passives to the list.
+local function GatherPlayerTags(entity, addPassive)
+    if entity == nil then
+        return
+    end
+
+    local function ToPassiveName(tagName)
+        local passiveName = "E6_Tag_" .. tagName .. "_Passive"
+        addPassive(passiveName)
+    end
+
+    local function ProcessTags(tags)
+        if tags == nil then
+            return
+        end
+
+        for _,tag in pairs(tags) do
+            if not tagNameCache[tag] then
+                ---@type ResourceTag
+                local tagResource = Ext.StaticData.Get(tag, Ext.Enums.ExtResourceManagerType.Tag)
+
+                tagNameCache[tag] = ToPassiveName(NormalizePascalCase(tagResource.Name))
+            end
+            addPassive(tagNameCache[tag])
+        end
+    end
+
+    if not entity.Tag then
+        return
+    end
+    ProcessTags(entity.Tag.Tags)
+end
+
+---Gathers saving throws and converts them to the corresponding passives to filter from selection for the player.
+---@param proficiencies ProficiencyInformationType The proficiency information for the player.
+---@param addPassive function Method to add passives to the list.
+local function GatherPlayerSavingThrows(proficiencies, addPassive)
+    if not proficiencies or not proficiencies.SavingThrows then
+        return
+    end
+    for savingThrow, _ in pairs(proficiencies.SavingThrows) do
+        local passiveName = "Resilient_" .. savingThrow
+        addPassive(passiveName)
+    end
+end
+
 ---We need to gather passives that have already been selected for the entity so we can filter if necessary.
 ---@param entity EntityHandle The player entity to gather passives for.
+---@param proficiencies ProficiencyInformationType The proficiency information for the player.
 ---@return table<string, number> The count of occurrences for each passive. 
-local function GatherPlayerPassives(entity)
+local function GatherPlayerPassives(entity, proficiencies)
     local passives = {}
     if entity == nil then
         return passives
@@ -89,6 +141,12 @@ local function GatherPlayerPassives(entity)
             end
         end
     end
+
+    -- Gather the tags from classes and emulate the E6_Tag_<target>_Passive passives to property
+    -- exclude them from the list.
+    GatherPlayerTags(entity, AddPassive)
+    GatherPlayerSavingThrows(proficiencies, AddPassive)
+    
     return passives
 end
 
@@ -589,7 +647,7 @@ end
 
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
-local function OnEpic6FeatSelectorSpell(caster)
+function OnEpic6FeatSelectorSpell(caster)
     ---@type EntityHandle
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
@@ -611,7 +669,8 @@ local function OnEpic6FeatSelectorSpell(caster)
             Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
             ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
             XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
-            IsHost = isHost
+            IsHost = isHost,
+            FeatPoints = featPoints
         }
         SendShowFeatSelector(caster, playerInfoLite)
         return
@@ -621,7 +680,7 @@ local function OnEpic6FeatSelectorSpell(caster)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
-    local passives = GatherPlayerPassives(ent)
+    local passives = GatherPlayerPassives(ent, proficiencies)
 
     ---@type PlayerFeatRequirementInformationType
     local featRequirementInfo = {
@@ -646,7 +705,8 @@ local function OnEpic6FeatSelectorSpell(caster)
         Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
         XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
-        IsHost = isHost
+        IsHost = isHost,
+        FeatPoints = featPoints
     }
 
     SendShowFeatSelector(caster, message)

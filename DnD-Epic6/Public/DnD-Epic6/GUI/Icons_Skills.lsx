@@ -7,65 +7,149 @@
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Ability_Charisma" />
           <attribute id="U1" type="float" value="0" />
-          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.125" />
           <attribute id="V1" type="float" value="0" />
-          <attribute id="V2" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.125" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Ability_Constitution" />
-          <attribute id="U1" type="float" value="0.25" />
-          <attribute id="U2" type="float" value="0.5" />
+          <attribute id="U1" type="float" value="0.125" />
+          <attribute id="U2" type="float" value="0.25" />
           <attribute id="V1" type="float" value="0" />
-          <attribute id="V2" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.125" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Ability_Dexterity" />
-          <attribute id="U1" type="float" value="0.5" />
-          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.375" />
           <attribute id="V1" type="float" value="0" />
-          <attribute id="V2" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.125" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Ability_Intelligence" />
-          <attribute id="U1" type="float" value="0.75" />
-          <attribute id="U2" type="float" value="1" />
+          <attribute id="U1" type="float" value="0.375" />
+          <attribute id="U2" type="float" value="0.5" />
           <attribute id="V1" type="float" value="0" />
-          <attribute id="V2" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.125" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Ability_Strength" />
-          <attribute id="U1" type="float" value="0" />
-          <attribute id="U2" type="float" value="0.25" />
-          <attribute id="V1" type="float" value="0.25" />
-          <attribute id="V2" type="float" value="0.5" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.625" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.125" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Ability_Wisdom" />
+          <attribute id="U1" type="float" value="0.625" />
+          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.125" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Barbarian" />
+          <attribute id="U1" type="float" value="0.75" />
+          <attribute id="U2" type="float" value="0.875" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.125" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Bard" />
+          <attribute id="U1" type="float" value="0.875" />
+          <attribute id="U2" type="float" value="1" />
+          <attribute id="V1" type="float" value="0" />
+          <attribute id="V2" type="float" value="0.125" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Cleric" />
+          <attribute id="U1" type="float" value="0" />
+          <attribute id="U2" type="float" value="0.125" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Druid" />
+          <attribute id="U1" type="float" value="0.125" />
+          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Fighter" />
           <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.375" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Monk" />
+          <attribute id="U1" type="float" value="0.375" />
           <attribute id="U2" type="float" value="0.5" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Paladin" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.625" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Ranger" />
+          <attribute id="U1" type="float" value="0.625" />
+          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Rogue" />
+          <attribute id="U1" type="float" value="0.75" />
+          <attribute id="U2" type="float" value="0.875" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Sorcerer" />
+          <attribute id="U1" type="float" value="0.875" />
+          <attribute id="U2" type="float" value="1" />
+          <attribute id="V1" type="float" value="0.125" />
+          <attribute id="V2" type="float" value="0.25" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Warlock" />
+          <attribute id="U1" type="float" value="0" />
+          <attribute id="U2" type="float" value="0.125" />
           <attribute id="V1" type="float" value="0.25" />
-          <attribute id="V2" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.375" />
+        </node>
+        <node id="IconUV">
+          <attribute id="MapKey" type="FixedString" value="E6_Class_Wizard" />
+          <attribute id="U1" type="float" value="0.125" />
+          <attribute id="U2" type="float" value="0.25" />
+          <attribute id="V1" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.375" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Expertise" />
-          <attribute id="U1" type="float" value="0.5" />
-          <attribute id="U2" type="float" value="0.75" />
+          <attribute id="U1" type="float" value="0.25" />
+          <attribute id="U2" type="float" value="0.375" />
           <attribute id="V1" type="float" value="0.25" />
-          <attribute id="V2" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.375" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Logo" />
-          <attribute id="U1" type="float" value="0.75" />
-          <attribute id="U2" type="float" value="1" />
+          <attribute id="U1" type="float" value="0.375" />
+          <attribute id="U2" type="float" value="0.5" />
           <attribute id="V1" type="float" value="0.25" />
-          <attribute id="V2" type="float" value="0.5" />
+          <attribute id="V2" type="float" value="0.375" />
         </node>
         <node id="IconUV">
           <attribute id="MapKey" type="FixedString" value="E6_Proficient" />
-          <attribute id="U1" type="float" value="0" />
-          <attribute id="U2" type="float" value="0.25" />
-          <attribute id="V1" type="float" value="0.5" />
-          <attribute id="V2" type="float" value="0.75" />
+          <attribute id="U1" type="float" value="0.5" />
+          <attribute id="U2" type="float" value="0.625" />
+          <attribute id="V1" type="float" value="0.25" />
+          <attribute id="V2" type="float" value="0.375" />
         </node>
       </children>
     </node>
@@ -79,11 +163,11 @@
         </node>
         <node id="TextureAtlasPath">
           <attribute id="Path" type="string" value="Assets/Textures/Icons/DnD_Epic6_Icons.DDS" />
-          <attribute id="UUID" type="FixedString" value="208e84e8-f3bc-40ee-80be-856e81b08835" />
+          <attribute id="UUID" type="FixedString" value="3a17254e-4d58-49de-8df2-8d6778b65082" />
         </node>
         <node id="TextureAtlasTextureSize">
-          <attribute id="Height" type="int32" value="256" />
-          <attribute id="Width" type="int32" value="256" />
+          <attribute id="Height" type="int32" value="512" />
+          <attribute id="Width" type="int32" value="512" />
         </node>
       </children>
     </node>

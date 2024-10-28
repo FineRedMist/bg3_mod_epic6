@@ -12,12 +12,12 @@
         </node>
 		    <node id="Feat">
           <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
-          <attribute id="Name" type="FixedString" value="SkillExpert"/>
-          <attribute id="PassivesAdded" type="LSString" value="SkillExpert"/>
+          <attribute id="Name" type="FixedString" value="E6_AvidLearner"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_AvidLearner_Passive"/>
           <attribute id="PassivesRemoved" type="LSString" value=""/>
-          <attribute id="Requirements" type="LSString" value=""/>
-          <attribute id="Selectors" type="LSString" value="SelectAbilities(372c1167-b9ed-46ef-be41-f345d45a7e13,1,1,SkillExpert);SelectSkills(f974ebd6-3725-4b90-bb5c-2b647d41615d,1);SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,1)"/>
-          <attribute id="UUID" type="guid" value="d10c01e5-50f9-4ffa-b20d-ffbfb89ab554"/>
+          <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
+          <attribute id="Selectors" type="LSString" value="SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,2);SelectPassives(ad216bb8-16d1-4d95-ad5b-272e390e2bd7,1)"/>
+          <attribute id="UUID" type="guid" value="c351df11-61c2-4086-aa8f-2cc05bd3215c"/>
         </node>
     		<node id="Feat">
           <attribute id="Name" type="FixedString" value="LightlyArmored"/>
@@ -41,10 +41,46 @@
         </node>
         <node id="Feat">
           <attribute id="Name" type="FixedString" value="Performer"/>
-          <attribute id="PassivesAdded" type="LSString" value="Performer"/>
+          <attribute id="PassivesAdded" type="LSString" value="Performer;E6_Tag_Bard_Passive"/>
           <attribute id="Requirements" type="LSString" value="FeatRequirementNonProficiency(&apos;MusicalInstrument&apos;)"/>
           <attribute id="Selectors" type="LSString" value="SelectAbilities(98acdfcb-3c74-4e1a-8707-5d6da747d430,1,1,PerformerASI)"/>
           <attribute id="UUID" type="guid" value="60dfd716-3ba8-4611-90ee-018b59775b1d"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="MagicInitiateBard"/>
+          <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Bard;E6_Tag_Bard_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectSpells(61f79a30-2cac-4a7a-b5fe-50c89d307dd6,2,0,MIBardCantrips,Charisma,,AlwaysPrepared,,92cd50b6-eb1b-4824-8adb-853e90c34c90);SelectSpells(dcb45167-86bd-4297-9b9d-c295be51af5b,1,0,MIBardSpells,Charisma,None,AlwaysPrepared,UntilRest,92cd50b6-eb1b-4824-8adb-853e90c34c90)"/>
+          <attribute id="UUID" type="guid" value="4f744a6e-8589-4a46-89ab-a95415a73245"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="MagicInitiateCleric"/>
+          <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Cleric;E6_Tag_Cleric_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectSpells(2f43a103-5bf1-4534-b14f-663decc0c525,2,0,MIClericCantrips,Wisdom,,AlwaysPrepared,,114e7aee-d1d4-4371-8d90-8a2080592faf);SelectSpells(269d1a3b-eed8-4131-8901-a562238f5289,1,0,MIClericSpells,Wisdom,None,AlwaysPrepared,UntilRest,114e7aee-d1d4-4371-8d90-8a2080592faf)"/>
+          <attribute id="UUID" type="guid" value="28e5fed3-bd41-4b74-ab48-b8e824ad3443"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="MagicInitiateDruid"/>
+          <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Druid;E6_Tag_Druid_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectSpells(b8faf12f-ca42-45c0-84f8-6951b526182a,2,0,MIDruidCantrips,Wisdom,,AlwaysPrepared,,457d0a6e-9da8-4f95-a225-18382f0e94b5);SelectSpells(2cd54137-2fe5-4100-aad3-df64735a8145,1,0,MIDruidSpells,Wisdom,None,AlwaysPrepared,UntilRest,457d0a6e-9da8-4f95-a225-18382f0e94b5)"/>
+          <attribute id="UUID" type="guid" value="1e1a9a4d-38f4-4a05-b080-d32c2b872250"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="MagicInitiateSorcerer"/>
+          <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Sorcerer;E6_Tag_Sorcerer_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectSpells(485a68b4-c678-4888-be63-4a702efbe391,2,0,MISorcererCantrips,Charisma,,AlwaysPrepared,,784001e2-c96d-4153-beb6-2adbef5abc92);SelectSpells(92c4751f-6255-4f67-822c-a75d53830b27,1,0,MISorcererSpells,Charisma,None,AlwaysPrepared,UntilRest,784001e2-c96d-4153-beb6-2adbef5abc92)"/>
+          <attribute id="UUID" type="guid" value="93d41226-d7af-495c-b023-08a6af077962"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="MagicInitiateWarlock"/>
+          <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Warlock;E6_Tag_Warlock_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectSpells(f5c4af9c-5d8d-4526-9057-94a4b243cd40,2,0,MIWarlockCantrips,Charisma,,AlwaysPrepared,,b4225a4b-4bbe-4d97-9e3c-4719dbd1487c);SelectSpells(21e1e2b9-81f7-47d2-ab69-90ba67c0c74c,1,0,MIWarlockSpells,Charisma,None,AlwaysPrepared,UntilRest,b4225a4b-4bbe-4d97-9e3c-4719dbd1487c)"/>
+          <attribute id="UUID" type="guid" value="1e0ac3c4-5bb5-42d7-941c-9de58d919732"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="MagicInitiateWizard"/>
+          <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Wizard;E6_Tag_Wizard_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectSpells(3cae2e56-9871-4cef-bba6-96845ea765fa,2,0,MIWizardCantrips,Intelligence,,AlwaysPrepared,,a865965f-501b-46e9-9eaa-7748e8c04d09);SelectSpells(11f331b0-e8b7-473b-9d1f-19e8e4178d7d,1,0,MIWizardSpells,Intelligence,None,AlwaysPrepared,UntilRest,a865965f-501b-46e9-9eaa-7748e8c04d09)"/>
+          <attribute id="UUID" type="guid" value="26c6990b-d9f0-41a2-8108-209789fafc18"/>
         </node>
       </children>
     </node>

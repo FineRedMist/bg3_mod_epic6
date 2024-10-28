@@ -12,11 +12,11 @@
                     <attribute id="UUID" type="guid" value="a6359d31-8579-45ef-80e4-8e4bd2cc38ec"/>
                 </node>
 				<node id="FeatDescription">
-                    <attribute id="Description" type="TranslatedString" handle="h3d607cc2g0131g477cgbd6bg89eb004a3641" version="1"/>
-                    <attribute id="DisplayName" type="TranslatedString" handle="h3d607cc2g0131g477cgbd6bg89eb004a3640" version="1"/>
-                    <attribute id="ExactMatch" type="FixedString" value="SkillExpert"/>
-                    <attribute id="FeatId" type="guid" value="d10c01e5-50f9-4ffa-b20d-ffbfb89ab554"/>
-                    <attribute id="UUID" type="guid" value="317e396f-4bfb-4b60-ab64-732939783d53"/>
+                    <attribute id="Description" type="TranslatedString" handle="hcd086f4bgb3ccg487eg90a7gfeae870aee03" version="1"/>
+                    <attribute id="DisplayName" type="TranslatedString" handle="h5a499cf9gad5cg4888gb48ag32f118c40da6" version="1"/>
+                    <attribute id="ExactMatch" type="FixedString" value="E6_AvidLearner"/>
+                    <attribute id="FeatId" type="guid" value="c351df11-61c2-4086-aa8f-2cc05bd3215c"/>
+                    <attribute id="UUID" type="guid" value="1acbd973-3caf-4ded-b791-aa16a6f04a18"/>
                 </node>
 			</children>
         </node>

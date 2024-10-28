@@ -210,3 +210,26 @@ function IsHost(playerId)
     return false
 end
 
+---Converts a string to PascalCase (does no internal checking)
+---@param str string
+---@return string
+function ToPascalCase(str)
+    return string.sub(str, 1, 1):upper() .. string.sub(str, 2):lower()
+end
+
+---Normalizes a string with separators to use PascalCase
+---@param str string
+---@return string
+function NormalizePascalCase(str)
+    for _, sep in ipairs({"_", " ", "-"}) do
+        local parts = SplitString(str, "_")
+        if #parts > 1 then
+            local result = ""
+            for _,part in ipairs(parts) do
+                result = result .. ToPascalCase(part)
+            end
+            return result
+        end
+    end
+    return ToPascalCase(str)
+end

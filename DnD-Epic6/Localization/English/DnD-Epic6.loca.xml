@@ -18,7 +18,9 @@
 	<content contentuid="h3ee30c4bg920fg46fdga857g21d9a21b5bb5" version="1">An error occurred getting the player's ability scores.</content>
 	<content contentuid="h54868782g1a0bg4f36g8e13gc6f4adfccfc4" version="1">An error occurred getting the player's proficiencies.</content>
 	<content contentuid="h2e9bd450g5df3g4075ga81eg29eef9f9f4a4" version="1">The feat grants more points than can be applied to abilities.</content>
+	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough unselected passives to choose from.</content>
 	<content contentuid="h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7" version="1">The ability list [2] wasn't found.</content>
+	<content contentuid="h31df0045ge2e3g453bga538ga0a618a38844" version="1">The pasive list [2] wasn't found.</content>
 	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>
 	<content contentuid="hf288edb6g7572g4963gb930ge36925049021" version="1">Maximum: {Maximum}</content>
 	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased by 1.</content>
@@ -49,8 +51,8 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
 	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Export Character</content>
 	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">The exported character can be found in %LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/Script Extender/E6_Character.json. Note: Exporting the character will generate a lot of spurious warnings and errors in the logs as it tests properties on objects.</content>
-	<content contentuid="h3d607cc2g0131g477cgbd6bg89eb004a3640" version="1">Skill Expert</content>
-	<content contentuid="h3d607cc2g0131g477cgbd6bg89eb004a3641" version="1">Increase one &lt;LSTag Tooltip="AbilityScore"&gt;Ability Score&lt;/LSTag&gt; of your choice by 1, to a maximum of 20. You gain proficiency in one &lt;LSTag Tooltip="Skill"&gt;Skill&lt;/LSTag&gt; of your choice.
-
-Choose one skill in which you have proficiency. You gain &lt;LSTag Tooltip="Expertise"&gt;Expertise&lt;/LSTag&gt; with that skill. The skill you choose must be one that isn't already benefiting from a feature, such as Expertise, that doubles your proficiency bonus.</content>
+	<content contentuid="h5a499cf9gad5cg4888gb48ag32f118c40da6" version="1">Avid Learner</content>
+	<content contentuid="hcd086f4bgb3ccg487eg90a7gfeae870aee03" version="1">Gain &lt;LSTag Tooltip="Expertise"&gt;Expertise&lt;/LSTag&gt; in two &lt;LSTag Tooltip="Skill"&gt;Skills&lt;/LSTag&gt; of your choice.
+	
+	Learn to present yourself as another class.</content>
 </contentList>

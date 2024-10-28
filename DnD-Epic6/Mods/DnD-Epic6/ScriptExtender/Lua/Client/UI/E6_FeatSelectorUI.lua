@@ -64,9 +64,9 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
     AddFeaturesToFeatDetailsUI(childWin, feat, extraPassives)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
-    local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources, skillStates)
     local passiveSharedResources = AddPassiveSelectorToFeatDetailsUI(childWin, feat, playerInfo, selectedPassives)
     local spellSharedResources = AddSpellSelectorToFeatDetailsUI(childWin, feat, playerInfo, selectedSpells)
+    local skillSharedResources = AddSkillSelectorToFeatDetailsUI(childWin, feat, playerInfo, abilityResources, skillStates)
 
     for _, resource in ipairs(skillSharedResources) do
         table.insert(sharedResources, resource)
@@ -84,7 +84,15 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     select:SetStyle("ButtonTextAlign", 0.5, 0.5)
 
     select.OnClick = function()
-        E6_CloseUI()
+        -- If we'll have more feat points after applying the feat, then close the detail window, but keep the selector window
+        -- open so the player can select another feat. We'll get an update from the server, however, to update feat status.
+        if playerInfo.FeatPoints > 1 then
+            playerInfo.FeatPoints = playerInfo.FeatPoints - 1
+            E6_CloseFeatDetailsUI()
+            E6_FeatSelectorUI(playerInfo) -- Refresh the UI to potentially filter out the selected feat.
+        else
+            E6_CloseUI()
+        end
 
         -- Gather the selected abilities and any boosts from passives that resolved to only one ability (so automatic selection)
         local boosts = {}
