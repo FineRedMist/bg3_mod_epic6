@@ -12,11 +12,11 @@
         </node>
 		    <node id="Feat">
           <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
-          <attribute id="Name" type="FixedString" value="E6_HigherLearning"/>
-          <attribute id="PassivesAdded" type="LSString" value="HigherLearning"/>
+          <attribute id="Name" type="FixedString" value="E6_AvidLearner"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_AvidLearner_Passive"/>
           <attribute id="PassivesRemoved" type="LSString" value=""/>
-          <attribute id="Requirements" type="LSString" value=""/>
-          <attribute id="Selectors" type="LSString" value="SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,2)"/>
+          <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
+          <attribute id="Selectors" type="LSString" value="SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,2);SelectPassives(ad216bb8-16d1-4d95-ad5b-272e390e2bd7,1)"/>
           <attribute id="UUID" type="guid" value="c351df11-61c2-4086-aa8f-2cc05bd3215c"/>
         </node>
     		<node id="Feat">
@@ -41,7 +41,7 @@
         </node>
         <node id="Feat">
           <attribute id="Name" type="FixedString" value="Performer"/>
-          <attribute id="PassivesAdded" type="LSString" value="Performer"/>
+          <attribute id="PassivesAdded" type="LSString" value="Performer;E6_Tag_Bard_Passive"/>
           <attribute id="Requirements" type="LSString" value="FeatRequirementNonProficiency(&apos;MusicalInstrument&apos;)"/>
           <attribute id="Selectors" type="LSString" value="SelectAbilities(98acdfcb-3c74-4e1a-8707-5d6da747d430,1,1,PerformerASI)"/>
           <attribute id="UUID" type="guid" value="60dfd716-3ba8-4611-90ee-018b59775b1d"/>
