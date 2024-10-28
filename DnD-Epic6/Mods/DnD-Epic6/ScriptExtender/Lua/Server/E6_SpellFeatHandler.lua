@@ -42,6 +42,44 @@ local function GatherPlayerFeats(entity)
     return feats
 end
 
+---@type table<GUIDSTRING, string> Mapping of tag GUID to tag name.
+local tagNameCache = {}
+
+---Gathers class tags and converts them to the corresponding passives to filter from selection for the player.
+---@param entity EntityHandle The character
+---@param addPassive function Method to add passives to the list.
+local function GatherPlayerTags(entity, addPassive)
+    if entity == nil then
+        return
+    end
+
+    local function ToPassiveName(tagName)
+        local passiveName = "E6_Tag_" .. tagName .. "_Passive"
+        addPassive(passiveName)
+    end
+
+    local function ProcessTags(tags)
+        if tags == nil then
+            return
+        end
+
+        for _,tag in pairs(tags) do
+            if not tagNameCache[tag] then
+                ---@type ResourceTag
+                local tagResource = Ext.StaticData.Get(tag, Ext.Enums.ExtResourceManagerType.Tag)
+
+                tagNameCache[tag] = ToPassiveName(NormalizePascalCase(tagResource.Name))
+            end
+            addPassive(tagNameCache[tag])
+        end
+    end
+
+    if not entity.Tag then
+        return
+    end
+    ProcessTags(entity.Tag.Tags)
+end
+
 ---We need to gather passives that have already been selected for the entity so we can filter if necessary.
 ---@param entity EntityHandle The player entity to gather passives for.
 ---@return table<string, number> The count of occurrences for each passive. 
@@ -89,6 +127,11 @@ local function GatherPlayerPassives(entity)
             end
         end
     end
+
+    -- Gather the tags from classes and emulate the E6_Tag_<target>_Passive passives to property
+    -- exclude them from the list.
+    GatherPlayerTags(entity, AddPassive)
+
     return passives
 end
 

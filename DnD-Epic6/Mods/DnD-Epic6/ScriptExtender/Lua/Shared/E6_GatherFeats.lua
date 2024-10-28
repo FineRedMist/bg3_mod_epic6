@@ -110,6 +110,49 @@ local function E6_ApplySelectAbilityRequirement(feat)
     end
 end
 
+---Generates the function to filter the feat if the character already has all the selectable passives.
+---@param feat FeatType The feat entry for the ability requirement
+local function E6_ApplySelectPassiveRequirement(feat)
+    if #feat.SelectPassives == 0 then
+        return
+    end
+    for _, passive in ipairs(feat.SelectPassives) do
+        ---@type ResourcePassiveList
+        local passiveList = Ext.StaticData.Get(passive.SourceId, Ext.Enums.ExtResourceManagerType.PassiveList)
+        if not passiveList then
+            E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h31df0045ge2e3g453bga538ga0a618a38844", passive.SourceId})) -- Feat misconfiguration: [1], The passive list [2] wasn't found.
+            return
+        end
+        ---@type string[] The list of passives in the passive list.
+        local passiveNames = {}
+        for _,passiveName in ipairs(passiveList.Passives) do
+            table.insert(passiveNames, passiveName)
+        end
+
+        -- Number of passives to choose.
+        local passiveCount = passive.Count
+
+        ---@param entity EntityHandle The entity to test the requirement against.
+        ---@param playerInfo PlayerFeatRequirementInformationType Information about what the player has for abilities, proficiencies, etc.
+        ---@return boolean Whether the feat has enough passives remaining to select.
+        ---@return FeatMessageType The message to display to the player about why the requirement failed.
+        local passiveRequirement = function(entity, playerInfo)
+            local playerPassives = playerInfo.PlayerPassives
+            local missingPassives = 0
+            for _,passiveName in ipairs(passiveNames) do
+                if not playerPassives[passiveName] then
+                    missingPassives  = missingPassives + 1
+                end
+                if missingPassives >= passiveCount then
+                    return true, RequirementsMet
+                end
+            end
+            return false, ToMessageLoca("h8b51336eg9283g49acgb856g30ab5c92524c")
+        end
+        E6_AddFeatRequirement(feat, passiveRequirement)
+    end
+end
+
 ---Generates the function to test the character for meeting the ability requirement specified.
 ---@param feat FeatType The feat entry for the ability requirement
 ---@param abilityMatch string[] The matched requirement parameters from the requirement expression
@@ -391,6 +434,7 @@ local function E6_ApplyFeatOverrides(feat, spec)
 
     E6_ApplyFeatAbilityConstraints(feat)
     E6_ApplySelectAbilityRequirement(feat)
+    E6_ApplySelectPassiveRequirement(feat)
     E6_ApplyFeatRequirements(feat, spec)
 end
 
