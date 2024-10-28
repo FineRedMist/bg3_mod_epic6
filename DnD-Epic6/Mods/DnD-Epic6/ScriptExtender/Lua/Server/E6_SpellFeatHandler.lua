@@ -589,7 +589,7 @@ end
 
 ---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
 ---@param caster string
-local function OnEpic6FeatSelectorSpell(caster)
+function OnEpic6FeatSelectorSpell(caster)
     ---@type EntityHandle
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
@@ -611,7 +611,8 @@ local function OnEpic6FeatSelectorSpell(caster)
             Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
             ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
             XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
-            IsHost = isHost
+            IsHost = isHost,
+            FeatPoints = featPoints
         }
         SendShowFeatSelector(caster, playerInfoLite)
         return
@@ -646,7 +647,8 @@ local function OnEpic6FeatSelectorSpell(caster)
         Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
         XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
-        IsHost = isHost
+        IsHost = isHost,
+        FeatPoints = featPoints
     }
 
     SendShowFeatSelector(caster, message)

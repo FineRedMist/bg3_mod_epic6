@@ -17,7 +17,15 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     table.insert(e6Feats, message.Feat)
     entity.Vars.E6_Feats = e6Feats
 
+    -- If we will have more feat points after applying the feat, then send a message to restore the UI.
+    local restoreFeatSelectorUI = E6_GetFeatPointBoostAmount(message.PlayerId) > 1
+
     E6_ApplyFeat(message.PlayerId, message.Feat)
+
+    if restoreFeatSelectorUI then
+        _E6P("Adding feat selector spell handler for player: " .. message.PlayerId)
+        FeatPointTracker:OnStableCallback(entity.Uuid.EntityUuid, OnEpic6FeatSelectorSpell)
+    end
 end
 
 ---Handles applying the selected feat for the current player.
