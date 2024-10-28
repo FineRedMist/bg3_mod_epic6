@@ -80,10 +80,24 @@ local function GatherPlayerTags(entity, addPassive)
     ProcessTags(entity.Tag.Tags)
 end
 
+---Gathers saving throws and converts them to the corresponding passives to filter from selection for the player.
+---@param proficiencies ProficiencyInformationType The proficiency information for the player.
+---@param addPassive function Method to add passives to the list.
+local function GatherPlayerSavingThrows(proficiencies, addPassive)
+    if not proficiencies or not proficiencies.SavingThrows then
+        return
+    end
+    for savingThrow, _ in pairs(proficiencies.SavingThrows) do
+        local passiveName = "Resilient_" .. savingThrow
+        addPassive(passiveName)
+    end
+end
+
 ---We need to gather passives that have already been selected for the entity so we can filter if necessary.
 ---@param entity EntityHandle The player entity to gather passives for.
+---@param proficiencies ProficiencyInformationType The proficiency information for the player.
 ---@return table<string, number> The count of occurrences for each passive. 
-local function GatherPlayerPassives(entity)
+local function GatherPlayerPassives(entity, proficiencies)
     local passives = {}
     if entity == nil then
         return passives
@@ -131,7 +145,8 @@ local function GatherPlayerPassives(entity)
     -- Gather the tags from classes and emulate the E6_Tag_<target>_Passive passives to property
     -- exclude them from the list.
     GatherPlayerTags(entity, AddPassive)
-
+    GatherPlayerSavingThrows(proficiencies, AddPassive)
+    
     return passives
 end
 
@@ -665,7 +680,7 @@ function OnEpic6FeatSelectorSpell(caster)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
-    local passives = GatherPlayerPassives(ent)
+    local passives = GatherPlayerPassives(ent, proficiencies)
 
     ---@type PlayerFeatRequirementInformationType
     local featRequirementInfo = {

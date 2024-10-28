@@ -141,7 +141,7 @@ local function E6_ApplySelectPassiveRequirement(feat)
             local missingPassives = 0
             for _,passiveName in ipairs(passiveNames) do
                 if not playerPassives[passiveName] then
-                    missingPassives  = missingPassives + 1
+                    missingPassives = missingPassives + 1
                 end
                 if missingPassives >= passiveCount then
                     return true, RequirementsMet
