@@ -108,6 +108,7 @@
 ---@field Spells SelectedSpellsType The selected spells for the player.
 ---@field XPPerFeat integer The amount of experience required per feat.
 ---@field IsHost boolean Whether the current player is the host of the session.
+---@field FeatPoints integer How many feat points the player currently has.
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Selected Feat Information
