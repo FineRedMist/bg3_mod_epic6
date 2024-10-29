@@ -126,20 +126,59 @@ end
 
 ---Substitutes parameters using the format [1], [2], etc, indexing into the parameters table.
 ---It will call functions to get values if provided as substitutes, then try loca lookups for strings,
----then convert the value to a string.
+---then pass each part of the string to the function given.
 ---@param loca string The localization string to start with for the parameterized loca
----@param arg any[] The parameters to substitute into the loca string
-function GetParameterizedLoca(loca, arg)
+---@param args any[] The parameters to substitute into the loca string
+---@param func function The function to process each piece of the resulting string
+function ProcessParameterizedLoca(loca, args, func)
     local message = Ext.Loca.GetTranslatedString(loca)
-    if arg == nil then
-        return message
+    if args == nil or #args == 0 then
+        func(message)
+        return
     end
 
-    for i,v in ipairs(arg) do
-        local keySubString = "%[" .. tostring(i) .. "%]"
-        message = string.gsub(message, keySubString, GetParameterArgument(v))
+    local parts = {message}
+    -- Go through each argument and process replacements in the parts list.
+    -- Each instance of [1], [2], etc will be expanded so that [1], [2] are isolated
+    -- as their own elements to be replaced in the parts list.
+    -- For example:
+    --   "Hello [1], how are you [2]?"
+    -- Becomes:
+    --   {"Hello ", "[1]", ", how are you ", "[2]", "?"}
+    -- It will then swap in the arguments and continue to expand the list until all 
+    -- arguments are processed.
+    for argIndex, arg in ipairs(args) do
+        local substitute = "[" .. tostring(argIndex) .. "]"
+        for partIndex, part in ipairs(parts) do
+            local foundIndex = string.find(part, substitute, 1, true)
+            if foundIndex then
+                local before = string.sub(part, 1, foundIndex - 1)
+                local after = string.sub(part, foundIndex + string.len(substitute))
+                parts[partIndex] = before
+                table.insert(parts, partIndex + 1, arg)
+                table.insert(parts, partIndex + 2, after)
+                partIndex = partIndex + 1 -- Skip the argument for processing (avoids recursion), but ensure we process 'after', the for-loop will increment the index by 1.
+            end
+        end
     end
-    return message
+    for _, part in ipairs(parts) do
+        func(part)
+    end
+end
+
+
+---Substitutes parameters using the format [1], [2], etc, indexing into the parameters table.
+---It will call functions to get values if provided as substitutes, then try loca lookups for strings,
+---then convert the value to a string.
+---@param loca string The localization string to start with for the parameterized loca
+---@param args any[] The parameters to substitute into the loca string
+function GetParameterizedLoca(loca, args)
+    local result = ""
+    ProcessParameterizedLoca(loca, args, function(part)
+        result = result + part
+    end)
+
+    return result
 end
 
 ---Retrieves the name for the character, either from the CharacterCreationStats or the Origin
