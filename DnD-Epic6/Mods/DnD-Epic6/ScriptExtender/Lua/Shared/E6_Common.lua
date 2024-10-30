@@ -42,9 +42,12 @@ end
 
 ---Splits a string based on the separator, which defaults to whitspace
 ---@param inputstr string The string to split
----@param separator any The separator to split the string with
----@return table The list of tokens split by separator
+---@param separator string? The separator to split the string with
+---@return string[]? The list of tokens split by separator
 function SplitString(inputstr, separator)
+    if inputstr == nil then
+        return nil
+    end
     if separator == nil then
         separator = "%s"
     end
@@ -131,7 +134,7 @@ end
 ---@param args any[] The parameters to substitute into the loca string
 ---@param func function The function to process each piece of the resulting string
 function ProcessParameterizedLoca(loca, args, func)
-    local message = Ext.Loca.GetTranslatedString(loca)
+    local message = GetParameterArgument(loca)
     if args == nil or #args == 0 then
         func(message)
         return
@@ -147,8 +150,9 @@ function ProcessParameterizedLoca(loca, args, func)
     --   {"Hello ", "[1]", ", how are you ", "[2]", "?"}
     -- It will then swap in the arguments and continue to expand the list until all 
     -- arguments are processed.
-    for argIndex, arg in ipairs(args) do
+    for argIndex, argParam in ipairs(args) do
         local substitute = "[" .. tostring(argIndex) .. "]"
+        local arg = GetParameterArgument(argParam)
         for partIndex, part in ipairs(parts) do
             local foundIndex = string.find(part, substitute, 1, true)
             if foundIndex then
@@ -175,7 +179,7 @@ end
 function GetParameterizedLoca(loca, args)
     local result = ""
     ProcessParameterizedLoca(loca, args, function(part)
-        result = result + part
+        result = result .. part
     end)
 
     return result
