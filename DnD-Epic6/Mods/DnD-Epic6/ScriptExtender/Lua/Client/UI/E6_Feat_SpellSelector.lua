@@ -4,6 +4,7 @@
 ---@field CanSelect boolean Whether the spell can be selected (if you already have it, you can't select it again).
 ---@field DisplayName string The display name of the spell.
 ---@field Description string The description of the spell.
+---@field DescriptionParams string[]? The parameters for the description.
 ---@field Icon string The icon of the spell.
 
 ---Checks the player's grant map for either added or selected spells to determine if the spell can be selected.
@@ -76,7 +77,7 @@ end
 ---@param unlockSpell SelectSpellInfoUIType The spell to unlock.
 local function AddSpellButton(cell, sharedResource, unlockSpell)
     local icon = cell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
-    AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description)
+    AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description, unlockSpell.DescriptionParams)
     icon.SameLine = true
 
     if not unlockSpell.CanSelect then
@@ -152,6 +153,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
             unlockSpell.IsSelected = false
             unlockSpell.DisplayName = spellStat.DisplayName
             unlockSpell.Description = spellStat.Description
+            unlockSpell.DescriptionParams = SplitString(spellStat.DescriptionParams, ";")
             unlockSpell.Icon = spellStat.Icon
             unlockSpell.CanSelect = CanSelectSpell(unlockSpell, playerInfo)
             table.insert(selectedSpells, unlockSpell)

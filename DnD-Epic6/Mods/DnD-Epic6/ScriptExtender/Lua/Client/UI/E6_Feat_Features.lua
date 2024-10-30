@@ -8,11 +8,11 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
     ---@type ExtuiTableCell The cell to add the passives to.
     local centeredCell = nil
 
-    local function AddPassiveIcon(displayNameId, descriptionId, iconId)
+    local function AddPassiveIcon(iconId, displayNameId, descriptionId, descriptionParams)
         local key = displayNameId .. "|" .. descriptionId .. "|" .. iconId
         if not avoidDupes[key] then
             local icon = centeredCell:AddImage(iconId, DefaultIconSize)
-            AddLocaTooltipTitled(icon, displayNameId, descriptionId)
+            AddLocaTooltipTitled(icon, displayNameId, descriptionId, descriptionParams)
             icon.SameLine = true
             avoidDupes[key] = true
         end
@@ -27,10 +27,10 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
     for _,passive in ipairs(feat.PassivesAdded) do
         ---@type PassiveData Data for the passive
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
-        AddPassiveIcon(passiveStat.DisplayName, passiveStat.Description, passiveStat.Icon)
+        AddPassiveIcon(passiveStat.Icon, passiveStat.DisplayName, passiveStat.Description, SplitString(passiveStat.DescriptionParams, ";"))
     end
     for _,passive in ipairs(extraPassives) do
-        AddPassiveIcon(passive.DisplayName, passive.Description, passive.Icon)
+        AddPassiveIcon(passive.Icon, passive.DisplayName, passive.Description, passive.DescriptionParams)
     end
 
     if #feat.AddSpells ~= 0 then
@@ -50,7 +50,7 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
                     ---@type SpellData The spell data.
                     local spellStat = Ext.Stats.Get(spellId, -1, true, true)
                     if spellStat then
-                        AddPassiveIcon(spellStat.DisplayName, spellStat.Description, spellStat.Icon)
+                        AddPassiveIcon(spellStat.Icon, spellStat.DisplayName, spellStat.Description, SplitString(spellStat.DescriptionParams, ";"))
                     end
                 end
             end
