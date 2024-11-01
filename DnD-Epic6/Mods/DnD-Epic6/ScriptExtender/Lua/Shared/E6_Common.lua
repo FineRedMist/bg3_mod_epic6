@@ -281,6 +281,18 @@ function IsHost(playerId)
     return false
 end
 
+---Whether the current player id is for the host.
+---@return EntityHandle? Whether the current character is the host
+function GetHost()
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
+        if entity.UserReservedFor then
+            return entity
+        end
+    end
+
+    return nil
+end
+
 ---Converts a string to PascalCase (does no internal checking)
 ---@param str string
 ---@return string

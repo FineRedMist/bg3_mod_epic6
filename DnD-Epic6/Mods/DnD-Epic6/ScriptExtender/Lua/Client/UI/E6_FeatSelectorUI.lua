@@ -15,6 +15,7 @@ end
 function E6_CloseUI()
     if featUI then
         featUI.Open = false
+        featUI.UserData = nil
     end
     E6_CloseFeatDetailsUI()
 end
@@ -362,6 +363,7 @@ function E6_FeatSelectorUI(playerInfo)
     local win = ConfigureFeatSelectorUI(windowDimensions, playerInfo)
 
     win.Open = true
+    win.UserData = playerInfo.UUID
     win:SetFocus()
 
     ClearChildren(win)
@@ -373,11 +375,63 @@ function E6_FeatSelectorUI(playerInfo)
     end
 end
 
+-- Tracks whether it is safe to be trying to update the feat count or not.
+-- We only do this in the Running state of the game.
+local E6_CanCheckWin = false
+
 ---@param e EclLuaGameStateChangedEvent
 local function E6_ManageUI(e)
-    if e.ToState ~= Ext.Enums.ServerGameState.Running then
+    if e.ToState ~= Ext.Enums.ClientGameState.Running then
         E6_CloseUI() -- Close the UI if we are changing state and not running.
+        E6_CanCheckWin = false
+    elseif not E6_CanCheckWin then
+        E6_CanCheckWin = true
     end
 end
 
+---Returns the current character's UUID.
+---@return GUIDSTRING?
+local function GetCurrentCharacterUUID()
+    local entity = GetHost()
+    if not entity then
+        return nil
+    end
+    local uuid = entity.Uuid
+    if not uuid or not uuid.EntityUuid then
+        return nil
+    end
+    if not IsValidGuid(uuid.EntityUuid) then
+        return nil
+    end
+    return uuid.EntityUuid
+end
+
+---Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.
+---@param tickParams any ignored
+local function E6_OnTick_UpdateFeatUI(tickParams)
+    if not E6_CanCheckWin then
+        return
+    end
+    if not featUI or not featUI.Open then
+        return
+    end
+
+    local host = GetCurrentCharacterUUID()
+
+    if host == nil then
+        E6_CloseUI()
+    end
+    
+    if host ~= featUI.UserData then
+        E6_CloseFeatDetailsUI()
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER, host)
+        featUI.UserData = host -- to prevent retriggering this until we get a message back.
+    end
+end
+
+-- Ensure the UI is closed when the game mode changes out of Running.
 Ext.Events.GameStateChanged:Subscribe(E6_ManageUI)
+
+-- Checking every tick seems less than optimal, but I'm not sure where I can hook for
+-- when the selected character changes.
+Ext.Events.Tick:Subscribe(E6_OnTick_UpdateFeatUI)

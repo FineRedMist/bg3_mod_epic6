@@ -12,5 +12,7 @@ NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC = "E6_Client_To_Server_Select
 NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER = "E6_Client_To_server_Export_Character"
 -- Client to server message to set the amount of experience to use per feat.
 NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT = "E6_Client_To_Server_Set_XP_Per_Feat"
+-- Client to server message to switch the character to show feats for.
+NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER = "E6_Client_To_Server_Switch_Character"
 
 return NetChannels
