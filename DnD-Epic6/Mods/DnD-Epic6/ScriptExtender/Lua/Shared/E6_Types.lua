@@ -93,6 +93,7 @@
 ---@field Selected table<string, SpellGrantMapType> The mapping of spell list ID to the selected spells from that list.
 
 ---@class PlayerFeatRequirementInformationType The minimum information required to evaluate feat requirements for the player.
+---@field PlayerLevels table<string, number> The mapping of class names to the number of levels in the class.
 ---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
 ---@field PlayerFeats table<string, number> The mapping of feat IDs to the number of times the feat has been taken by the player.
 ---@field Proficiencies ProficiencyInformationType? The proficiency information for the player.

@@ -1,18 +1,27 @@
 ---Adds the list of passives to the cell.
 ---@param parent ExtuiTreeParent
+---@param playerInfo PlayerInformationType
 ---@param feat FeatType
 ---@param extraPassives ExtraPassiveType[] Passives to add to the passives list for when there is only one ability to select. 
-local function AddFeaturesToCell(parent, feat, extraPassives)
+local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
     local avoidDupes = {}
 
     ---@type ExtuiTableCell The cell to add the passives to.
     local centeredCell = nil
 
-    local function AddPassiveIcon(displayNameId, descriptionId, iconId)
+    ---Adds a passive icon and its corresponding tooltip.
+    ---@param iconId string
+    ---@param displayNameId string
+    ---@param descriptionId string
+    ---@param descriptionParams string[]?
+    local function AddPassiveIcon(iconId, displayNameId, descriptionId, descriptionParams)
         local key = displayNameId .. "|" .. descriptionId .. "|" .. iconId
         if not avoidDupes[key] then
             local icon = centeredCell:AddImage(iconId, DefaultIconSize)
-            AddLocaTooltipTitled(icon, displayNameId, descriptionId)
+            local resolver = ParameterResolver:new(playerInfo)
+            local builder = AddTooltip(icon)
+            builder.preText = { function(text) return resolver:Resolve(text) end }
+            builder:AddText(displayNameId):AddSpacing():AddLoca(descriptionId, descriptionParams)
             icon.SameLine = true
             avoidDupes[key] = true
         end
@@ -27,10 +36,10 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
     for _,passive in ipairs(feat.PassivesAdded) do
         ---@type PassiveData Data for the passive
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
-        AddPassiveIcon(passiveStat.DisplayName, passiveStat.Description, passiveStat.Icon)
+        AddPassiveIcon(passiveStat.Icon, passiveStat.DisplayName, passiveStat.Description, SplitString(passiveStat.DescriptionParams, ";"))
     end
     for _,passive in ipairs(extraPassives) do
-        AddPassiveIcon(passive.DisplayName, passive.Description, passive.Icon)
+        AddPassiveIcon(passive.Icon, passive.DisplayName, passive.Description, nil)
     end
 
     if #feat.AddSpells ~= 0 then
@@ -50,7 +59,7 @@ local function AddFeaturesToCell(parent, feat, extraPassives)
                     ---@type SpellData The spell data.
                     local spellStat = Ext.Stats.Get(spellId, -1, true, true)
                     if spellStat then
-                        AddPassiveIcon(spellStat.DisplayName, spellStat.Description, spellStat.Icon)
+                        AddPassiveIcon(spellStat.Icon, spellStat.DisplayName, spellStat.Description, SplitString(spellStat.DescriptionParams, ";"))
                     end
                 end
             end
@@ -61,13 +70,14 @@ end
 
 ---Adds the passives to the feat details, if present.
 ---@param parent ExtuiTreeParent
+---@param playerInfo PlayerInformationType
 ---@param feat FeatType
 ---@param extraPassives ExtraPassiveType[] Passives to add to the passives list for when there is only one ability to select. 
-function AddFeaturesToFeatDetailsUI(parent, feat, extraPassives)
+function AddFeaturesToFeatDetailsUI(parent, playerInfo, feat, extraPassives)
     if #feat.PassivesAdded > 0 or #extraPassives > 0 or #feat.AddSpells > 0 then
         parent:AddSpacing()
         parent:AddSeparator()
         parent:AddSpacing()
-        AddFeaturesToCell(parent, feat, extraPassives)
+        AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
     end
 end

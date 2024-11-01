@@ -62,7 +62,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local selectedSpells = {}
     ---@type AbilityInfoUIType[] The ability information to display in the UI.
     local abilityInfo = GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
-    AddFeaturesToFeatDetailsUI(childWin, feat, extraPassives)
+    AddFeaturesToFeatDetailsUI(childWin, playerInfo, feat, extraPassives)
     local sharedResources = AddAbilitySelectorToFeatDetailsUI(childWin, abilityInfo, abilityResources)
     local passiveSharedResources = AddPassiveSelectorToFeatDetailsUI(childWin, feat, playerInfo, selectedPassives)
     local spellSharedResources = AddSpellSelectorToFeatDetailsUI(childWin, feat, playerInfo, selectedSpells)
@@ -181,18 +181,17 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat, isFiltered)
     local featButton = win:AddButton(feat.DisplayName)
     SetSizeToViewport(featButton, buttonWidth - 30, 48)
     featButton:SetStyle("ButtonTextAlign", 0.5, 0.5)
-    local tooltip = AddTooltip(featButton, TidyDescription(feat.Description))
+    local tooltip = AddTooltip(featButton):AddText(feat.Description)
     if isFiltered then
         UI_Disable(featButton)
         local playerEntity = Ext.Entity.Get(playerInfo.ID)
         local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
         tooltip:AddSpacing()
         tooltip:AddSpacing()
-        local missingReqTitle = AddTooltipText(tooltip, Ext.Loca.GetTranslatedString("hc3a8865ageffcg4d60gabd8gccd4f828d6e9")) -- Requirements:
-        MakeErrorText(missingReqTitle)
+        tooltip.onText = MakeErrorText
+        tooltip:AddText("hc3a8865ageffcg4d60gabd8gccd4f828d6e9") -- Requirements:
         for _, req in ipairs(reqs) do
-            local missingReqText = AddTooltipText(tooltip, " - " .. GetParameterizedLoca(req.MessageLoca, req.Args))
-            MakeErrorText(missingReqText)
+            tooltip:AddText(" - "):AddLoca(req.MessageLoca, req.Args)
         end
     else
         featButton.OnClick = function()
@@ -247,7 +246,7 @@ end
 local function AddExportCharacterButton(win, windowDimensions, playerInfo)
     local centerCell = CreateCenteredControlCell(win, "ExportCharacterCell", windowDimensions[1] - 30)
     local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
-    AddLocaTooltip(exportButton, "h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
+    AddTooltip(exportButton):AddText("h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
     exportButton.OnClick = function()
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, playerInfo.ID)
     end
@@ -268,7 +267,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
     settings.SpanFullWidth = true
 
     local slider = settings:AddSliderInt("", playerInfo.XPPerFeat, 100, 20000)
-    AddLocaTooltip(slider, "hcbbf8d49g36fbg496bga9beg275c367f94c0")
+    AddTooltip(slider):AddText("hcbbf8d49g36fbg496bga9beg275c367f94c0")
     slider.AlwaysClamp = true
     slider.OnChange = function()
         local rounded = 100 * math.floor(slider.Value[1]/100 + 0.5)
@@ -276,7 +275,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
     end
 
     local saveSlider = settings:AddButton(Ext.Loca.GetTranslatedString("h21681079gab67g4ea5ga4dfg88f40d38818a")) -- Save
-    AddLocaTooltip(saveSlider, "hf2b3a061gbf90g48cbg8defg30ec6aef6159")
+    AddTooltip(saveSlider):AddText("hf2b3a061gbf90g48cbg8defg30ec6aef6159")
     saveSlider.SameLine = true
     saveSlider.OnClick = function()
         local payload = {
@@ -296,7 +295,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
     win:AddSpacing()
     win:AddSpacing()
     local showFilteredCheckbox = SpicyCheckbox(settings, Ext.Loca.GetTranslatedString("hbc9684d8gca58g4210gb373gb55e83cc0081")) -- Show filtered feats
-    AddLocaTooltip(showFilteredCheckbox, "ha087585cgc6beg407ega903g92b69efc6e9b") -- Show feats that were filtered because requirements were not met.
+    AddTooltip(showFilteredCheckbox):AddText("ha087585cgc6beg407ega903g92b69efc6e9b") -- Show feats that were filtered because requirements were not met.
     showFilteredCheckbox.Checked = ShowFilteredFeats
     showFilteredCheckbox.OnChange = function()
         ShowFilteredFeats = not ShowFilteredFeats

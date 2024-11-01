@@ -36,7 +36,7 @@ local imageLookup = {
 local function AddSkillImage(parent, name)
     local imageInfo = imageLookup[name]
     local image = parent:AddImage(imageInfo.ImageName, DefaultIconSize)
-    AddLocaTooltipTitled(image, imageInfo.Title, imageInfo.Description)
+    AddTooltip(image):AddText(imageInfo.Title):AddSpacing():AddText(imageInfo.Description)
 end
 
 local function AddProficiencyImage(parent, isProficient, isExpert)
@@ -180,7 +180,7 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
         local skillNameCell = row:AddCell()
         local skillNameText = Ext.Loca.GetTranslatedString(skill.DisplayName)
         local skillTextbox = skillNameCell:AddText(skillNameText)
-        AddLocaTooltip(skillTextbox, skill.Description)
+        AddTooltip(skillTextbox):AddText(skill.Description)
 
         -- Fourth column is the skill bonus total
         local skillBonusCell = row:AddCell()
@@ -251,7 +251,7 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
         --  changes in the proficiency allocation
         --  the initial proficiency/expertise state
         local updateSkillBonus = function()
-            local abilityBonus = math.floor((abilityResource.count - 10)/2)
+            local abilityBonus = GetAbilityModifier(abilityResource.count)
             local bonus = abilityBonus
             local hasProficiency = getProficient()
             local hasExpertise = getExpertise()
@@ -275,7 +275,7 @@ function AddSkillSelectorToFeatDetailsUI(parent, feat, playerInfo, abilityResour
             skillBonusText.Label = text
             local tooltip = Ext.Loca.GetTranslatedString(tooltipTextId)
             local abilityName = Ext.Loca.GetTranslatedString(AbilityPassives[skill.Ability].DisplayName)
-            AddTooltip(skillBonusText, SubstituteParameters(tooltip, { Ability = abilityName, AbilityMod = signNumber(abilityBonus), ProficiencyBonus = signNumber(playerInfo.ProficiencyBonus) }))
+            AddTooltip(skillBonusText):AddText(SubstituteParameters(tooltip, { Ability = abilityName, AbilityMod = signNumber(abilityBonus), ProficiencyBonus = signNumber(playerInfo.ProficiencyBonus) }))
         end
 
         updateSkillBonus()
