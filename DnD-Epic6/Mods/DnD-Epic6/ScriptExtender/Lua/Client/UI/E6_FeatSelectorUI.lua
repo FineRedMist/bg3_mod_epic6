@@ -188,7 +188,16 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat, isFiltered)
         local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
         tooltip:AddSpacing()
         tooltip:AddSpacing()
-        tooltip.onText = MakeErrorText
+        local lastTextWasBullet = false -- Hack to do the SameLine on the next text element after the bullet.
+        tooltip.onText = function(textElement)
+                MakeErrorText(textElement)
+                if textElement.Label == " - " then
+                    lastTextWasBullet = true
+                elseif lastTextWasBullet then
+                    textElement.SameLine = true
+                    lastTextWasBullet = false
+                end
+            end
         tooltip:AddText("hc3a8865ageffcg4d60gabd8gccd4f828d6e9") -- Requirements:
         for _, req in ipairs(reqs) do
             tooltip:AddText(" - "):AddLoca(req.MessageLoca, req.Args)
