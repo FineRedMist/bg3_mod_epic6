@@ -101,6 +101,7 @@
 
 ---@class PlayerInformationType : PlayerFeatRequirementInformationType Information about the player for determine what is legal to select for the feat.
 ---@field ID string The unique id of the player
+---@field UUID GUIDSTRING The UUID of the player
 ---@field Name string? The name of the character the player is playing
 ---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
 ---@field SelectableFeats string[] The list of feat IDs that the player can select from.

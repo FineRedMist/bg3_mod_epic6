@@ -703,13 +703,15 @@ function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
-    local isHost = IsHost(ent.Uuid.EntityUuid)
+    local uuid = ent.Uuid.EntityUuid
+    local isHost = IsHost(uuid)
     local featPoints = E6_GetFeatPointBoostAmount(caster)
     -- Show the feat selector without any feats to show settings.
     if featPoints == 0 and isHost then
         ---@type PlayerInformationType
         local playerInfoLite = {
             ID = caster,
+            UUID = uuid,
             Name = charname,
             PlayerFeats = {},
             PlayerPassives = {},
@@ -748,6 +750,7 @@ function OnEpic6FeatSelectorSpell(caster)
     ---@type PlayerInformationType
     local message = {
         ID = caster,
+        UUID = uuid,
         Name = charname,
         PlayerLevels = levels,
         PlayerFeats = playerFeats,

@@ -57,4 +57,17 @@ function NetServerHandlers.SetXPPerFeat(_, payload, peerId)
     end
 end
 
+---Trigger sending an updated feat list from the server to the client on switching.
+---@param _ string The network message channel
+---@param payload string The character ID to switch to
+---@param peerId integer The peer ID of the player.
+function NetServerHandlers.SwitchCharacter(_, payload, peerId)
+    local entity = Ext.Entity.Get(payload)
+    if entity ~= nil then
+        OnEpic6FeatSelectorSpell(payload)
+    else
+        _E6Error("Failed find the character '" .. payload .. "' to switch to.")
+    end
+end
+
 return NetServerHandlers
