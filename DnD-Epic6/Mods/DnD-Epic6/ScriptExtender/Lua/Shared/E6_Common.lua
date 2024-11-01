@@ -21,6 +21,13 @@ local function ArgString(arg)
     return tostring(arg)
 end
 
+---comment
+---@param abilityScore integer The ability score to get the modifier for.
+---@return integer The modifier based on the score.
+function GetAbilityModifier(abilityScore)
+    return math.floor((abilityScore - 10) / 2)
+end
+
 ---Joins multiple terms together as a string for various functions.
 ---@param args table The list of arguments to join. Must be amenable to tostring. nil is converted to the empty string
 ---@param separator string? The separator to join the terms with. Defaults to comma if unspecified.
@@ -43,17 +50,27 @@ end
 ---Splits a string based on the separator, which defaults to whitspace
 ---@param inputstr string The string to split
 ---@param separator string? The separator to split the string with
----@return string[]? The list of tokens split by separator
-function SplitString(inputstr, separator)
+---@param includeSeparators boolean? Whether to include the separators in the resulting list, default false
+---@return string[] The list of tokens split by separator
+function SplitString(inputstr, separator, includeSeparators)
     if inputstr == nil then
-        return nil
+        return {}
     end
     if separator == nil then
         separator = "%s"
     end
     local result = {}
+    local pos = 1
     for str in string.gmatch(inputstr, "([^"..separator.."]+)") do
       table.insert(result, str)
+      pos = pos + string.len(str)
+      if includeSeparators then
+        local s, e = string.find(inputstr, "(["..separator.."]+)", pos)
+        if s then
+          table.insert(result, string.sub(inputstr, s, e))
+          pos = e + 1
+        end
+      end
     end
     return result
   end
@@ -103,12 +120,17 @@ function TidyDescription(str)
     return str
 end
 
----Converts an argument to a string.
----@param arg any
----@return string
-local function GetParameterArgument(arg)
+---Converts an argument to a string. 
+--- If it is a function, it will resolve it and then continue processiong
+--- If it is a string, it will attempt to localize it, otherwise just return the string.
+--- If it is a table, it will error out.
+--- If it is nil, it will return an empty string.
+--- Otherwise, it will return the string representation of the argument.
+---@param arg any The argument to lookup.
+---@return string The string representation of the argument (with function evaluation and localization)
+function GetParameterArgument(arg)
     if type(arg) == "function" then
-        return arg()
+        arg = arg()
     end
     if type(arg) == "string" then
         local loca = Ext.Loca.GetTranslatedString(arg)
@@ -131,7 +153,7 @@ end
 ---It will call functions to get values if provided as substitutes, then try loca lookups for strings,
 ---then pass each part of the string to the function given.
 ---@param loca string The localization string to start with for the parameterized loca
----@param args any[] The parameters to substitute into the loca string
+---@param args any[]? The parameters to substitute into the loca string
 ---@param func function The function to process each piece of the resulting string
 function ProcessParameterizedLoca(loca, args, func)
     local message = GetParameterArgument(loca)
@@ -170,12 +192,18 @@ function ProcessParameterizedLoca(loca, args, func)
     end
 end
 
+---Trims the leading and trailing whitespace of a string.
+---@param s string The string to trim
+---@return string The trimmed string
+function Trim(s)
+    return (s:gsub("^%s*(.-)%s*$", "%1"))
+ end
 
 ---Substitutes parameters using the format [1], [2], etc, indexing into the parameters table.
 ---It will call functions to get values if provided as substitutes, then try loca lookups for strings,
 ---then convert the value to a string.
 ---@param loca string The localization string to start with for the parameterized loca
----@param args any[] The parameters to substitute into the loca string
+---@param args any[]? The parameters to substitute into the loca string
 function GetParameterizedLoca(loca, args)
     local result = ""
     ProcessParameterizedLoca(loca, args, function(part)

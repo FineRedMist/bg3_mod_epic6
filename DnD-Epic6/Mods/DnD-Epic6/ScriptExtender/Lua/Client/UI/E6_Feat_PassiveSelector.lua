@@ -5,6 +5,7 @@
 ---@field Icon string The Icon of the passive
 ---@field DisplayName string The display name of the passive.
 ---@field Description string The description of the passive.
+---@field DescriptionParams string[] The parameters for the description.
 
 ---@class RenderStateType Tracks render information for collections of passives spanning multiple rows.
 ---@field CenterCell ExtuiTableCell The center cell to add the passives to.
@@ -88,7 +89,10 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
             end
         end)
     end
-    AddTooltip(checkBoxControl, passive.Description)
+    local resolver = ParameterResolver:new(playerInfo)
+    local tooltip = AddTooltip(checkBoxControl)
+    tooltip.preText = { function(text) return resolver:Resolve(text) end }
+    tooltip:AddLoca(passive.Description, passive.DescriptionParams)
 end
 
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
@@ -141,7 +145,10 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
             end
         end)
     end
-    AddTooltipTitled(IconControl, passive.DisplayName, passive.Description)
+    local resolver = ParameterResolver:new(playerInfo)
+    local tooltip = AddTooltip(IconControl)
+    tooltip.preText = { function(text) return resolver:Resolve(text) end }
+    tooltip:AddText(passive.DisplayName):AddSpacing():AddLoca(passive.Description, passive.DescriptionParams)
     IconControl.SameLine = true
 
     renderState.IconRowCount = renderState.IconRowCount + 1
@@ -156,7 +163,7 @@ end
 ---@param stat PassiveData The stat data for the passive
 ---@return InternalPassiveSelectorType
 local function GetInternalPassiveData(passive, iconId, stat)
-    return { ID = passive, Stat = stat, Icon = iconId, DisplayName = Ext.Loca.GetTranslatedString(stat.DisplayName), Description = Ext.Loca.GetTranslatedString(stat.Description) }
+    return { ID = passive, Stat = stat, Icon = iconId, DisplayName = Ext.Loca.GetTranslatedString(stat.DisplayName), Description = Ext.Loca.GetTranslatedString(stat.Description), DescriptionParams = SplitString(stat.DescriptionParams, ";") }
 end
 
 ---Adds the ability selector to the feat details, if ability selection is present.

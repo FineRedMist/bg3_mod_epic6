@@ -73,11 +73,20 @@ end
 
 ---Adds a spell button to the UI. The button will be disabled if the spell cannot be selected.
 ---@param cell ExtuiTableCell The cell to add the button to.
+---@param playerInfo PlayerInformationType Information about the player to alter the spell selector.
 ---@param sharedResource SharedResource The shared resource for selecting the spell.
 ---@param unlockSpell SelectSpellInfoUIType The spell to unlock.
-local function AddSpellButton(cell, sharedResource, unlockSpell)
+local function AddSpellButton(cell, playerInfo, sharedResource, unlockSpell)
     local icon = cell:AddImageButton("", unlockSpell.Icon, DefaultIconSize)
-    AddLocaTooltipTitled(icon, unlockSpell.DisplayName, unlockSpell.Description, unlockSpell.DescriptionParams)
+    local modifier = "0"
+    local abilityValue = playerInfo.Abilities[unlockSpell.Ability]
+    if abilityValue then
+        modifier = tostring(GetAbilityModifier(abilityValue.Current))
+    end
+    local resolver = ParameterResolver:new(playerInfo, { SpellCastingAbility=modifier, SpellCastingAbilityModifier=modifier })
+    local builder = AddTooltip(icon)
+    builder.preText = { function(text) return resolver:Resolve(text) end }
+    builder:AddText(unlockSpell.DisplayName):AddSpacing():AddLoca(unlockSpell.Description, unlockSpell.DescriptionParams)
     icon.SameLine = true
 
     if not unlockSpell.CanSelect then
@@ -166,7 +175,7 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
     local spellsPerRow = ComputeIconsPerRow(spellCount)
     local spellsInRow = 0
     for _,unlockSpell in ipairs(selectedSpells) do
-        AddSpellButton(centeredCell, sharedResource, unlockSpell)
+        AddSpellButton(centeredCell, playerInfo, sharedResource, unlockSpell)
         spellsInRow = spellsInRow + 1
         if spellsInRow >= spellsPerRow then
             rowNumber = rowNumber + 1

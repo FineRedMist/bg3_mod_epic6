@@ -1,4 +1,55 @@
 
+---@type table<GUIDSTRING, string> mapping of class GUID to class name.
+local classNameCache = {}
+
+local function GetClassName(classId)
+    local value = classNameCache[classId]
+    if value then
+        return value
+    end
+
+    ---@type ResourceClassDescription
+    local class = Ext.StaticData.Get(classId, Ext.Enums.ExtResourceManagerType.ClassDescription)
+    if class then
+        classNameCache[classId] = class.Name
+        return class.Name
+    end
+
+    _E6Error("Failed to lookup the class name for id: " .. classId)
+    return "unknown"
+end
+
+---We need to gather feats that have already been selected for the entity so we can filter if necessary.
+---@param entity EntityHandle The player entity to gather feats for.
+---@return table<string, number> The count of occurrences for each feat. 
+local function GatherPlayerClassLevels(entity)
+    local levels = {}
+    if entity == nil then
+        return levels
+    end
+    local CCLevelUp = entity.CCLevelUp
+    if CCLevelUp == nil then
+        return levels
+    end
+    local function AddLevel(class)
+        if IsValidGuid(class) then
+            local className = GetClassName(class)
+            local curCount = levels[className]
+            if curCount == nil then
+                curCount = 1
+            else
+                curCount = curCount + 1
+            end
+            levels[className] = curCount
+        end
+    end
+
+    for _, levelup in ipairs(CCLevelUp.LevelUps) do
+        AddLevel(levelup.Class)
+    end
+    return levels
+end
+
 ---We need to gather feats that have already been selected for the entity so we can filter if necessary.
 ---@param entity EntityHandle The player entity to gather feats for.
 ---@return table<string, number> The count of occurrences for each feat. 
@@ -681,9 +732,11 @@ function OnEpic6FeatSelectorSpell(caster)
     local proficiencies = GatherProficiencies(ent)
     local spells = GatherSpells(ent)
     local passives = GatherPlayerPassives(ent, proficiencies)
+    local levels = GatherPlayerClassLevels(ent)
 
     ---@type PlayerFeatRequirementInformationType
     local featRequirementInfo = {
+        PlayerLevels = levels,
         PlayerPassives = passives,
         PlayerFeats = playerFeats,
         Proficiencies = proficiencies,
@@ -696,6 +749,7 @@ function OnEpic6FeatSelectorSpell(caster)
     local message = {
         ID = caster,
         Name = charname,
+        PlayerLevels = levels,
         PlayerFeats = playerFeats,
         PlayerPassives = passives,
         SelectableFeats = selectableFeats,
