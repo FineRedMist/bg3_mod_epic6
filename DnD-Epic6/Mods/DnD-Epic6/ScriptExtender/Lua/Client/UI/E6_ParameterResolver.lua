@@ -191,7 +191,6 @@ local function GetValue(originalFormula)
     end)
 
     formula = CleanSigns(formula)
-    _E6P("Original: " .. originalFormula .. ", Resolved: " .. formula)
     if string.find(formula, "[^%-%d%.]") then
         return nil
     end
@@ -202,15 +201,18 @@ local function ComputeFormula(formula)
     formula = TripleCheck(formula, "Level", "6")
     local lowText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceLowest)
     local highText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceHighest)
-    _E6P("Low: " .. lowText .. ", High: " .. highText)
+
     local low = GetValue(lowText)
     local high = GetValue(highText)
+
     if low == nil or high == nil then
         return formula
     end
+
     if low == high then
         return tostring(low)
     end
+
     return tostring(low) .. "~" .. tostring(high)
 end
 
@@ -284,10 +286,10 @@ function ParameterResolver:RunReplacements(playerInfo, text)
     text = TripleCheck(text, "GainTemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
     text = TripleCheck(text, "TemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
     text = TripleCheck(text, "RegainHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", RegainHitPoints)
-    text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./, ]+)%s*,%s*([%a]+).*%)", DealDamage)
+    text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*([%a]+).*%)", DealDamage)
 
     text = Trim(text)
-    
+
     if damageTypeLoca[text] then
         text = damageTypeLoca[text]
     end
@@ -326,9 +328,6 @@ function ParameterResolver:RunReplacements(playerInfo, text)
     -- Slashing
     -- WeaponDamage(1d4, Poison)
 
-    if orig ~= text then
-        _E6P("Replaced: " .. orig .. " -> " .. text)
-    end
     return text
 end
 
@@ -342,9 +341,6 @@ function ParameterResolver:Resolve(text)
     if not success then
         _E6Error("Error resolving: " .. text .. " -> " .. result)
         return text
-    end
-    if result ~= text then
-        _E6P("Resolved: " .. text .. " -> " .. result)
     end
     return result
 end
