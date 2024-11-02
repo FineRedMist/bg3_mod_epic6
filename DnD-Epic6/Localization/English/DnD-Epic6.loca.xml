@@ -50,8 +50,8 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="hb09763begcf50g4351gb1f1gd39ec792509b" version="1">Feats: {CharacterName}</content>
 	<content contentuid="h262bbb67gb8abg4d35g9822g854af550a474" version="1">Number of feats chosen.</content>
 	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
-	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Export Character</content>
-	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">The exported character can be found in %LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/Script Extender/E6_Character.json. Note: Exporting the character will generate a lot of spurious warnings and errors in the logs as it tests properties on objects.</content>
+	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Reset Feats</content>
+	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">Reset the feats and feat points for the current character, allowing reselection.</content>
 	<content contentuid="h5a499cf9gad5cg4888gb48ag32f118c40da6" version="1">Avid Learner</content>
 	<content contentuid="hcd086f4bgb3ccg487eg90a7gfeae870aee03" version="1">Gain &lt;LSTag Tooltip="Expertise"&gt;Expertise&lt;/LSTag&gt; in two &lt;LSTag Tooltip="Skill"&gt;Skills&lt;/LSTag&gt; of your choice.
 	

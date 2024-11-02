@@ -70,4 +70,19 @@ function NetServerHandlers.SwitchCharacter(_, payload, peerId)
     end
 end
 
+---Reset the feats and feat points for the given character.
+---@param _ string The network message channel
+---@param payload string The character ID to switch to
+---@param peerId integer The peer ID of the player.
+function NetServerHandlers.ResetFeats(_, payload, peerId)
+    local entity = Ext.Entity.Get(payload)
+    if entity ~= nil then
+        E6_RemoveFeats(payload, entity.Vars.E6_Feats)
+        entity.Vars.E6_Feats = nil
+        FeatPointTracker:OnStableCallback(payload, OnEpic6FeatSelectorSpell)
+    else
+        _E6Error("Failed find the character '" .. payload .. "' to reset the feats for.")
+    end
+end
+
 return NetServerHandlers
