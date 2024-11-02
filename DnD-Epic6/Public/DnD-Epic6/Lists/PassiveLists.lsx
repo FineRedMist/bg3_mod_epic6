@@ -8,6 +8,14 @@
                     <attribute id="Passives" type="LSString" value="E6_Tag_Barbarian_Passive,E6_Tag_Bard_Passive,E6_Tag_Cleric_Passive,E6_Tag_Druid_Passive,E6_Tag_Fighter_Passive,E6_Tag_Monk_Passive,E6_Tag_Paladin_Passive,E6_Tag_Ranger_Passive,E6_Tag_Rogue_Passive,E6_Tag_Sorcerer_Passive,E6_Tag_Warlock_Passive,E6_Tag_Wizard_Passive"/>
                     <attribute id="UUID" type="guid" value="ad216bb8-16d1-4d95-ad5b-272e390e2bd7"/>
                 </node>
+                <node id="PassiveList"> <!-- Ability cap list major -->
+                    <attribute id="Passives" type="LSString" value="E6_Ability_Cap_Major_Strength_Passive,E6_Ability_Cap_Major_Dexterity_Passive,E6_Ability_Cap_Major_Constitution_Passive,E6_Ability_Cap_Major_Intelligence_Passive,E6_Ability_Cap_Major_Wisdom_Passive,E6_Ability_Cap_Major_Charisma_Passive"/>
+                    <attribute id="UUID" type="guid" value="3fa0f903-5226-4b12-aae4-622071760cec"/>
+                </node>
+                <node id="PassiveList"> <!-- Ability cap list major -->
+                    <attribute id="Passives" type="LSString" value="E6_Ability_Cap_Minor_Strength_Passive,E6_Ability_Cap_Minor_Dexterity_Passive,E6_Ability_Cap_Minor_Constitution_Passive,E6_Ability_Cap_Minor_Intelligence_Passive,E6_Ability_Cap_Minor_Wisdom_Passive,E6_Ability_Cap_Minor_Charisma_Passive"/>
+                    <attribute id="UUID" type="guid" value="e428cd22-1887-49cc-8a9f-e851c666cdb0"/>
+                </node>
             </children>
         </node>
     </region>

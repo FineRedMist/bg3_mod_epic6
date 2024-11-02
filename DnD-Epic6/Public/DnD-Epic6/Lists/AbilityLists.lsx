@@ -4,9 +4,17 @@
     <region id="AbilityLists">
         <node id="root">
             <children>
-				<node id="AbilityList"> <!-- Skill Expert-->
-                    <attribute id="Abilities" type="LSString" value="Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma"/>
-                    <attribute id="UUID" type="guid" value="372c1167-b9ed-46ef-be41-f345d45a7e13"/>
+				<node id="AbilityList"> <!-- Aspect of the Beast-->
+                    <attribute id="Abilities" type="LSString" value="Strength, Dexterity, Constitution"/>
+                    <attribute id="UUID" type="guid" value="c4aed5a2-92ec-45d6-95c0-926028d82579"/>
+                </node>
+				<node id="AbilityList"> <!-- Natural Explorer-->
+                    <attribute id="Abilities" type="LSString" value="Strength, Dexterity, Wisdom"/>
+                    <attribute id="UUID" type="guid" value="4c486429-ff0c-42ef-8d10-034de2d81f16"/>
+                </node>
+				<node id="AbilityList"> <!-- Evasion-->
+                    <attribute id="Abilities" type="LSString" value="Dexterity, Intelligence, Wisdom"/>
+                    <attribute id="UUID" type="guid" value="f8b365bd-3ce4-4156-9c9f-e11b06058f22"/>
                 </node>
             </children>
         </node>
