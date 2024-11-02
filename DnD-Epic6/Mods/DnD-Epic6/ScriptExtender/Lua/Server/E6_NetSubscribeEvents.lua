@@ -6,6 +6,7 @@ netEventsRegistry:register(NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC, N
 netEventsRegistry:register(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, NetCommand:new(NetServerHandlers.ExportCharacter))
 netEventsRegistry:register(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, NetCommand:new(NetServerHandlers.SetXPPerFeat))
 netEventsRegistry:register(NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER, NetCommand:new(NetServerHandlers.SwitchCharacter))
+netEventsRegistry:register(NetChannels.E6_CLIENT_TO_SERVER_RESET_FEATS, NetCommand:new(NetServerHandlers.ResetFeats))
 
 -- Subscribe to events
 function SubscribedEvents.SubscribeToEvents()

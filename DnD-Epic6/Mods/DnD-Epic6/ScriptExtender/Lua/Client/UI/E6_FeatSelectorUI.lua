@@ -249,16 +249,16 @@ local function AddFeatButtons(win, windowDimensions, playerInfo)
     end
 end
 
----Adds a button to export the character to the file system.
+---Adds a button to reset the character's feats.
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param windowDimensions integer[] The dimensions of the window.
 ---@param playerInfo PlayerInformationType The player information.
-local function AddExportCharacterButton(win, windowDimensions, playerInfo)
-    local centerCell = CreateCenteredControlCell(win, "ExportCharacterCell", windowDimensions[1] - 30)
-    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Export Character
-    AddTooltip(exportButton):AddText("h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
-    exportButton.OnClick = function()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, playerInfo.ID)
+local function AddResetFeatsButton(win, windowDimensions, playerInfo)
+    local centerCell = CreateCenteredControlCell(win, "ResetFeatsCell", windowDimensions[1] - 30)
+    local resetFeatsButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Reset Feats
+    AddTooltip(resetFeatsButton):AddText("h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Where to find the exported character
+    resetFeatsButton.OnClick = function()
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RESET_FEATS, playerInfo.ID)
     end
 end
 
@@ -313,7 +313,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
     end
     win:AddSpacing()
     win:AddSpacing()
-    AddExportCharacterButton(settings, windowDimensions, playerInfo)
+    AddResetFeatsButton(settings, windowDimensions, playerInfo)
 end
 
 local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}
