@@ -16,10 +16,15 @@
           <attribute id="Requirements" type="LSString" value="CharacterLevelGreaterThan(5)"/>
         </node>
 		    <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_Legendary"/>
+          <attribute id="Requirements" type="LSString" value="CharacterLevelGreaterThan(5)"/>
+          <attribute id="Selectors" type="LSString" value="SelectPassives(ad216bb8-16d1-4d95-ad5b-272e390e2bd7,1);SelectPassives(3fa0f903-5226-4b12-aae4-622071760cec,1);SelectPassives(e428cd22-1887-49cc-8a9f-e851c666cdb0,1)"/>
+          <attribute id="UUID" type="guid" value="0fafb9b3-15f2-45ad-ad22-fd96e7ea8ce5"/>
+        </node>
+		    <node id="Feat">
           <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
           <attribute id="Name" type="FixedString" value="E6_AvidLearner"/>
           <attribute id="PassivesAdded" type="LSString" value="E6_AvidLearner_Passive"/>
-          <attribute id="PassivesRemoved" type="LSString" value=""/>
           <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
           <attribute id="Selectors" type="LSString" value="SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,2);SelectPassives(ad216bb8-16d1-4d95-ad5b-272e390e2bd7,1)"/>
           <attribute id="UUID" type="guid" value="c351df11-61c2-4086-aa8f-2cc05bd3215c"/>

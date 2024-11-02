@@ -12,6 +12,13 @@
                     <attribute id="UUID" type="guid" value="a6359d31-8579-45ef-80e4-8e4bd2cc38ec"/>
                 </node>
 				<node id="FeatDescription">
+                    <attribute id="Description" type="TranslatedString" handle="hefa94be9g1b09g42c7g9f93gaa542216d259" version="1"/>
+                    <attribute id="DisplayName" type="TranslatedString" handle="hc2a4fce5gd6aeg4023g8b4dg78205543dbb7" version="1"/>
+                    <attribute id="ExactMatch" type="FixedString" value="E6_Legendary"/>
+                    <attribute id="FeatId" type="guid" value="0fafb9b3-15f2-45ad-ad22-fd96e7ea8ce5"/>
+                    <attribute id="UUID" type="guid" value="de814f48-6172-473a-b260-94af9064467f"/>
+                </node>
+				<node id="FeatDescription">
                     <attribute id="Description" type="TranslatedString" handle="hcd086f4bgb3ccg487eg90a7gfeae870aee03" version="1"/>
                     <attribute id="DisplayName" type="TranslatedString" handle="h5a499cf9gad5cg4888gb48ag32f118c40da6" version="1"/>
                     <attribute id="ExactMatch" type="FixedString" value="E6_AvidLearner"/>

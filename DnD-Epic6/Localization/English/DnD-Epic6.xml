@@ -25,7 +25,7 @@
 	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>	
 	<content contentuid="hf288edb6g7572g4963gb930ge36925049021" version="1">Maximum: {Maximum}</content>
 	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased by 1.</content>
-	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic Feat: Heroic</content>
+	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic: Heroic</content>
 	<content contentuid="h6f4a6e38g074eg4717g949cga847c9fa7cc2" version="1">You have reached maximum level and can select feats as you earn more experience!</content>
 	<content contentuid="h55b3cc22g6c3eg468dg807ag42e9300ff0f7" version="1">Epic Character</content>
 	<content contentuid="hf2b3a061gbf90g48cbg8defg30ec6aef6159" version="1">Saves the amount of XP per feat to the save game.</content>
@@ -56,4 +56,20 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	<content contentuid="hcd086f4bgb3ccg487eg90a7gfeae870aee03" version="1">Gain &lt;LSTag Tooltip="Expertise"&gt;Expertise&lt;/LSTag&gt; in two &lt;LSTag Tooltip="Skill"&gt;Skills&lt;/LSTag&gt; of your choice.
 	
 	Learn to present yourself as another class.</content>
+	<content contentuid="hc2a4fce5gd6aeg4023g8b4dg78205543dbb7" version="1">Epic: Legendary</content>
+	<content contentuid="hefa94be9g1b09g42c7g9f93gaa542216d259" version="1">Increase the ability score limit of one ability by 4, and another ability by 2. This does not increase the score itself.</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_0" version="1">The ability score limit is increased by 4.</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_1" version="1">Major Strength Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_2" version="1">Major Dexterity Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_3" version="1">Major Constitution Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_4" version="1">Major Intelligence Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_5" version="1">Major Wisdom Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_6" version="1">Major Charisma Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_0" version="1">The ability score limit is increased by 2.</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_1" version="1">Minor Strength Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_2" version="1">Minor Dexterity Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_3" version="1">Minor Constitution Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_4" version="1">Minor Intelligence Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_5" version="1">Minor Wisdom Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_6" version="1">Minor Charisma Cap Increase</content>
 </contentList>
