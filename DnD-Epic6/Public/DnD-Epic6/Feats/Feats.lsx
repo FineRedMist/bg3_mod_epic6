@@ -5,10 +5,15 @@
     <node id="root">
       <children>
         <node id="Feat">
+            <attribute id="Name" type="FixedString" value="Actor"/>
+            <attribute id="PassivesAdded" type="LSString" value="Actor;E6_Tag_Bard_Passive"/>
+            <attribute id="UUID" type="guid" value="cdcbc538-883b-401c-a8ed-1373fb6d1720"/>
+        </node>
+        <node id="Feat">
           <attribute id="Name" type="FixedString" value="E6_ProficiencyBonus"/>
           <attribute id="PassivesAdded" type="LSString" value="E6_ProficiencyBonus_Passive"/>
           <attribute id="UUID" type="guid" value="623a5c6f-71eb-46be-b253-8bc977faece9"/>
-          <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
+          <attribute id="Requirements" type="LSString" value="CharacterLevelGreaterThan(5)"/>
         </node>
 		    <node id="Feat">
           <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
@@ -18,6 +23,24 @@
           <attribute id="Requirements" type="LSString" value="HasPassive('E6_Epic_EpicCharacter_Passive')"/>
           <attribute id="Selectors" type="LSString" value="SelectSkillsExpertise(ed664663-93b9-4070-a54b-3c7b19c0e7b4,2);SelectPassives(ad216bb8-16d1-4d95-ad5b-272e390e2bd7,1)"/>
           <attribute id="UUID" type="guid" value="c351df11-61c2-4086-aa8f-2cc05bd3215c"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_AspectOfTheBeast"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_Tag_Barbarian_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(c4aed5a2-92ec-45d6-95c0-926028d82579,1,1,AspectOfTheBeast);SelectPassives(fb9ea4a2-a1ce-4242-a893-84a088ac1145,1,AspectOfTheBeast)"/>
+          <attribute id="UUID" type="guid" value="b724eb9f-7b3e-43f3-b267-1eb166d0215c"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_NaturalExplorer"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_Tag_Ranger_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(4c486429-ff0c-42ef-8d10-034de2d81f16,1,1,NaturalExplorer);SelectPassives(72c63024-60af-486e-a180-c7aeee5d77c1,1,NaturalExplorer)"/>
+          <attribute id="UUID" type="guid" value="256769b1-0a9f-4c08-b7f4-4984bf16079f"/>
+        </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_Evasion"/>
+          <attribute id="PassivesAdded" type="LSString" value="Evasion;E6_Tag_Rogue_Passive"/>
+          <attribute id="Selectors" type="LSString" value="SelectAbilities(f8b365bd-3ce4-4156-9c9f-e11b06058f22,1,1)"/>
+          <attribute id="UUID" type="guid" value="31ecef09-9aa8-4fc7-870e-dfb56102cbf6"/>
         </node>
     		<node id="Feat">
           <attribute id="Name" type="FixedString" value="LightlyArmored"/>
@@ -81,6 +104,28 @@
           <attribute id="PassivesAdded" type="LSString" value="MagicInitiate_Wizard;E6_Tag_Wizard_Passive"/>
           <attribute id="Selectors" type="LSString" value="SelectSpells(3cae2e56-9871-4cef-bba6-96845ea765fa,2,0,MIWizardCantrips,Intelligence,,AlwaysPrepared,,a865965f-501b-46e9-9eaa-7748e8c04d09);SelectSpells(11f331b0-e8b7-473b-9d1f-19e8e4178d7d,1,0,MIWizardSpells,Intelligence,None,AlwaysPrepared,UntilRest,a865965f-501b-46e9-9eaa-7748e8c04d09)"/>
           <attribute id="UUID" type="guid" value="26c6990b-d9f0-41a2-8108-209789fafc18"/>
+        </node>
+        <node id="Feat">
+            <attribute id="Name" type="FixedString" value="MartialAdept"/>
+            <attribute id="PassivesAdded" type="LSString" value="MartialAdept;E6_Tag_Fighter_Passive"/>
+            <attribute id="Selectors" type="LSString" value="SelectPassives(e51a2ef5-3663-43f9-8e74-5e28520323f1,2,MAManeuvers)"/>
+            <attribute id="UUID" type="guid" value="455fc2d5-1c77-40e7-a010-0b51044ae74b"/>
+        </node>
+        <node id="Feat">
+            <attribute id="Name" type="FixedString" value="WeaponMaster"/>
+            <attribute id="PassivesAdded" type="LSString" value="WeaponMaster;E6_Tag_Fighter_Passive"/>
+            <attribute id="Selectors" type="LSString" value="SelectAbilities(499230af-5946-4680-a7ee-4d76d421f2ef,1,1,LightlyArmoredASI);SelectPassives(f21e6b94-44e8-4ae0-a6f1-0c81abac03a2,4,WeaponMasterProficiencies)"/>
+            <attribute id="UUID" type="guid" value="b153e75c-27a2-4412-95cd-60b477121679"/>
+        </node>
+        <node id="Feat">
+            <attribute id="Name" type="FixedString" value="DungeonDelver"/>
+            <attribute id="PassivesAdded" type="LSString" value="DungeonDelver_Perception;DungeonDelver_ResistTraps;E6_Tag_Rogue_Passive"/>
+            <attribute id="UUID" type="guid" value="71b65667-0eac-4e62-b878-fa862e88ebbf"/>
+        </node>
+        <node id="Feat">
+            <attribute id="Name" type="FixedString" value="Mobile"/>
+            <attribute id="PassivesAdded" type="LSString" value="Mobile_PassiveBonuses;Mobile_CounterAttackOfOpportunity;Mobile_DashAcrossDifficultTerrain;E6_Tag_Monk_Passive"/>
+            <attribute id="UUID" type="guid" value="0a3b07bf-a806-4c77-9c8f-6e7c0965f9dd"/>
         </node>
       </children>
     </node>
