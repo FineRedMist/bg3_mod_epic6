@@ -47,6 +47,11 @@
           <attribute id="Selectors" type="LSString" value="SelectAbilities(f8b365bd-3ce4-4156-9c9f-e11b06058f22,1,1)"/>
           <attribute id="UUID" type="guid" value="31ecef09-9aa8-4fc7-870e-dfb56102cbf6"/>
         </node>
+        <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_FastHands"/>
+          <attribute id="PassivesAdded" type="LSString" value="FastHands;E6_Tag_Rogue_Passive"/>
+          <attribute id="UUID" type="guid" value="f60bb8bf-9dd4-4666-bc8d-e00f5bffc976"/>
+        </node>
     		<node id="Feat">
           <attribute id="Name" type="FixedString" value="LightlyArmored"/>
           <attribute id="PassivesAdded" type="LSString" value="LightlyArmored"/>
