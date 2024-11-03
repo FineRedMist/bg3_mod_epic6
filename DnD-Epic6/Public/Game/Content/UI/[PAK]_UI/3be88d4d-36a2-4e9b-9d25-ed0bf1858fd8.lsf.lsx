@@ -5,7 +5,7 @@
     <node id="TextureBank">
       <children>
         <node id="Resource">
-          <attribute id="ID" type="FixedString" value="3a17254e-4d58-49de-8df2-8d6778b65082" />
+          <attribute id="ID" type="FixedString" value="3be88d4d-36a2-4e9b-9d25-ed0bf1858fd8" />
           <attribute id="Localized" type="bool" value="False" />
           <attribute id="Name" type="LSString" value="DnD_Epic6_Icons" />
           <attribute id="SRGB" type="bool" value="True" />
