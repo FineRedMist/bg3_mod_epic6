@@ -3,7 +3,7 @@
 ---Closes the UI for the given character.
 ---@param char string The character ID
 function E6_NetCloseUI(char)
-    Ext.Net.PostMessageToClient(char, NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI, "")
+    Ext.Net.PostMessageToClient(char, NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI, char)
 end
 
 -- Given an array of character entities, update their feat count
@@ -16,46 +16,9 @@ local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
     end
 end
 
--- Determines if we can safely update the feat counts for the party.
--- Returns the main charater entity if we can.
----@return EntityHandle?
-local function E6_CanUpdateEpic6FeatCounts()
-    -- No character, no party to retrieve to update.
-    if not Osi or not Osi.GetHostCharacter then
-        return nil
-    end
-
-    -- Ensure we can safely get the character, too (some game states outside of running it doesn't work for)
-    ---@type boolean, string?
-    local success, char = pcall(function()
-        return Osi.GetHostCharacter()
-    end)
-
-    if not success or char == nil then
-        return nil
-    end
-
-    -- Ensure we can get the entity for the character.
-    local ent = Ext.Entity.Get(char)
-    if char == nil then
-        return nil
-    end
-
-    -- Do we have a party member... member on the character?
-    if ent.PartyMember == nil then
-        return nil
-    end
-
-    -- Ensure we have a party that we can gather the party members for.
-    if ent.PartyMember.Party == nil then
-        return nil
-    end
-    return ent
-end
-
 -- Tracks whether it is safe to be trying to update the feat count or not.
 -- We only do this in the Running state of the game.
-local bool E6_CanUpdate = false
+local E6_CanUpdate = false
 
 function E6_OnTick_UpdateEpic6FeatCount(tickParams)
     -- Only update when we are in the Running state.
@@ -63,16 +26,14 @@ function E6_OnTick_UpdateEpic6FeatCount(tickParams)
         return
     end
 
-    -- Only update if we can get the data we need.
-    local ent = E6_CanUpdateEpic6FeatCounts()
-    if ent == nil then
-        return
+    local clientEntities = GetClientEntities()
+    for _,client in ipairs(clientEntities) do
+        -- Update the feat count for all party members -- we don't bother with other non-party members 
+        -- since you can't currently level them up without them being in your party.
+        if client.PartyMember and client.PartyMember.Party and client.PartyMember.Party.PartyView then
+            E6_UpdateEpic6FeatCountForAllByEntity(client.PartyMember.Party.PartyView.Characters)
+        end
     end
-
-    -- Update the feat count for all party members -- we don't bother with other
-    -- non-party members since you can't currently level them up without them being
-    -- in your party.
-    E6_UpdateEpic6FeatCountForAllByEntity(ent.PartyMember.Party.PartyView.Characters)
 end
 
 ---@param e EclLuaGameStateChangedEvent
@@ -144,7 +105,7 @@ local function E6_OnRespecStart(characterGuid)
     end
 
     E6_NetCloseUI(characterGuid)
-    FeatPointTracker:OnRespecBegin(char)
+    FeatPointTracker:OnRespecBegin(char.Uuid.EntityUuid)
 end
 
 function E6_FeatPointInit()

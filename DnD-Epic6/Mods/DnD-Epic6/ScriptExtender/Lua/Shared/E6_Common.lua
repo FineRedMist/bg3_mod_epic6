@@ -21,7 +21,7 @@ local function ArgString(arg)
     return tostring(arg)
 end
 
----comment
+---Retrieves the ability modifier for a given ability score.
 ---@param abilityScore integer The ability score to get the modifier for.
 ---@return integer The modifier based on the score.
 function GetAbilityModifier(abilityScore)
@@ -281,8 +281,22 @@ function IsHost(playerId)
     return false
 end
 
----Whether the current player id is for the host.
----@return EntityHandle? Whether the current character is the host
+---Gather the entities with client controls. This is for the server to gather all instances of clients playing.
+---@return EntityHandle[] The list of entity handles that are clients.
+function GetClientEntities()
+    local entities = {}
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
+        if entity.UserReservedFor then
+            table.insert(entities, entity)
+        end
+    end
+
+    return entities
+end
+
+
+---The entity handle for the current host. This is for the client to identify the entity currently under client control.
+---@return EntityHandle? The character under client control.
 function GetHost()
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
         if entity.UserReservedFor then
