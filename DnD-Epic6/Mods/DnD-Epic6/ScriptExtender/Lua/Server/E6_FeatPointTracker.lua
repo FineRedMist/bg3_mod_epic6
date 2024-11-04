@@ -14,6 +14,7 @@ local PendingFeatPoints = {}
 ---@type table<GUIDSTRING, integer> The mapping of character ID to tick wait to test pending points are granted.
 local PendingTickWait = {}
 
+local DefaultPendingTickWait = 10
 local EpicCharacterPassive = "E6_Epic_EpicCharacter_Passive"
 local FeatPointSourceId = "623a5c6f-71eb-46be-b253-8bc977faece9"
 
@@ -196,7 +197,7 @@ end
 ---@param val CharacterFeatPoints? Optional new value for feat point modifications.
 local function SetPendingFeatCount(id, val)
     PendingFeatPoints[id] = val
-    PendingTickWait[id] = 5
+    PendingTickWait[id] = DefaultPendingTickWait
 end
 
 ---Updates the feat granting spell, removing if if they are not the host or don't have action points, and adding it if they are the host and do have points.

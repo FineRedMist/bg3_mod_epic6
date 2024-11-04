@@ -392,7 +392,7 @@ end
 ---Returns the current character's UUID.
 ---@return GUIDSTRING?
 local function GetCurrentCharacterUUID()
-    local entity = GetHost()
+    local entity = GetLocallyControlledCharacter()
     if not entity then
         return nil
     end

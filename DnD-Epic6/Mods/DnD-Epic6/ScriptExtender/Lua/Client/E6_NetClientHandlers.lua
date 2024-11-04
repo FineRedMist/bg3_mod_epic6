@@ -4,14 +4,11 @@ NetClientHandlers = {}
 ---@param messageUuid GUIDSTRING The Uuid sent in the message.
 ---@return boolean Whether the UUID of the host matches that sent in the message.
 local function CheckPlayerIsRightHandler(messageUuid)
-    local player = GetHost()
-    if player == nil then
+    local player = GetLocallyControlledCharacter()
+    if not player or not player.Uuid then
         return false
     end
-    if not player.Uuid or player.Uuid.EntityUuid ~= messageUuid then
-        return false
-    end
-    return true
+    return player.Uuid.EntityUuid == messageUuid
 end
 
 

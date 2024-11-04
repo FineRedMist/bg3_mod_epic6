@@ -294,16 +294,14 @@ function GetClientEntities()
     return entities
 end
 
-
----The entity handle for the current host. This is for the client to identify the entity currently under client control.
----@return EntityHandle? The character under client control.
-function GetHost()
+---Gets the locally controlled entity for the client side.
+---@return EntityHandle? The entity under client control.
+function GetLocallyControlledCharacter()
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor then
+        if entity.UserReservedFor and entity.UserReservedFor.UserID == 1 then
             return entity
         end
     end
-
     return nil
 end
 
