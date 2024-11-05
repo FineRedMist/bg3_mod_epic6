@@ -200,18 +200,13 @@ local function SetPendingFeatCount(id, val)
     PendingTickWait[id] = DefaultPendingTickWait
 end
 
----Updates the feat granting spell, removing if if they are not the host or don't have action points, and adding it if they are the host and do have points.
+---Ensure the player has the feat granting spell.
 ---@param id GUIDSTRING The ID of the character.
----@param charName string The name of the character.
----@param currentFeatPointCount integer The current feat point count for the character.
-local function UpdateFeatGrantingSpell(id, charName, currentFeatPointCount)
+local function UpdateFeatGrantingSpell(id)
     local hasSpell = HasFeatGrantingSpell(id)
     -- Allow the host to have the spell to set the initial XP Per Feat value.
-    if not hasSpell and (currentFeatPointCount >= 1 or IsHost(id)) then
+    if not hasSpell then
         Osi.AddSpell(id, EpicSpellContainerName, 0, 0)
-        SetPendingFeatCount(id)
-    elseif hasSpell and currentFeatPointCount < 1 and not IsHost(id) then -- Remove the spell if we have no feats to grant.
-        Osi.RemoveSpell(id, EpicSpellContainerName, 0)
         SetPendingFeatCount(id)
     end
 end
@@ -349,7 +344,7 @@ function FeatPointTracker:Update(ent)
         targetFeatPointCount = 0
     end
 
-    UpdateFeatGrantingSpell(id, charName, targetFeatPointCount)
+    UpdateFeatGrantingSpell(id)
     UpdateEpicCharacterPassive(id, charName, ent.EocLevel.Level)
 
     -- If we have caught up from the total feat count expected to the amount granted, we are done.
