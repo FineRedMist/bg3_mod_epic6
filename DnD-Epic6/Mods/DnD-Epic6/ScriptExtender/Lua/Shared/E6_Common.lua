@@ -11,6 +11,23 @@ function IsValidGuid(guid)
     return guid ~= nil and string.len(guid) == string.len(GuidZero) and guid ~= GuidZero and string.match(guid, GuidMatch) ~= nil
 end
 
+---Retrieves the entity id from the entity handle
+---@param entity EntityHandle The entity to retrieve the id from
+---@return GUIDSTRING? The entity id, or nil if the entity is nil or has no id.
+function GetEntityID(entity)
+    if not entity or not entity.Uuid then
+        return nil
+    end
+    return entity.Uuid.EntityUuid
+end
+
+---Determines if the entity is valid, not nil, and has a valid guid.
+---@param entity EntityHandle The entity to check
+---@return boolean Whether the entity is valid
+function EntityHasID(entity)
+    return GetEntityID(entity) ~= nil
+end
+
 ---Helper function to convert an argument to a string. Nil becomes an empty string.
 ---@param arg any
 ---@return string
@@ -273,7 +290,7 @@ function DeepCopy(o, seen)
 ---@return boolean Whether the current character is the host
 function IsHost(playerId)
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor.UserID == 65537 and entity.Uuid.EntityUuid == playerId then
+        if entity.UserReservedFor.UserID == 65537 and GetEntityID(entity) == playerId then
             return true
         end
     end
@@ -281,12 +298,30 @@ function IsHost(playerId)
     return false
 end
 
+---Whether the player is in combat
+---@param playerId GUIDSTRING ID of the player
+---@return boolean Whether the player is in combat
+function IsInCombat(playerId)
+    return Osi and Osi.InCombat and Osi.InCombat(playerId) ~= 0
+end
+
+---Whether the entity is in combat
+---@param entity EntityHandle The entity to check if they are in combat
+---@return boolean Whether the entity is in combat
+function IsEntityInCombat(entity)
+    local id = GetEntityID(entity)
+    if not id then
+        return false
+    end
+    return IsInCombat(id)
+end
+
 ---Gather the entities with client controls. This is for the server to gather all instances of clients playing.
 ---@return EntityHandle[] The list of entity handles that are clients.
 function GetClientEntities()
     local entities = {}
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor then
+        if entity.UserReservedFor and GetEntityID(entity) then
             table.insert(entities, entity)
         end
     end
