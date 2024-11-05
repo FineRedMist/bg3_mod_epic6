@@ -7,10 +7,10 @@ function E6_NetCloseUI(char)
 end
 
 -- Given an array of character entities, update their feat count
----@param chars EntityHandle[]
+---@param chars EntityHandle[] The list of character entities to update with the feat granting spell.
 local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
     for _,char in pairs(chars) do
-        if char ~= nil then
+        if EntityHasID(char) and not IsEntityInCombat(char) then
             FeatPointTracker:Update(char)
         end
     end
@@ -23,6 +23,10 @@ local E6_CanUpdate = false
 function E6_OnTick_UpdateEpic6FeatCount(tickParams)
     -- Only update when we are in the Running state.
     if not E6_CanUpdate then
+        return
+    end
+
+    if not Osi or not Osi.IsInCombat then
         return
     end
 
