@@ -302,6 +302,12 @@ local function AddSettings(win, windowDimensions, playerInfo)
         end
     end
 
+    -- Only the host can modify the amount of XP per feat.
+    if not playerInfo.IsHost then
+        slider.Disabled = true
+        saveSlider.Disabled = true
+    end
+
     win:AddSpacing()
     win:AddSpacing()
     local showFilteredCheckbox = SpicyCheckbox(settings, Ext.Loca.GetTranslatedString("hbc9684d8gca58g4210gb373gb55e83cc0081")) -- Show filtered feats
