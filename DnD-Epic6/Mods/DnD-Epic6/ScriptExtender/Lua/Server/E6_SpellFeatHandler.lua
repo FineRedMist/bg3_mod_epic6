@@ -772,9 +772,7 @@ end
 function E6_SpellFeatHandlerInit()
     Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function (caster, spell, _, _, _)
         if spell == EpicSpellContainerName then
-            if not IsInCombat(caster) then
-                OnEpic6FeatSelectorSpell(caster)
-            end
+            OnEpic6FeatSelectorSpell(caster)
         end
     end)
 end
