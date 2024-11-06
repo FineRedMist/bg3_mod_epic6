@@ -395,23 +395,6 @@ local function E6_ManageUI(e)
     end
 end
 
----Returns the current character's UUID.
----@return GUIDSTRING?
-local function GetCurrentCharacterUUID()
-    local entity = GetLocallyControlledCharacter()
-    if not entity then
-        return nil
-    end
-    local uuid = entity.Uuid
-    if not uuid or not uuid.EntityUuid then
-        return nil
-    end
-    if not IsValidGuid(uuid.EntityUuid) then
-        return nil
-    end
-    return uuid.EntityUuid
-end
-
 ---Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.
 ---@param tickParams any ignored
 local function E6_OnTick_UpdateFeatUI(tickParams)
@@ -422,12 +405,24 @@ local function E6_OnTick_UpdateFeatUI(tickParams)
         return
     end
 
-    local host = GetCurrentCharacterUUID()
-
-    if host == nil then
+    local entity = GetLocallyControlledCharacter()
+    if not entity then
         E6_CloseUI()
     end
-    
+
+    -- Close when we enter dialog
+    if entity.ClientCharacter and entity.ClientCharacter.InDialog then
+        E6_CloseUI()
+    end
+
+    local host GetEntityID(entity)
+
+    -- Close when we enter combat
+    if IsInCombat(host) then
+        E6_CloseUI()
+    end
+
+    -- Request the UI to switch to the newly selected character.
     if host ~= featUI.UserData then
         E6_CloseFeatDetailsUI()
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER, host)
