@@ -408,19 +408,16 @@ local function E6_OnTick_UpdateFeatUI(tickParams)
     local entity = GetLocallyControlledCharacter()
     if not entity then
         E6_CloseUI()
+        return
     end
 
     -- Close when we enter dialog
-    if entity.ClientCharacter and entity.ClientCharacter.InDialog then
+    if entity.Vars.E6_InCombat or entity.Vars.E6_InDialog then
         E6_CloseUI()
+        return
     end
 
-    local host GetEntityID(entity)
-
-    -- Close when we enter combat
-    if IsInCombat(host) then
-        E6_CloseUI()
-    end
+    local host = GetEntityID(entity)
 
     -- Request the UI to switch to the newly selected character.
     if host ~= featUI.UserData then

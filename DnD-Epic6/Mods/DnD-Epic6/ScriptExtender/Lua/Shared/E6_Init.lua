@@ -22,6 +22,8 @@ local function DnDEpic6Init()
     Ext.Events.StatsLoaded:Subscribe(OnStatsLoaded_RedirectXPFiles)
 
     Ext.Vars.RegisterUserVariable("E6_Feats", {})
+    Ext.Vars.RegisterUserVariable("E6_InCombat", {Client = true, Persistent = false, SyncToClient = true, SyncOnTick = true})
+    Ext.Vars.RegisterUserVariable("E6_InDialog", {Client = true, Persistent = false, SyncToClient = true, SyncOnTick = true})
     Ext.Vars.RegisterModVariable(ModuleUUID, "E6_XPPerFeat", {Server = true, Client = false, SyncToClient = false})
 end
 

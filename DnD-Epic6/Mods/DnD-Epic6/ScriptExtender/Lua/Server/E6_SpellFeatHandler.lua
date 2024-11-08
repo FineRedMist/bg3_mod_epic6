@@ -707,7 +707,7 @@ function OnEpic6FeatSelectorSpell(caster)
     local isHost = IsHost(uuid)
     local featPoints = E6_GetFeatPointBoostAmount(caster)
     -- Show the feat selector without any feats to show settings.
-    if featPoints == 0 or isHost then
+    if featPoints == 0 then
         ---@type PlayerInformationType
         local playerInfoLite = {
             ID = caster,
