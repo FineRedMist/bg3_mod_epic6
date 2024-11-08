@@ -10,8 +10,18 @@ end
 ---@param chars EntityHandle[] The list of character entities to update with the feat granting spell.
 local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
     for _,char in pairs(chars) do
-        if EntityHasID(char) and not IsEntityInCombat(char) then
-            FeatPointTracker:Update(char)
+        if EntityHasID(char) then
+            local inCombat = IsEntityInCombat(char)
+            local inDialog = char.DialogState and char.DialogState.field_0 ~= 0
+            if char.Vars.E6_InCombat ~= inCombat then
+                char.Vars.E6_InCombat = inCombat
+            end
+            if char.Vars.E6_InDialog ~= inDialog then
+                char.Vars.E6_InDialog = inDialog
+            end
+            if not inCombat then
+                FeatPointTracker:Update(char)
+            end
         end
     end
 end
@@ -23,10 +33,6 @@ local E6_CanUpdate = false
 function E6_OnTick_UpdateEpic6FeatCount(tickParams)
     -- Only update when we are in the Running state.
     if not E6_CanUpdate then
-        return
-    end
-
-    if not Osi or not Osi.IsInCombat then
         return
     end
 

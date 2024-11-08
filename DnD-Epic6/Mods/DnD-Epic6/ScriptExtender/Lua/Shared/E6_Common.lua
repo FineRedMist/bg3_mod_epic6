@@ -302,7 +302,10 @@ end
 ---@param playerId GUIDSTRING ID of the player
 ---@return boolean Whether the player is in combat
 function IsInCombat(playerId)
-    return Osi and Osi.InCombat and Osi.InCombat(playerId) ~= 0
+    if not Osi or not Osi.IsInCombat then
+        return false
+    end
+    return Osi.IsInCombat(playerId) ~= 0
 end
 
 ---Whether the entity is in combat
