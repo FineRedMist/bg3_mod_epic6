@@ -36,7 +36,13 @@ local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
     for _,passive in ipairs(feat.PassivesAdded) do
         ---@type PassiveData Data for the passive
         local passiveStat = Ext.Stats.Get(passive,  -1, true, true)
-        AddPassiveIcon(passiveStat.Icon, passiveStat.DisplayName, passiveStat.Description, SplitString(passiveStat.DescriptionParams, ";"))
+        -- We are allowing feats with passives that can't be found. If it doesn't exist, don't show it.
+        -- It does mean if it does get fixed, the feat will need to be reapplied to get the effect (if any).
+        if passiveStat then
+            AddPassiveIcon(passiveStat.Icon, passiveStat.DisplayName, passiveStat.Description, SplitString(passiveStat.DescriptionParams, ";"))
+        else
+            _E6Warn("The feat '" .. feat.ShortName .. "' has a passive " .. passive .. " that can't be found. When fixed, the character may need to reapply the feat to get the effect.")
+        end
     end
     for _,passive in ipairs(extraPassives) do
         AddPassiveIcon(passive.Icon, passive.DisplayName, passive.Description, nil)

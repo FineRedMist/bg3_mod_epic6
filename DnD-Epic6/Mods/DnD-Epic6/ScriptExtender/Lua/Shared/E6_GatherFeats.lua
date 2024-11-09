@@ -339,14 +339,16 @@ end
 ---Gathers any ability modifiers from the passive ability boosts.
 ---Note: This will be used for both feats and for passives listed in the passive list for selection. 
 ---@param passiveName string Name of the passive to gather the ability modifiers from. 
+---@param feat FeatType The feat to test against
 ---@return table<string,number>? A mapping of ability name to delta value.
-local function GatherPassiveAbilityModifiers(passiveName)
+local function GatherPassiveAbilityModifiers(feat, passiveName)
     local result = {}
     ---@type PassiveData Data for the passive
     local passive = Ext.Stats.Get(passiveName, -1, true, true)
-    --There is a passive in the list we can't get data for, indicate it is invalid and filter it out.
+    --There is a passive in the list we can't get data for. We don't want to block the feat, but we want to report it.
     if not passive then
-        return nil
+        _E6Warn("The feat '" .. feat.ShortName .. "' has a passive '" .. passiveName .. "' that doesn't exist.")
+        return result
     end
     if passive and passive.Boosts then
         local boosts = SplitString(passive.Boosts, ";")
@@ -384,7 +386,7 @@ local function E6_ApplyFeatAbilityConstraints(feat)
     local isValid = true
     local failedPassiveName = nil
     for _,passiveName in ipairs(feat.PassivesAdded) do
-        local passiveBoosts = GatherPassiveAbilityModifiers(passiveName)
+        local passiveBoosts = GatherPassiveAbilityModifiers(feat, passiveName)
         if passiveBoosts then
             MergeAbilityBoosts(abilityBoosts, passiveBoosts)
         else
