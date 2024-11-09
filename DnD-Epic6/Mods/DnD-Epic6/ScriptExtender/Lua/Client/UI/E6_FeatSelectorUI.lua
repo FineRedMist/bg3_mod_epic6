@@ -395,6 +395,13 @@ local function E6_ManageUI(e)
     end
 end
 
+---Closes the UI when the viewport is resized.
+local function E6_OnViewportResize(param)
+    _E6P("UI: Viewport resize event: " .. Ext.Json.Stringify(param))
+    E6_CloseUI()
+    return true
+end
+
 ---Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.
 ---@param tickParams any ignored
 local function E6_OnTick_UpdateFeatUI(tickParams)
@@ -433,3 +440,6 @@ Ext.Events.GameStateChanged:Subscribe(E6_ManageUI)
 -- Checking every tick seems less than optimal, but I'm not sure where I can hook for
 -- when the selected character changes.
 Ext.Events.Tick:Subscribe(E6_OnTick_UpdateFeatUI)
+
+-- Close the UI when the viewport is resized. This allows creating a new one with the right dimensions
+Ext.Events.ViewportResized:Subscribe(E6_OnViewportResize)

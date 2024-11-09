@@ -41,6 +41,16 @@ end
 local viewportWidth = Ext.IMGUI.GetViewportSize()[1]
 local viewportHeight = Ext.IMGUI.GetViewportSize()[2]
 
+---Update the viewport width and height measurements when the viewport is resized.
+local function OnViewportResize(param)
+    _E6P("Common: Viewport resize event: " .. Ext.Json.Stringify(param))
+    viewportWidth = Ext.IMGUI.GetViewportSize()[1]
+    viewportHeight = Ext.IMGUI.GetViewportSize()[2]
+    return true
+end
+
+Ext.Events.ViewportResized:Subscribe(OnViewportResize)
+
 ---Scale from 3840 width to the current viewport width.
 ---@param width integer The source control width to scale.
 ---@return integer The scaled width to render with.
