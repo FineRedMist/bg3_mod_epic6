@@ -71,13 +71,6 @@ local function InitiateCharacter(id)
     return false
 end
 
-
----@return number
-local function E6_GetLevel6XP()
-    local extraData = Ext.Stats.GetStatsManager().ExtraData
-    return extraData.Level1 + extraData.Level2 + extraData.Level3 + extraData.Level4 + extraData.Level5
-end
-
 ---Returns the number of feat points granted to the character.
 ---@param uuid GUIDSTRING The character ID.
 ---@return number The number of feat points the character has (may be negative)
@@ -100,17 +93,6 @@ local function E6_GetUsedFeatCount(entity)
     return #e6Feats
 end
 
----Retrieves the amount of experience required for the character to earn a feat.
----@return number
-function FeatPointTracker:GetEpicFeatXP()
-    local setting = Ext.Vars.GetModVariables(ModuleUUID).E6_XPPerFeat
-    if type(setting) == "number" and setting >= 100 and setting <= 20000 then
-        return setting
-    end
-    return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
-end
-
-
 ---Creates a new double-ended queue.
 ---@return FeatPointTracker The double ended queue.
 function FeatPointTracker:new()
@@ -131,7 +113,6 @@ end
 function FeatPointTracker:OnRespecBegin(entity)
     local characterGuid = entity.Uuid.EntityUuid
     IsRespecing[characterGuid] = true
-    local charName = GetCharacterName(entity, true)
 
     if entity.Vars.E6_Feats then
         E6_RemoveFeats(characterGuid, entity.Vars.E6_Feats)
@@ -329,7 +310,7 @@ function FeatPointTracker:Update(ent)
         xpToNextLevel = ent.Experience.CurrentLevelExperience
     end
 
-    local epic6FeatXP = self:GetEpicFeatXP()
+    local epic6FeatXP = GetEpicFeatXP()
     -- Number of feats and feat points we should have.
     local totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
 

@@ -721,7 +721,7 @@ function OnEpic6FeatSelectorSpell(caster)
             Proficiencies = nil, -- gathered so we know what they are proficient in and what could be granted
             Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
             ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
-            XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
+            XPPerFeat = GetEpicFeatXP(),
             IsHost = isHost,
             FeatPoints = featPoints
         }
@@ -761,7 +761,7 @@ function OnEpic6FeatSelectorSpell(caster)
         Proficiencies = proficiencies, -- gathered so we know what they are proficient in and what could be granted
         Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
-        XPPerFeat = FeatPointTracker:GetEpicFeatXP(),
+        XPPerFeat = GetEpicFeatXP(),
         IsHost = isHost,
         FeatPoints = featPoints
     }

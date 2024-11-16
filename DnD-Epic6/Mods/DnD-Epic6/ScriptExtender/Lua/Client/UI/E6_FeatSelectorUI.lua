@@ -1,5 +1,7 @@
 ---@type ExtuiWindow?
 local featUI = nil
+---@type string?
+local featPlayerUI = nil
 ---@type ExtuiWindow?
 local featDetailUI = nil
 ---@type boolean Whether to show the filtered feats.
@@ -15,7 +17,7 @@ end
 function E6_CloseUI()
     if featUI then
         featUI.Open = false
-        featUI.UserData = nil
+        featPlayerUI = nil
     end
     E6_CloseFeatDetailsUI()
 end
@@ -353,26 +355,48 @@ local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
     return featUI
 end
 
-local registeredForCloseUI = false
+---Adds information about how much experience is left to the next feat.
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param playerInfo PlayerInformationType The player information.
+local function AddExpInfo(win, windowDimensions, playerInfo)
+    local centerCell = CreateCenteredControlCell(win, "ExpInfo", windowDimensions[1] - 30)
+
+    local ent = Ext.Entity.Get(playerInfo.ID)
+    local level6Exp = E6_GetLevel6XP()
+    local xpDiff = level6Exp - ent.Experience.TotalExperience
+    local progressText = nil
+    if ent.EocLevel.Level >= 6 then
+        local xpToNextLevel = ent.Experience.CurrentLevelExperience
+        local remainingExp = playerInfo.XPPerFeat - math.fmod(xpToNextLevel, playerInfo.XPPerFeat)
+        progressText = GetParameterizedLoca("hbd475c8ega2dcg4491ga9a9gabbe7a9c8216", {string.format("%.0f", remainingExp)}) -- Level 6: [1] XP
+    else
+        if xpDiff < 0 then
+            xpDiff = 0
+        end
+        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {string.format("%.0f", xpDiff)}) -- Next feat: [1] XP
+    end
+
+    centerCell:AddText(progressText)
+end
 
 ---Shows the Feat Selector UI
 ---@param playerInfo PlayerInformationType
 function E6_FeatSelectorUI(playerInfo)
-    if not registeredForCloseUI then
-        --RegisterForCloseUIEvents(E6_CloseUI) -- Doesn't seem to work on the client to register for events.
-        registeredForCloseUI = true
-    end
-
     local windowDimensions = {500, 1450}
-    
+
+    _E6P("Showing Feat UI for: " .. playerInfo.Name)
+
     ---@type ExtuiWindow
     local win = ConfigureFeatSelectorUI(windowDimensions, playerInfo)
 
     win.Open = true
-    win.UserData = playerInfo.UUID
+    featPlayerUI = playerInfo.UUID
     win:SetFocus()
 
     ClearChildren(win)
+
+    AddExpInfo(win, windowDimensions, playerInfo)
 
     AddFeatButtons(win, windowDimensions, playerInfo)
 
@@ -420,10 +444,10 @@ local function E6_OnTick_UpdateFeatUI(tickParams)
     local host = GetEntityID(entity)
 
     -- Request the UI to switch to the newly selected character.
-    if host ~= featUI.UserData then
+    if host ~= featPlayerUI then
         E6_CloseFeatDetailsUI()
         Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER, host)
-        featUI.UserData = host -- to prevent retriggering this until we get a message back.
+        featPlayerUI = host -- to prevent retriggering this until we get a message back.
     end
 end
 
