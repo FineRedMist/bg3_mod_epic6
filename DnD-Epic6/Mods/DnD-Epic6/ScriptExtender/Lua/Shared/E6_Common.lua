@@ -366,3 +366,21 @@ function NormalizePascalCase(str)
     end
     return ToPascalCase(str)
 end
+
+---The amount of experience required to reach level 6.
+---@return number
+function E6_GetLevel6XP()
+    local extraData = Ext.Stats.GetStatsManager().ExtraData
+    return extraData.Level1 + extraData.Level2 + extraData.Level3 + extraData.Level4 + extraData.Level5
+end
+
+---Retrieves the amount of experience required for the character to earn a feat.
+---@return number
+function GetEpicFeatXP()
+    local setting = Ext.Vars.GetModVariables(ModuleUUID).E6_XPPerFeat
+    if type(setting) == "number" and setting >= 100 and setting <= 20000 then
+        return setting
+    end
+    return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
+end
+
