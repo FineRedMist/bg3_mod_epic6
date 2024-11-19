@@ -111,7 +111,12 @@ end
 ---When respecing a character, we need to track that the respec is in progress, and remove all the 
 ---feats from the character so that they don't interfere with the respec process.
 function FeatPointTracker:OnRespecBegin(entity)
-    local characterGuid = entity.Uuid.EntityUuid
+    local characterGuid = GetEntityID(entity)
+    if not characterGuid then
+        local characterName = GetCharacterName(entity, true)
+        _E6Warn("OnRespecBegin: Failed to get the character GUID for the player: " .. characterName)
+        return
+    end
     IsRespecing[characterGuid] = true
 
     if entity.Vars.E6_Feats then
@@ -121,9 +126,13 @@ end
 
 ---Restores feats for a character that cancelled a respec.
 function FeatPointTracker:OnRespecCancel(entity)
-    local characterGuid = entity.Uuid.EntityUuid
+    local characterGuid = GetEntityID(entity)
+    if not characterGuid then
+        local characterName = GetCharacterName(entity, true)
+        _E6Warn("OnRespecCancel: Failed to get the character GUID for the player: " .. characterName)
+        return
+    end
     IsRespecing[characterGuid] = false
-    local charName = GetCharacterName(entity, true)
 
     if entity.Vars.E6_Feats then
         E6_ApplyFeats(characterGuid, entity.Vars.E6_Feats)
@@ -133,10 +142,14 @@ end
 ---I've seen this fire without a start respec on level load. To be sure I don't accidentally
 ---break a character, check that the respec was started before resetting the character.
 function FeatPointTracker:OnRespecComplete(entity)
-    local characterGuid = entity.Uuid.EntityUuid
+    local characterGuid = GetEntityID(entity)
+    if not characterGuid then
+        local characterName = GetCharacterName(entity, true)
+        _E6Warn("OnRespecComplete: Failed to get the character GUID for the player: " .. characterName)
+        return
+    end
     local wasRespecStarted = IsRespecing[characterGuid]
     IsRespecing[characterGuid] = false
-    local charName = GetCharacterName(entity, true)
 
     if wasRespecStarted then
         self:Reset(entity, true)
@@ -148,16 +161,19 @@ end
 ---@param entity EntityHandle The entity for the character.
 ---@param isRespec boolean Whether the reset is due to a respec.
 function FeatPointTracker:Reset(entity, isRespec)
-    if entity.Uuid then
-        local characterGuid = entity.Uuid.EntityUuid
-        local charName = GetCharacterName(entity, true)
-        RemoveAllFeatPoints(characterGuid)
-        if isRespec then
-            Osi.RemovePassive(characterGuid, EpicCharacterPassive)
-            Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
-            if entity.Vars.E6_Feats then
-                entity.Vars.E6_Feats = nil
-            end
+    local characterGuid = GetEntityID(entity)
+    if not characterGuid then
+        local characterName = GetCharacterName(entity, true)
+        _E6Warn("Reset: Failed to get the character GUID for the player: " .. characterName)
+        return
+    end
+
+    RemoveAllFeatPoints(characterGuid)
+    if isRespec then
+        Osi.RemovePassive(characterGuid, EpicCharacterPassive)
+        Osi.RemoveSpell(characterGuid, EpicSpellContainerName, 0)
+        if entity.Vars.E6_Feats then
+            entity.Vars.E6_Feats = nil
         end
     end
 end
@@ -284,7 +300,11 @@ function FeatPointTracker:Update(ent)
         return
     end
 
-    local id = ent.Uuid.EntityUuid
+    local id = GetEntityID(ent)
+    if not id then
+        _E6Warn("Update: Failed to get the character GUID for the player: " .. charName)
+        return
+    end
     
     if IsRespecing[id] then
         return

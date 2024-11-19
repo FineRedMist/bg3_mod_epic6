@@ -9,6 +9,12 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     local message = Ext.Json.Parse(payload)
     local entity = Ext.Entity.Get(message.PlayerId)
 
+    local characterGuid = GetEntityID(entity)
+    if not characterGuid then
+        _E6Error("SelectedFeatSpecification: Failed to get the character GUID for the player.")
+        return
+    end
+
     ---@type SelectedFeatType[]
     local e6Feats = entity.Vars.E6_Feats
     if e6Feats == nil then
@@ -23,7 +29,7 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     E6_ApplyFeat(message.PlayerId, message.Feat)
 
     if restoreFeatSelectorUI then
-        FeatPointTracker:OnStableCallback(entity.Uuid.EntityUuid, OnEpic6FeatSelectorSpell)
+        FeatPointTracker:OnStableCallback(characterGuid, OnEpic6FeatSelectorSpell)
     end
 end
 

@@ -703,7 +703,7 @@ function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
-    local uuid = ent.Uuid.EntityUuid
+    local uuid = GetEntityID(ent)
     local isHost = IsHost(uuid)
     local featPoints = E6_GetFeatPointBoostAmount(caster)
     -- Show the feat selector without any feats to show settings.
@@ -772,6 +772,7 @@ end
 function E6_SpellFeatHandlerInit()
     Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function (caster, spell, _, _, _)
         if spell == EpicSpellContainerName then
+            _E6P("E6_SpellFeatHandlerInit: Casting Epic6 Feat spell for: " .. caster)
             OnEpic6FeatSelectorSpell(caster)
         end
     end)

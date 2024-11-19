@@ -1,5 +1,6 @@
 ---@type ExtuiWindow?
 local featUI = nil
+local featUIClosed = true
 ---@type string?
 local featPlayerUI = nil
 ---@type ExtuiWindow?
@@ -17,6 +18,7 @@ end
 function E6_CloseUI()
     if featUI then
         featUI.Open = false
+        featUIClosed = true
         featPlayerUI = nil
     end
     E6_CloseFeatDetailsUI()
@@ -391,6 +393,7 @@ function E6_FeatSelectorUI(playerInfo)
     local win = ConfigureFeatSelectorUI(windowDimensions, playerInfo)
 
     win.Open = true
+    featUIClosed = false
     featPlayerUI = playerInfo.UUID
     win:SetFocus()
 
@@ -421,11 +424,16 @@ end
 
 ---Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.
 ---@param tickParams any ignored
+local function E6_OnTick_UpdateFeatUI_Old(tickParams)
+end
+
+---Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.
+---@param tickParams any ignored
 local function E6_OnTick_UpdateFeatUI(tickParams)
     if not E6_CanCheckWin then
         return
     end
-    if not featUI or not featUI.Open then
+    if featUIClosed then
         return
     end
 

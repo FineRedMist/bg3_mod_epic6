@@ -15,7 +15,13 @@ end
 ---@param entity EntityHandle The entity to retrieve the id from
 ---@return GUIDSTRING? The entity id, or nil if the entity is nil or has no id.
 function GetEntityID(entity)
-    if not entity or not entity.Uuid then
+    if not entity then
+        return nil
+    end
+    if not entity.Uuid then
+        if entity.OriginalTemplate then
+            return entity.OriginalTemplate.OriginalTemplate
+        end
         return nil
     end
     return entity.Uuid.EntityUuid
