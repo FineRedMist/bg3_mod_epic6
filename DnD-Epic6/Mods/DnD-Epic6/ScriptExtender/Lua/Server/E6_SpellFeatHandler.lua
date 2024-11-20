@@ -387,7 +387,9 @@ local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
             local expertise = boost.ExpertiseBonusBoost
             if expertise then -- Expertise
                 local skill = expertise.Skill.Label
-                proficiencies.Skills[skill].Expertise = true -- The character should already have proficiency in the skill, initializing this.
+                if proficiencies.Skills[skill] then -- After a respec, we get some odd lingering entries.
+                    proficiencies.Skills[skill].Expertise = true
+                end
             end
         end
     end
@@ -772,7 +774,6 @@ end
 function E6_SpellFeatHandlerInit()
     Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function (caster, spell, _, _, _)
         if spell == EpicSpellContainerName then
-            _E6P("E6_SpellFeatHandlerInit: Casting Epic6 Feat spell for: " .. caster)
             OnEpic6FeatSelectorSpell(caster)
         end
     end)

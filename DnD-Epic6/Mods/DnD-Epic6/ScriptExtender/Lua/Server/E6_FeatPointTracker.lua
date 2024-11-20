@@ -114,7 +114,11 @@ function FeatPointTracker:OnRespecBegin(entity)
     local characterGuid = GetEntityID(entity)
     if not characterGuid then
         local characterName = GetCharacterName(entity, true)
-        _E6Warn("OnRespecBegin: Failed to get the character GUID for the player: " .. characterName)
+        if characterName == nil then
+            _E6Warn("OnRespecBegin: Failed to get the character name for the player.")
+        else
+            _E6Warn("OnRespecBegin: Failed to get the character GUID for the player: " .. characterName)
+        end
         return
     end
     IsRespecing[characterGuid] = true
@@ -129,7 +133,11 @@ function FeatPointTracker:OnRespecCancel(entity)
     local characterGuid = GetEntityID(entity)
     if not characterGuid then
         local characterName = GetCharacterName(entity, true)
-        _E6Warn("OnRespecCancel: Failed to get the character GUID for the player: " .. characterName)
+        if characterName == nil then
+            _E6Warn("OnRespecCancel: Failed to get the character name for the player.")
+        else
+            _E6Warn("OnRespecCancel: Failed to get the character GUID for the player: " .. characterName)
+        end
         return
     end
     IsRespecing[characterGuid] = false
@@ -145,7 +153,11 @@ function FeatPointTracker:OnRespecComplete(entity)
     local characterGuid = GetEntityID(entity)
     if not characterGuid then
         local characterName = GetCharacterName(entity, true)
-        _E6Warn("OnRespecComplete: Failed to get the character GUID for the player: " .. characterName)
+        if characterName == nil then
+            _E6Warn("OnRespecComplete: Failed to get the character name for the player.")
+        else
+            _E6Warn("OnRespecComplete: Failed to get the character GUID for the player: " .. characterName)
+        end
         return
     end
     local wasRespecStarted = IsRespecing[characterGuid]
@@ -164,7 +176,11 @@ function FeatPointTracker:Reset(entity, isRespec)
     local characterGuid = GetEntityID(entity)
     if not characterGuid then
         local characterName = GetCharacterName(entity, true)
-        _E6Warn("Reset: Failed to get the character GUID for the player: " .. characterName)
+        if characterName == nil then
+            _E6Warn("Reset: Failed to get the character name for the player.")
+        else
+            _E6Warn("Reset: Failed to get the character GUID for the player: " .. characterName)
+        end
         return
     end
 

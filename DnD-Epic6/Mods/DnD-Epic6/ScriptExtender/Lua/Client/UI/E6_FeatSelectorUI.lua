@@ -387,8 +387,6 @@ end
 function E6_FeatSelectorUI(playerInfo)
     local windowDimensions = {500, 1450}
 
-    _E6P("Showing Feat UI for: " .. playerInfo.Name)
-
     ---@type ExtuiWindow
     local win = ConfigureFeatSelectorUI(windowDimensions, playerInfo)
 

@@ -115,7 +115,7 @@ local function E6_OnRespecStart(characterGuid)
     end
 
     E6_NetCloseUI(characterGuid)
-    FeatPointTracker:OnRespecBegin(GetEntityID(char))
+    FeatPointTracker:OnRespecBegin(char)
 end
 
 function E6_FeatPointInit()
