@@ -8,6 +8,11 @@ local featDetailUI = nil
 ---@type boolean Whether to show the filtered feats.
 local ShowFilteredFeats = false
 
+local FeatUIDimensions = {500, 1450}
+local FeatUIPosition = {1000, 100}
+local FeatUIDetailsDimensions = {1000, 1450}
+local FeatUIDetailsPosition = {1600, 100}
+
 local function E6_CloseFeatDetailsUI()
     if featDetailUI then
         featDetailUI.Open = false
@@ -17,7 +22,14 @@ end
 ---Closes the UI
 function E6_CloseUI()
     if featUI then
-        featUI.Open = false
+        -- Instead of actually closing the window, we are going to empty it and move it elsewhere.
+        -- This way it is around to for interactions, but uninteractible.
+        ClearChildren(featUI)
+        featUI:SetSize({1, 1})
+        featUI:SetPos(Ext.IMGUI.GetViewportSize())
+        featUI.NoTitleBar = true
+        featUI.Closeable = false
+        featUI.Open = true
         featUIClosed = true
         featPlayerUI = nil
     end
@@ -28,7 +40,7 @@ end
 ---@param feat FeatType The feat to create the window for.
 ---@param playerInfo PlayerInformationType The player id for the feat.
 local function ShowFeatDetailSelectUI(feat, playerInfo)
-    local windowDimensions = {1000, 1450}
+    local windowDimensions = FeatUIDetailsDimensions
     if not featDetailUI then
         featDetailUI = Ext.IMGUI.NewWindow("FeatDetailsWindow")
     end
@@ -36,7 +48,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     featDetailUI.Label = feat.DisplayName
     -- When the label changes, I need to reset the size and position of the window as it ends up moving.
     featDetailUI:SetSize(ScaleToViewport(windowDimensions))
-    featDetailUI:SetPos(ScaleToViewport({1400, 100}))
+    featDetailUI:SetPos(ScaleToViewport(FeatUIDetailsPosition))
     featDetailUI.Closeable = true
     featDetailUI.NoMove = true
     featDetailUI.NoResize = true
@@ -335,24 +347,25 @@ end
 
 ---Creates/Gets the Feat Selector UI
 ---@param windowDimensions integer[] The dimensions of the window.
----@param playerInfo PlayerInformationType The player information.
 ---@return ExtuiWindow The window to display.
-local function ConfigureFeatSelectorUI(windowDimensions, playerInfo)
+local function ConfigureFeatSelectorUI(windowDimensions)
     if featUI then
         E6_CloseFeatDetailsUI() -- Close the detail window if it's open so it doesn't get used.
     else
         featUI = Ext.IMGUI.NewWindow("FeatSelector")
-        featUI.OnClose = E6_CloseFeatDetailsUI
+        featUI.OnClose = function()
+            E6_CloseFeatDetailsUI()
+            E6_CloseUI()
+        end
     end
 
-    SetWindowTitle(playerInfo)
-
+    featUI.NoTitleBar = false
     featUI.Closeable = true
     featUI.NoMove = true
     featUI.NoResize = true
     featUI.NoCollapse = true
     featUI:SetSize(ScaleToViewport(windowDimensions))
-    featUI:SetPos(ScaleToViewport({800, 100}))
+    featUI:SetPos(ScaleToViewport(FeatUIPosition))
 
     return featUI
 end
@@ -385,10 +398,12 @@ end
 ---Shows the Feat Selector UI
 ---@param playerInfo PlayerInformationType
 function E6_FeatSelectorUI(playerInfo)
-    local windowDimensions = {500, 1450}
+    local windowDimensions = FeatUIDimensions
 
     ---@type ExtuiWindow
-    local win = ConfigureFeatSelectorUI(windowDimensions, playerInfo)
+    local win = ConfigureFeatSelectorUI(windowDimensions)
+
+    SetWindowTitle(playerInfo)
 
     win.Open = true
     featUIClosed = false
@@ -463,3 +478,6 @@ Ext.Events.GameStateChanged:Subscribe(E6_ManageUI)
 -- Checking every tick seems less than optimal, but I'm not sure where I can hook for
 -- when the selected character changes.
 Ext.Events.Tick:Subscribe(E6_OnTick_UpdateFeatUI)
+
+featUI = ConfigureFeatSelectorUI({1, 1})
+E6_CloseUI()
