@@ -387,7 +387,9 @@ local function GatherExpertiseFromBoosts(entity, boosts, proficiencies)
             local expertise = boost.ExpertiseBonusBoost
             if expertise then -- Expertise
                 local skill = expertise.Skill.Label
-                proficiencies.Skills[skill].Expertise = true -- The character should already have proficiency in the skill, initializing this.
+                if proficiencies.Skills[skill] then -- After a respec, we get some odd lingering entries.
+                    proficiencies.Skills[skill].Expertise = true
+                end
             end
         end
     end
@@ -703,7 +705,7 @@ function OnEpic6FeatSelectorSpell(caster)
     local ent = Ext.Entity.Get(caster)
     local charname = GetCharacterName(ent)
 
-    local uuid = ent.Uuid.EntityUuid
+    local uuid = GetEntityID(ent)
     local isHost = IsHost(uuid)
     local featPoints = E6_GetFeatPointBoostAmount(caster)
     -- Show the feat selector without any feats to show settings.

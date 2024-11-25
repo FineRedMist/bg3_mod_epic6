@@ -8,7 +8,7 @@ local function CheckPlayerIsRightHandler(messageUuid)
     if not player or not player.Uuid then
         return false
     end
-    return player.Uuid.EntityUuid == messageUuid
+    return GetEntityID(player) == messageUuid
 end
 
 

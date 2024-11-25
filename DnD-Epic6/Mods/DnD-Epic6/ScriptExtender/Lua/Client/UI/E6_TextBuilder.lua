@@ -58,7 +58,6 @@ function TextBuilder:SplitFlattenText(textParts)
             end
         end
     end
-    _E6P("SplitFlattenText: " .. Ext.Json.Stringify(textParts))
     return textParts
 end
 
