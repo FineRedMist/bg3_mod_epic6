@@ -42,7 +42,7 @@ function NetServerHandlers.ExportCharacter(_, payload, peerId)
     if entity ~= nil then
         --local datePrefix = os.date("%Y-%m-%d")
         local character = GetCharacterName(entity)
-        E6_ToFile(entity, character .. "-Export.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer", "ServerRecruitedBy"})
+        E6_ToFile(entity, character .. "-Export.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer", "ServerRecruitedBy", "ServerOwneeHistory", "StatusManager"})
     end
 end
 
@@ -87,7 +87,7 @@ function NetServerHandlers.ResetFeats(_, payload, peerId)
     if entity ~= nil then
         E6_RemoveFeats(payload, entity.Vars.E6_Feats)
         entity.Vars.E6_Feats = nil
-        FeatPointTracker:OnStableCallback(payload, OnEpic6FeatSelectorSpell)
+        FeatPointTracker:OnStableCallback(GetEntityID(entity), OnEpic6FeatSelectorSpell)
     else
         _E6Error("Failed find the character '" .. payload .. "' to reset the feats for.")
     end
