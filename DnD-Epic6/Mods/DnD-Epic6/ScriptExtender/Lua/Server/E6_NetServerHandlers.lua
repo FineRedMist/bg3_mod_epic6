@@ -40,7 +40,9 @@ end
 function NetServerHandlers.ExportCharacter(_, payload, peerId)
     local entity = Ext.Entity.Get(payload)
     if entity ~= nil then
-        E6_ToFile(entity, "E6_Character.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer"})
+        --local datePrefix = os.date("%Y-%m-%d")
+        local character = GetCharacterName(entity)
+        E6_ToFile(entity, character .. "-Export.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer", "ServerRecruitedBy"})
     end
 end
 
