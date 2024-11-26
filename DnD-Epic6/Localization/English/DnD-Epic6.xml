@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="h27d08b54g94d5g405cga8c6g57231379a05f" version="1">Export Character</content>
+	<content contentuid="h5cb70d0agc32bg49d6g96f1gdd2daa2ac545" version="1">Exports the character to the server's '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-Export.json. 
+Note: this operation is time consuming and the game may be unresponsive.</content>
 	<content contentuid="h95f979dcg69e9g464fgb943gf2559470bcc1" version="1">Level 6: [1] XP</content>
 	<content contentuid="hbd475c8ega2dcg4491ga9a9gabbe7a9c8216" version="1">Next feat: [1] XP</content>
 	<content contentuid="ha7eeaa4ag452bg469dg9127gaa4afb1e3abc" version="1">[1] [2] damage</content>
