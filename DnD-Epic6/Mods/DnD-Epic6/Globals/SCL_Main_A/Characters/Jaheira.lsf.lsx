@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<save>
+	<version major="4" minor="0" revision="9" build="0" lslib_meta="v1,bswap_guids,lsf_adjacency" />
+	<region id="Templates">
+		<node id="Templates">
+			<children>
+				<node id="GameObjects">
+					<attribute id="AnubisConfigName" type="FixedString" value="GLO_Jaheira_Act2" />
+					<attribute id="Archetype" type="FixedString" value="act2_Jaheira" />
+					<attribute id="CharacterVisualResourceID" type="FixedString" value="966e8a68-24a0-fd94-8323-74f7b091df7c" />
+					<attribute id="DisplayName" type="TranslatedString" handle="h0223790egb879g4d5dg87eag2ded4ff2feae" version="1" />
+					<attribute id="Equipment" type="FixedString" value="EQP_Jaheira" />
+					<attribute id="Faction" type="guid" value="9a7c52c8-ca88-4493-bca5-9b917494c94c" />
+					<attribute id="Flag" type="int32" value="1" />
+					<attribute id="GeneratePortrait" type="LSString" value="Icon_Jaheira" />
+					<attribute id="HasPlayerApprovalRating" type="bool" value="True" />
+					<attribute id="Icon" type="FixedString" value="966e8a68-24a0-fd94-8323-74f7b091df7c-EQP_Jaheira_(Icon_Jaheira)" />
+					<attribute id="IsBoss" type="bool" value="True" />
+					<attribute id="IsGlobal" type="bool" value="True" />
+					<attribute id="LevelName" type="FixedString" value="SCL_Main_A" />
+					<attribute id="LevelOverride" type="int32" value="-1" />
+					<attribute id="MapKey" type="FixedString" value="91b6b200-7d00-4d62-8dc9-99e8339dfa1a" />
+					<attribute id="Name" type="LSString" value="S_Player_Jaheira" />
+					<attribute id="PortraitVisualResourceID" type="FixedString" value="b90c6552-4529-e6ef-1084-34c56eca1521" />
+					<attribute id="Stats" type="FixedString" value="HAV_Jaheira" />
+					<attribute id="TemplateName" type="FixedString" value="7c7e6552-3fc0-4495-bb11-4b9f9a8e71fc" />
+					<attribute id="Title" type="TranslatedString" handle="ha824f086gc905g4893g89a5g99d9f8a44048" version="2" />
+					<attribute id="Type" type="FixedString" value="character" />
+					<attribute id="VFXScale" type="float" value="1.03" />
+					<attribute id="_OriginalFileVersion_" type="int64" value="144115207403209054" />
+					<children>
+						<node id="LayerList">
+							<children>
+								<node id="Layers">
+									<children>
+										<node id="Object">
+											<attribute id="MapKey" type="FixedString" value="SCL_Main_A" />
+											<children>
+												<node id="Layer">
+													<attribute id="Object" type="guid" value="5155fad3-4d34-3798-f8ca-8a7942d22a05" />
+												</node>
+												<node id="Layer">
+													<attribute id="Object" type="guid" value="5e5a101d-7bf1-abbb-d73e-2c46941f05dd" />
+												</node>
+											</children>
+										</node>
+									</children>
+								</node>
+							</children>
+						</node>
+						<node id="LocomotionParams" />
+						<node id="SkillList" />
+						<node id="SpeakerGroupList">
+							<children>
+								<node id="SpeakerGroup">
+									<attribute id="Object" type="guid" value="c3ff8592-cb9e-94c4-68a3-28b3c5724048" />
+								</node>
+								<node id="SpeakerGroup">
+									<attribute id="Object" type="guid" value="7997dfff-126b-11d0-3ee3-0893193cf633" />
+								</node>
+							</children>
+						</node>
+						<node id="TradeTreasures">
+							<children>
+								<node id="TreasureItem">
+									<attribute id="Object" type="FixedString" value="GLO_Jaheira" />
+								</node>
+							</children>
+						</node>
+						<node id="Transform">
+							<attribute id="Position" type="fvec3" value="-28.24854 27.264294 129.39754" />
+							<attribute id="RotationQuat" type="fvec4" value="0 0.6828061 0 0.73059964" />
+							<attribute id="Scale" type="float" value="1.03" />
+						</node>
+					</children>
+				</node>
+			</children>
+		</node>
+	</region>
+</save>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<save>
+	<version major="4" minor="0" revision="9" build="0" lslib_meta="v1,bswap_guids,lsf_adjacency" />
+	<region id="Templates">
+		<node id="Templates">
+			<children>
+				<node id="GameObjects">
+					<attribute id="CharacterVisualResourceID" type="FixedString" value="966e8a68-24a0-fd94-8323-74f7b091df7c" />
+					<attribute id="Equipment" type="FixedString" value="EQP_Jaheira" />
+					<attribute id="GeneratePortrait" type="LSString" value="Icon_Jaheira" />
+					<attribute id="Icon" type="FixedString" value="966e8a68-24a0-fd94-8323-74f7b091df7c-EQP_Jaheira_(Icon_Jaheira)" />
+					<attribute id="LevelName" type="FixedString" value="" />
+					<attribute id="LevelOverride" type="int32" value="-1" />
+					<attribute id="MapKey" type="FixedString" value="7c7e6552-3fc0-4495-bb11-4b9f9a8e71fc" />
+					<attribute id="Name" type="LSString" value="HalfElves_Female_High_Jaheira" />
+					<attribute id="ParentTemplateId" type="FixedString" value="01718a36-3102-4dd2-b141-4f5f042deb10" />
+					<attribute id="PortraitVisualResourceID" type="FixedString" value="db8f68d4-c84b-2349-886a-d996f4ba5804" />
+					<attribute id="Type" type="FixedString" value="character" />
+					<attribute id="_OriginalFileVersion_" type="int64" value="144115207403209054" />
+					<children>
+						<node id="LocomotionParams" />
+						<node id="Tags">
+							<children>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="2c948b46-0d8a-426b-ad8b-5f41233df4c1" />
+								</node>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="91f4b379-63a2-40e9-a509-7b9b2f90e4c8" />
+								</node>
+							</children>
+						</node>
+					</children>
+				</node>
+				<node id="GameObjects">
+					<attribute id="CharacterVisualResourceID" type="FixedString" value="9404e0a4-fafd-47ec-ad6d-52d63cb116ff" />
+					<attribute id="DisplayName" type="TranslatedString" handle="hcf282116g50dcg4e58ga995g638d7ae08e7e" version="1" />
+					<attribute id="Equipment" type="FixedString" value="EQP_CC_Ranger" />
+					<attribute id="Faction" type="guid" value="afb9d9bb-9a52-4737-4d8d-c5c72f32b730" />
+					<attribute id="Flag" type="int32" value="0" />
+					<attribute id="GeneratePortrait" type="LSString" value="Icon_Minsc" />
+					<attribute id="Icon" type="FixedString" value="9404e0a4-fafd-47ec-ad6d-52d63cb116ff-EQP_CC_Ranger_(Icon_Minsc)" />
+					<attribute id="LevelName" type="FixedString" value="" />
+					<attribute id="LevelOverride" type="int32" value="-1" />
+					<attribute id="MapKey" type="FixedString" value="9d5f838a-8595-490c-85d5-8a2a69414356" />
+					<attribute id="Name" type="LSString" value="ORIGIN_Minsc" />
+					<attribute id="ParentTemplateId" type="FixedString" value="056fffd0-9009-4627-84c2-f0a22e311ec7" />
+					<attribute id="PortraitVisualResourceID" type="FixedString" value="6acff363-4407-0b10-0a7c-c1e27fe03c58" />
+					<attribute id="SoftBodyCollisionTemplate" type="FixedString" value="" />
+					<attribute id="SpellSet" type="FixedString" value="CommonPlayerActions" />
+					<attribute id="Stats" type="FixedString" value="Origin_Minsc" />
+					<attribute id="Type" type="FixedString" value="character" />
+					<attribute id="_OriginalFileVersion_" type="int64" value="144115207403209054" />
+					<children>
+						<node id="LocomotionParams" />
+						<node id="Tags">
+							<children>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="37a733c1-a862-4157-b92a-9cff46232c6a" />
+								</node>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="1eec74e8-3673-4500-abec-57b7ed8469ed" />
+								</node>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="91f4b379-63a2-40e9-a509-7b9b2f90e4c8" />
+								</node>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="2a4f9fcc-5891-4150-bf3f-a219e69a7f33" />
+								</node>
+								<node id="Tag">
+									<attribute id="Object" type="guid" value="26fb71ce-d2c8-44b5-90d6-cb08705cb531" />
+								</node>
+							</children>
+						</node>
+					</children>
+				</node>
+			</children>
+		</node>
+	</region>
+</save>
