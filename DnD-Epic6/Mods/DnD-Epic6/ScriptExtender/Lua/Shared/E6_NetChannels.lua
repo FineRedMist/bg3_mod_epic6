@@ -16,5 +16,6 @@ NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT = "E6_Client_To_Server_Set_XP_Pe
 NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER = "E6_Client_To_Server_Switch_Character"
 -- Client to server message to reset the feats and feat points for the current character.
 NetChannels.E6_CLIENT_TO_SERVER_RESET_FEATS = "E6_Client_To_Server_Reset_Feats"
-
+---Client to server message to run tests.
+NetChannels.E6_CLIENT_TO_SERVER_RUN_TEST = "E6_Client_To_Server_Run_Tests"
 return NetChannels
