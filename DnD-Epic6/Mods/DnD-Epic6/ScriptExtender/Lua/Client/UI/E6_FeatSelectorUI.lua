@@ -27,6 +27,7 @@ function E6_CloseUI()
         ClearChildren(featUI)
         featUI:SetSize({1, 1})
         featUI:SetPos(Ext.IMGUI.GetViewportSize())
+        featUI.NoBackground = true
         featUI.NoTitleBar = true
         featUI.Closeable = false
         featUI.Open = true
@@ -292,6 +293,20 @@ local function AddExportCharacterButton(win, windowDimensions, playerInfo)
     end
 end
 
+---Adds a button to reset the character's feats.
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param playerInfo PlayerInformationType The player information.
+local function AddRunTestButton(win, windowDimensions, playerInfo)
+    local centerCell = CreateCenteredControlCell(win, "RunTest", windowDimensions[1] - 30)
+    local runTestButton = centerCell:AddButton("Run Test")
+    AddTooltip(runTestButton):AddText("Runs a test regarding Minsc and Jaheira")
+    runTestButton.OnClick = function()
+        E6_CloseUI()
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RUN_TEST, playerInfo.ID)
+    end
+end
+
 ---Adds configuration settings under a collapsible header.
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param windowDimensions integer[] The dimensions of the window.
@@ -355,6 +370,10 @@ local function AddSettings(win, windowDimensions, playerInfo)
     win:AddSpacing()
     win:AddSpacing()
     AddExportCharacterButton(settings, windowDimensions, playerInfo)
+
+    --win:AddSpacing()
+    --win:AddSpacing()
+    --AddRunTestButton(settings, windowDimensions, playerInfo)
 end
 
 local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}
@@ -378,6 +397,7 @@ local function ConfigureFeatSelectorUI(windowDimensions)
         end
     end
 
+    featUI.NoBackground = false
     featUI.NoTitleBar = false
     featUI.Closeable = true
     featUI.NoMove = true
@@ -450,11 +470,6 @@ local function E6_ManageUI(e)
     elseif not E6_CanCheckWin then
         E6_CanCheckWin = true
     end
-end
-
----Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.
----@param tickParams any ignored
-local function E6_OnTick_UpdateFeatUI_Old(tickParams)
 end
 
 ---Updates the Feat UI if the character has changed. It also closes if any selected character is not a player.

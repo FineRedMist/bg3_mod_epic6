@@ -93,4 +93,70 @@ function NetServerHandlers.ResetFeats(_, payload, peerId)
     end
 end
 
+local player_uuid = {
+    S_Player_Jaheira = "91b6b200-7d00-4d62-8dc9-99e8339dfa1a",
+    S_Player_Minsc = "0de603c5-42e2-4811-9dad-f652de080eba"
+}
+local function SetAvailableLevel(id, level)
+    local entity = Ext.Entity.Get(player_uuid[id])
+    if entity == nil then
+        _E6Error("Failed to get the entity.")
+        return
+    end
+
+    if not entity.AvailableLevel or not entity.AvailableLevel.Level then
+        _E6Error("Failed to get the entity's AvailableLevel.'")
+        return
+    end
+
+    _E6P("Setting the available level for " .. id .. " from " .. tostring(entity.AvailableLevel.Level) .. " to " .. tostring(level))
+    entity.AvailableLevel.Level = level
+
+    if not entity.ServerCharacter or not entity.ServerCharacter.Template or not entity.ServerCharacter.Template.LevelOverride then
+        _E6Error("Failed to get the entity's ServerCharacter.LevelOverride.")
+        return
+    end
+
+    _E6P("Setting the level override for " .. id .. " from " .. tostring(entity.ServerCharacter.Template.LevelOverride) .. " to " .. tostring(level))
+    entity.ServerCharacter.Template.LevelOverride = level
+end
+
+local function GetAvailableLevel(id)
+    local entity = Ext.Entity.Get(player_uuid[id])
+    if not entity then
+        return -1, -1
+    end
+    if not entity.AvailableLevel or not entity.AvailableLevel.Level then
+        return -1, -1
+    end
+    if not entity.ServerCharacter or not entity.ServerCharacter.Template or not entity.ServerCharacter.Template.LevelOverride then
+        _E6Error("Failed to get the entity's ServerCharacter.LevelOverride.")
+        return entity.AvailableLevel.Level, -1
+    end
+    return entity.AvailableLevel.Level, entity.ServerCharacter.Template.LevelOverride
+end
+
+local function TestLevels(id)
+    SetAvailableLevel("S_Player_Jaheira", 6)
+    local available, templateOverride = GetAvailableLevel("S_Player_Jaheira")
+    if available ~= 6 then
+        _E6Error("Failed to set the available level for " .. id)
+    end
+    if templateOverride ~= 6 then
+        _E6Error("Failed to set the template level override for " .. id)
+    end
+end
+
+
+function NetServerHandlers.RunTest(_, payload, peerId)
+    _E6P("Running test: " .. payload)
+
+    -- Try to get Jaheira and set her AvailableLevel directly.
+    -- Then test by retrieving it again and seeing what the value is.
+    TestLevels("S_Player_Jaheira")
+
+    -- Repeat for Minsc
+    TestLevels("S_Player_Minsc")
+end
+
 return NetServerHandlers

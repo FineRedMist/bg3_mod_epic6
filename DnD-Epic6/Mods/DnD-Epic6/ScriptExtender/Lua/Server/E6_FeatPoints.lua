@@ -6,6 +6,18 @@ function E6_NetCloseUI(char)
     Ext.Net.PostMessageToClient(char, NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI, char)
 end
 
+---Ensure that the character's level limit is constrained to 6.
+---@param entity EntityHandle
+local function FixupLevelLimit(entity)
+    if entity.AvailableLevel and entity.AvailableLevel.Level > 6 then
+        _E6P("Setting available level for " .. GetCharacterName(entity) .. " from " .. tostring(entity.AvailableLevel.Level) .. " to 6")
+        entity.AvailableLevel.Level = 6
+    end
+    --if entity.ServerCharacter and entity.ServerCharacter.Template and entity.ServerCharacter.Template.LevelOverride > 6 then
+    --    entity.ServerCharacter.Template.LevelOverride = 6
+    --end
+end
+
 -- Given an array of character entities, update their feat count
 ---@param chars EntityHandle[] The list of character entities to update with the feat granting spell.
 local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
@@ -20,6 +32,7 @@ local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
                 char.Vars.E6_InDialog = inDialog
             end
             if not inCombat then
+                FixupLevelLimit(char)
                 FeatPointTracker:Update(char)
             end
         end
