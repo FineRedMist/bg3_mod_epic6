@@ -34,11 +34,11 @@ end
 ---@param message string The error message about the failure
 ---@param args any[]? Additional arguments to pass to the error message.
 ---@return FeatMessageType The message to display to the player about why the requirement failed.
-local function ToMessageLoca(message, args)
+function ToMessageLoca(message, args)
     return { MessageLoca = message, Args = args }
 end
 
-local RequirementsMet = ToMessageLoca("h35115c97g6f5bg4ba5gad35gfdba5e7e1d51")
+local RequirementsMet = ToMessageLoca("h35115c97g6f5bg4ba5gad35gfdba5e7e1d51") -- Requirements met
 
 ---Returns the loca for a missing ability.
 ---@param abilityName string The name of the ability that was missing.
@@ -102,7 +102,7 @@ local function E6_ApplySelectAbilityRequirement(feat)
                 availablePointRoom = availablePointRoom + abilityScore.Maximum - abilityScore.Current
             end
             if availablePointRoom < ability.Count then
-                return false, ToMessageLoca("h2e9bd450g5df3g4075ga81eg29eef9f9f4a4")
+                return false, ToMessageLoca("h2e9bd450g5df3g4075ga81eg29eef9f9f4a4") -- The feat grants more points than can be applied to abilities.
             end
             return true, RequirementsMet
         end
@@ -147,7 +147,7 @@ local function E6_ApplySelectPassiveRequirement(feat)
                     return true, RequirementsMet
                 end
             end
-            return false, ToMessageLoca("h8b51336eg9283g49acgb856g30ab5c92524c")
+            return false, ToMessageLoca("h8b51336eg9283g49acgb856g30ab5c92524c") -- There aren't enough unselected passives to choose from.
         end
         E6_AddFeatRequirement(feat, passiveRequirement)
     end
@@ -253,7 +253,11 @@ local function E6_MakeCharacterLevelRequirement(feat, proficiencyMatch)
     ---@return boolean Whether the character level is strictly greater than the requirement.
     ---@return FeatMessageType The message to display to the player about why the requirement failed.
     return function(entity, playerInfo)
-        return entity.EocLevel.Level > levelRequirement, ToMessageLoca("h04fab965g7b1bg47fegad9bg69ae676c8cdf", {levelRequirement}) -- Character level must be greater than: [1]
+        if entity.EocLevel.Level > levelRequirement then
+            return true, RequirementsMet
+        else
+            return false, ToMessageLoca("h04fab965g7b1bg47fegad9bg69ae676c8cdf", {levelRequirement}) -- Character level must be greater than: [1]
+        end
     end
 end
 
@@ -274,7 +278,11 @@ local function E6_MakePassiveRequirement(feat, proficiencyMatch)
         if not passiveStat then
             return false, ToMessageLoca("h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h9d531312g1e6ag4dd9ga25ag405948ce70af", passiveName}) -- Feat misconfiguration: [1], The passive [2] wasn't found.
         end
-        return playerInfo.PlayerPassives[passiveName] ~= nil, ToMessageLoca("hd7005e0bgad9bg43afgabb9gd831f1708f49", {passiveStat.DisplayName}) -- Missing ability: [1]
+        if playerInfo.PlayerPassives[passiveName] ~= nil then
+            return true, RequirementsMet
+        else
+            return false, ToMessageLoca("hd7005e0bgad9bg43afgabb9gd831f1708f49", {passiveStat.DisplayName}) -- Missing ability: [1]
+        end
     end
 end
 
@@ -340,7 +348,7 @@ end
 ---Note: This will be used for both feats and for passives listed in the passive list for selection. 
 ---@param passiveName string Name of the passive to gather the ability modifiers from. 
 ---@param feat FeatType The feat to test against
----@return table<string,number>? A mapping of ability name to delta value.
+---@return table<string,AbilityScoreType> A mapping of ability name to delta value.
 local function GatherPassiveAbilityModifiers(feat, passiveName)
     local result = {}
     ---@type PassiveData Data for the passive
@@ -353,39 +361,50 @@ local function GatherPassiveAbilityModifiers(feat, passiveName)
     if passive and passive.Boosts then
         local boosts = SplitString(passive.Boosts, ";")
         for _,boost in ipairs(boosts) do
-            local ability, delta = ParseAbilityBoost(boost)
-            if ability then
-                if not result[ability] then
-                    result[ability] = delta
-                else
-                    result[ability] = result[ability] + delta
-                end
+            local ability, score = ParseAbilityBoost(boost)
+            if ability and score then
+                result[ability] = MergeAbilityBoost(result[ability], score)
             end
         end
     end
     return result
 end
 
+---Determines if the new ability score modifier can be applied to the current one for the player.
+---Unfortunately, the game's passives can't be used to incrase the ability score beyond the maximum
+---they specify in their boosts. So this function helps find and filter them so you don't waste a
+---selection.
+---@param player AbilityScoreType The current ability score
+---@param delta AbilityScoreType The new ability score modifier to apply
+---@return boolean Whether the new abiity score modifier can be applied.
+function CanApplyAbilityBoost(player, delta)
+    -- if the new maximum is nil, use the player maximum
+    local limit = player.Maximum
+    -- if the new maximum is not nil, use it instead.
+    if delta.Maximum then
+        limit = delta.Maximum
+    end
+    return player.Current + delta.Current <= limit
+end
+
 ---Merges the ability boosts from the passive into the general ability boost table.
----@param abilityBoosts table<string,number>
----@param passiveBoosts table<string,number>
+---@param abilityBoosts table<string,AbilityScoreType> Target to merge into
+---@param passiveBoosts table<string,AbilityScoreType> Ability boosts to merge in
 local function MergeAbilityBoosts(abilityBoosts, passiveBoosts)
     for ability,delta in pairs(passiveBoosts) do
-        if not abilityBoosts[ability] then
-            abilityBoosts[ability] = delta
-        else
-            abilityBoosts[ability] = abilityBoosts[ability] + delta
-        end
+        abilityBoosts[ability] = MergeAbilityBoost(abilityBoosts[ability], delta)
     end
 end
 
 ---Determines whether taking the feat will raise the player's abilities above the maximum
 ---@param feat FeatType The feat to test against
 local function E6_ApplyFeatAbilityConstraints(feat)
+    ---@type table<string,AbilityScoreType>
     local abilityBoosts = {}
     local isValid = true
     local failedPassiveName = nil
     for _,passiveName in ipairs(feat.PassivesAdded) do
+        ---@type table<string,AbilityScoreType>
         local passiveBoosts = GatherPassiveAbilityModifiers(feat, passiveName)
         if passiveBoosts then
             MergeAbilityBoosts(abilityBoosts, passiveBoosts)
@@ -406,7 +425,6 @@ local function E6_ApplyFeatAbilityConstraints(feat)
         local function validateAbilityBoosts(entity, playerInfo)
             local abilityScores = playerInfo.Abilities
             for ability,delta in pairs(abilityBoosts) do
-                local name = GetCharacterName(entity)
                 if not abilityScores then
                     return false, ToMessageLoca("h3ee30c4bg920fg46fdga857g21d9a21b5bb5") -- An error occurred getting the player's ability scores.
                 end
@@ -414,11 +432,11 @@ local function E6_ApplyFeatAbilityConstraints(feat)
                 if not abilityScore then
                     return false, MissingAbilityLoca(ability)
                 end
-                if abilityScore.Current + delta > abilityScore.Maximum then
-                    return false, ToMessageLoca("h2e9bd450g5df3g4075ga81eg29eef9f9f4a4")
+                if not CanApplyAbilityBoost(abilityScore, delta) then
+                    return false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf") -- This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).
                 end
             end
-            return true, RequirementsMet
+            return true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7") -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).
         end
 
         E6_AddFeatRequirement(feat, validateAbilityBoosts)
@@ -624,9 +642,10 @@ end
 ---@param feat FeatType The feat to test for
 ---@param entity EntityHandle The entity to test against
 ---@param playerInfo PlayerFeatRequirementInformationType Information about what the player has for abilities, proficiencies, etc.
+---@param filterOnPass boolean Call onFilter if the requirement is met, not just when it fails
 ---@param onMet function The function to call if the requirement is met. Only called once.
 ---@param onFilter function The function to call if the requirement is not met, which takes the FeatType and FeatMessageType. May be called multiple times.
-local function FeatRequirementTest(feat, entity, playerInfo, onMet, onFilter)
+local function FeatRequirementTest(feat, entity, playerInfo, filterOnPass, onMet, onFilter)
     if not feat.CanBeTakenMultipleTimes and playerInfo.PlayerFeats[feat.ID] ~= nil then
         onFilter(feat, ToMessageLoca("ha0a03263g1b55g40c2g8a7fg5313663ee3a5")) -- The feat has already been selected.
         return
@@ -640,9 +659,9 @@ local function FeatRequirementTest(feat, entity, playerInfo, onMet, onFilter)
     local isMet = true
     for _, req in ipairs(feat.HasRequirements) do
         local met, message = req(entity, playerInfo)
-        if not met then
+        if filterOnPass or not met then
             onFilter(feat, message)
-            isMet = false
+            isMet = isMet and met
         end
     end
     if isMet then
@@ -657,9 +676,12 @@ end
 ---@return FeatMessageType[] The reasons why the feat requirements were not met.
 function GatherFailedFeatRequirements(feat, entity, playerInfo)
     local results = {}
-    FeatRequirementTest(feat, entity, playerInfo, function(feat)
-    end, function(feat, message)
-        table.insert(results, message)
+    FeatRequirementTest(feat, entity, playerInfo, true, function(feat)
+    end,
+    function(feat, message)
+        if message ~= RequirementsMet then
+            table.insert(results, message)
+        end
     end)
     return results
 end
@@ -677,9 +699,10 @@ function GatherSelectableFeatsForPlayer(entity, playerInfo)
     local filtered = {}
     local visited = {}
     for featId, feat in pairs(allFeats) do
-        FeatRequirementTest(feat, entity, playerInfo, function(feat)
+        FeatRequirementTest(feat, entity, playerInfo, false, function(feat)
             table.insert(featList, featId)
-        end, function(feat, message)
+        end,
+        function(feat, message)
             if not visited[featId] then
                 visited[featId] = true
                 table.insert(filtered, featId)

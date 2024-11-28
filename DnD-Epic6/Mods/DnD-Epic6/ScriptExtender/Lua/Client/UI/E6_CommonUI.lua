@@ -232,6 +232,7 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
 end
 
 local textRedColor = {Text = NormalizedRGBA(198, 56, 74, 0.76)}
+local textYellowColor = {Text = NormalizedRGBA(198, 170, 20, 0.76)}
 local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
 local selectedColors = {Border = NormalizedRGBA(255, 215, 0, 0.76), BorderShadow = NormalizedRGBA(192, 159, 106, 0.76)}
 local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
@@ -241,6 +242,14 @@ local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
 ---@param target ExtuiStyledRenderable The object with text to make red.
 function MakeErrorText(target)
     for k, v in pairs(textRedColor) do
+        target:SetColor(k, v)
+    end
+end
+
+---Sets the text color to red to indicate an error
+---@param target ExtuiStyledRenderable The object with text to make red.
+function MakeWarningText(target)
+    for k, v in pairs(textYellowColor) do
         target:SetColor(k, v)
     end
 end
@@ -312,4 +321,32 @@ function ComputeIconsPerRow(iconCount)
         end
     end
     return minRowCount
+end
+
+---
+---@param tooltip TextBuilder The tooltip to add the messages to
+---@param messages FeatMessageType[] The set of messages to add
+---@param tooltipTransform function transform to apply for the the control added for the messages
+function AddTooltipMessageDetails(tooltip, messages, tooltipTransform)
+    if not messages or not next(messages) then
+        return
+    end
+
+    tooltip:AddSpacing()
+    tooltip:AddSpacing()
+    local lastTextWasBullet = false -- Hack to do the SameLine on the next text element after the bullet.
+    tooltip.onText = function(textElement)
+            tooltipTransform(textElement)
+            if textElement.Label == " - " then
+                lastTextWasBullet = true
+            elseif lastTextWasBullet then
+                textElement.SameLine = true
+                lastTextWasBullet = false
+            end
+        end
+    tooltip:AddText("hc3a8865ageffcg4d60gabd8gccd4f828d6e9") -- Requirements:
+    for _, message in ipairs(messages) do
+        tooltip:AddText(" - "):AddLoca(message.MessageLoca, message.Args)
+    end
+
 end

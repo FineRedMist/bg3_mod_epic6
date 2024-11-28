@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="hb22ba8fege28fg4863ga54eg005886d16a6b" version="1">You already have this proficiency.</content>
+	<content contentuid="h6376efd2gf22cg47d9ga024gd8f39a0541c2" version="1">You already have proficiency for this saving throw.</content>
+	<content contentuid="h45303d74g2579g454ag9662g31dcf74794d7" version="1">This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).</content>
+	<content contentuid="h941fb918g8e78g4c41ga66fg1d14cd0f77cf" version="1">This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).</content>
+	<content contentuid="hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6" version="1">This feature has already been selected.</content>
 	<content contentuid="h27d08b54g94d5g405cga8c6g57231379a05f" version="1">Export Character</content>
 	<content contentuid="h5cb70d0agc32bg49d6g96f1gdd2daa2ac545" version="1">Exports the character to the server's '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-Export.json. 
 Note: this operation is time consuming and the game may be unresponsive.</content>
 	<content contentuid="h95f979dcg69e9g464fgb943gf2559470bcc1" version="1">Level 6: [1] XP</content>
 	<content contentuid="hbd475c8ega2dcg4491ga9a9gabbe7a9c8216" version="1">Next feat: [1] XP</content>
 	<content contentuid="ha7eeaa4ag452bg469dg9127gaa4afb1e3abc" version="1">[1] [2] damage</content>
-	<content contentuid="hc3a8865ageffcg4d60gabd8gccd4f828d6e9" version="1">Exclusion reason(s):</content>
+	<content contentuid="hc3a8865ageffcg4d60gabd8gccd4f828d6e9" version="1">Details:</content>
 	<content contentuid="ha0a03263g1b55g40c2g8a7fg5313663ee3a5" version="1">The feat has already been selected.</content>
 	<content contentuid="hbc9684d8gca58g4210gb373gb55e83cc0081" version="1">Show filtered feats</content>
 	<content contentuid="ha087585cgc6beg407ega903g92b69efc6e9b" version="1">Show feats that were filtered because requirements were not met.</content>
@@ -62,15 +67,17 @@ Proficiency Bonus: {ProficiencyBonus}</content>
 	
 Learn to present yourself as another class.</content>
 	<content contentuid="hc2a4fce5gd6aeg4023g8b4dg78205543dbb7" version="1">Epic: Legendary</content>
-	<content contentuid="hefa94be9g1b09g42c7g9f93gaa542216d259" version="1">Increase the ability score limit of one ability by 4, and another ability by 2. This does not increase the score itself.</content>
-	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_0" version="1">The ability score limit is increased by 4.</content>
+	<content contentuid="hefa94be9g1b09g42c7g9f93gaa542216d259" version="1">Increase the ability score limit of one ability by 4, and another ability by 2. This does not increase the score itself.
+	
+Do not select the same ability for both, you will only get the better of the two, not combined.</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_0" version="1">The ability score limit is increased to 24.</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_1" version="1">Major Strength Cap Increase</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_2" version="1">Major Dexterity Cap Increase</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_3" version="1">Major Constitution Cap Increase</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_4" version="1">Major Intelligence Cap Increase</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_5" version="1">Major Wisdom Cap Increase</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_6" version="1">Major Charisma Cap Increase</content>
-	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_0" version="1">The ability score limit is increased by 2.</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_0" version="1">The ability score limit is increased to 22.</content>
 	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_1" version="1">Minor Strength Cap Increase</content>
 	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_2" version="1">Minor Dexterity Cap Increase</content>
 	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_3" version="1">Minor Constitution Cap Increase</content>

@@ -384,3 +384,29 @@ function GetEpicFeatXP()
     return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
 end
 
+---Returns the maximum of a and b if they are numbers. If nil, either returns the other.
+---@param a number?
+---@param b number?
+---@return number?
+local function MaxNil(a, b)
+    if a == nil then
+        return b
+    end
+    if b == nil then
+        return a
+    end
+    return math.max(a, b)
+end
+
+---Merges two ability score types together, adding the current value and returning the maximum of the caps.
+---@param current AbilityScoreType? Target to merge into
+---@param new AbilityScoreType Ability boost to merge in
+function MergeAbilityBoost(current, new)
+    if not current then
+        return DeepCopy(new)
+    end
+    return {
+        Current = current.Current + new.Current,
+        Maximum = MaxNil(current.Maximum, new.Maximum)
+    }
+end
