@@ -281,8 +281,7 @@ end
 ---@param boostInfo BoostInfoComponent? The boost info component
 ---@return string? The name of the ability
 ---@return string? The cause of the boost
----@return integer? The delta value of the boost
----@return integer? The delta maximum of the boost
+---@return AbilityScoreType? The value of the boost
 local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
     if not IsValidCause(entity, boost, boostInfo) then
         return nil
@@ -295,9 +294,13 @@ local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
     end
     local abilityLabel = ability.Ability.Label
     local value = ability.Value
+    ---@type number?
     local max = ability.ValueCap
+    if max and max == 0 then
+        max = nil
+    end
     local cause = boostInfo.Cause.Type.Label
-    return abilityLabel, cause, value, max
+    return abilityLabel, cause, { Current = value, Maximum = max }
 end
 
 ---Gathers the ability scores from the ability boosts.
@@ -314,13 +317,13 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
     for _,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
-        local abilityLabel, cause, value, max = IncludeAbilityScoreBoost(entity, boost, boostInfo)
-        if abilityLabel then
+        local abilityLabel, cause, score = IncludeAbilityScoreBoost(entity, boost, boostInfo)
+        if abilityLabel and score then
             if not scores[abilityLabel] then
                 scores[abilityLabel] = {Current = 0, Maximum = 20}
             end
-            scores[abilityLabel].Current = scores[abilityLabel].Current + value
-            scores[abilityLabel].Maximum = scores[abilityLabel].Maximum + max
+
+            scores[abilityLabel] = MergeAbilityBoost(scores[abilityLabel], score)
         end
     end
     return scores
@@ -767,6 +770,8 @@ function OnEpic6FeatSelectorSpell(caster)
         IsHost = isHost,
         FeatPoints = featPoints
     }
+
+    --_E6P("Player Info: " .. Ext.Json.Stringify(message))
 
     SendShowFeatSelector(caster, message)
 end

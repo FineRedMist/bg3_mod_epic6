@@ -1,18 +1,17 @@
 ---Parses an ability boost into its component ability and amount.
 ---@param boost string The boost string from a passive or feat.
 ---@return string? The name of the ability being boosted if present, nil otherwise.
----@return number? The amount the ability is boosted.
----@return number? The amount the ability cap is boosted by if present, 0 otherwise.
+---@return AbilityScoreType? The ability score information for the boost.
 function ParseAbilityBoost(boost)
     local parts = GetFullMatch(boost, "%s*Ability%s*%(%s*(%a+)%s*,%s*(%d+),?%s*(%d*)%s*%)%s*")
     if not parts then
         return nil
     end
-    local capIncrease = 0
+    local capIncrease = nil
     if parts[3] and string.len(parts[3]) > 0 then
         capIncrease = tonumber(parts[3])
     end
-    return parts[1], tonumber(parts[2]), capIncrease
+    return parts[1], { Current = tonumber(parts[2]), Maximum = capIncrease }
 end
 
 ---Parses a proficieny bonus boost into its kind (Skill or SavingThrow) and the skill/ability.

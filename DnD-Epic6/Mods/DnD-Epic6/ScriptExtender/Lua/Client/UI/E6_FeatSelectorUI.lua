@@ -64,9 +64,13 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     SetSizeToViewport(childWin, windowDimensions[1] - 30, windowDimensions[2] - 130)
     childWin.PositionOffset = {0, 0}
     childWin.NoTitleBar = true
-    local description = childWin:AddText(TidyDescription(feat.Description))
-    description.ItemWidth = ScaleToViewportWidth(windowDimensions[1] - 60)
-    description.TextWrapPos = description.ItemWidth
+    local description = TextBuilder:new(childWin, windowDimensions[1] - 60)
+    description:AddText(TidyDescription(feat.Description))
+
+    local playerEntity = Ext.Entity.Get(playerInfo.ID)
+    local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
+    AddTooltipMessageDetails(description, reqs, MakeWarningText)
+
 
     ---@type ExtraPassiveType[] Extra passives to apply as part of applying a feat.
     local extraPassives = {}
@@ -200,31 +204,20 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat, isFiltered)
     SetSizeToViewport(featButton, buttonWidth - 30, 48)
     featButton:SetStyle("ButtonTextAlign", 0.5, 0.5)
     local tooltip = AddTooltip(featButton):AddText(feat.Description)
+    local transform = MakeErrorText
     if isFiltered then
         UI_Disable(featButton)
-        local playerEntity = Ext.Entity.Get(playerInfo.ID)
-        local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
-        tooltip:AddSpacing()
-        tooltip:AddSpacing()
-        local lastTextWasBullet = false -- Hack to do the SameLine on the next text element after the bullet.
-        tooltip.onText = function(textElement)
-                MakeErrorText(textElement)
-                if textElement.Label == " - " then
-                    lastTextWasBullet = true
-                elseif lastTextWasBullet then
-                    textElement.SameLine = true
-                    lastTextWasBullet = false
-                end
-            end
-        tooltip:AddText("hc3a8865ageffcg4d60gabd8gccd4f828d6e9") -- Requirements:
-        for _, req in ipairs(reqs) do
-            tooltip:AddText(" - "):AddLoca(req.MessageLoca, req.Args)
-        end
     else
+        transform = MakeWarningText
         featButton.OnClick = function()
             ShowFeatDetailSelectUI(feat, playerInfo)
         end
     end
+
+    local playerEntity = Ext.Entity.Get(playerInfo.ID)
+    local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
+    AddTooltipMessageDetails(tooltip, reqs, transform)
+
     return featButton
 end
 
