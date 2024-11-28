@@ -68,7 +68,7 @@
 
 ---@class AbilityScoreType The ability score type for the player.
 ---@field Current integer The current value of the ability score.
----@field Maximum integer The maximum value of the ability score.
+---@field Maximum? integer The maximum value of the ability score.
 
 ---@class ProficiencyType The ability score type for the player.
 ---@field Proficient boolean? Whether the character is proficient in a skill, nil implies false.
