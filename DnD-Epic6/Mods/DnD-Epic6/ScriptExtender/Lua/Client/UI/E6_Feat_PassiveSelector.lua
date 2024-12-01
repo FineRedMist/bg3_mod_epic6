@@ -13,71 +13,6 @@
 ---@field IconRowCount integer The number of icons added to the current row.
 ---@field Row integer The current index of the row for the passives.
 
-
----Returns true if selecting the passive won't cause the player to lose out on something important (like saving throw proficiency, stat increase, etc)
----@param playerInfo PlayerInformationType The player info to query against
----@param passive string The name of the passive
----@param passiveStat PassiveData The stat retrieved for the passive
----@return boolean Whether the passive can be safely selected.
----@return FeatMessageType[] The message to display to the player about why the requirement failed.
-local function IsPassiveSafe(playerInfo, passive, passiveStat)
-    local result = true
-    ---@type FeatMessageType[]
-    local successMessages = {}
-    local failMessages = {}
-
-    ---Adds a result message. If the canSelect is false, the result is set to false.
-    ---@param canSelect boolean Whether the passive is selectable.
-    ---@param message FeatMessageType A message about the passive (could occur even if selectable as a warning)
-    local function AddResultMessage(canSelect, message)
-        result = canSelect and result
-        if canSelect then
-            table.insert(successMessages, message)
-        else
-            table.insert(failMessages, message)
-        end
-    end
-
-    -- If we already have the passive, return false
-    if playerInfo.PlayerPassives[passive] then
-        AddResultMessage(false, ToMessageLoca("hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6")) -- This feature has already been selected.
-    end
-    local boostEntry = passiveStat.Boosts
-    local boosts = SplitString(boostEntry, ";")
-    for _,boost in ipairs(boosts) do
-        -- Check ability scores
-        local ability, score = ParseAbilityBoost(boost)
-        if ability and score then
-            local playerAbility = playerInfo.Abilities[ability]
-            if not CanApplyAbilityBoost(playerAbility, score) then
-                AddResultMessage(false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf")) -- This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).
-            else
-                AddResultMessage(true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7")) -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).
-            end
-        end
-    
-        -- Check saving throw proficiencies
-        local proficiencyType, proficiency = ParseProficiencyBonusBoost(boost)
-        if proficiencyType == "SavingThrow" then
-            if playerInfo.Proficiencies.SavingThrows[proficiency] then
-                AddResultMessage(false, ToMessageLoca("h6376efd2gf22cg47d9ga024gd8f39a0541c2")) -- You already have proficiency for this saving throw.
-            end
-        end
-        -- Check equipment proficiencies
-        local equipment = ParseProficiencyBoost(boost)
-        if equipment then
-            if playerInfo.Proficiencies.Equipment[string.lower(equipment)] then
-                AddResultMessage(false, ToMessageLoca("hb22ba8fege28fg4863ga54eg005886d16a6b")) -- You already have this proficiency.
-            end
-        end
-    end
-    if result then
-        return true, successMessages
-    else
-        return false, failMessages
-    end
-end
-
 ---@param parent ExtuiTreeParent The parent container to add the ability selector to.
 ---@param playerInfo PlayerInformationType The ability information to render.
 ---@param uniquingName string The unique name to use for the control names to avoid collisions.
@@ -94,7 +29,7 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
 
     local passiveID = passive.ID
     local checkBoxControl = SpicyCheckbox(renderState.CenterCell, passive.DisplayName)
-    local isPassiveSafe, passiveMessages = IsPassiveSafe(playerInfo, passiveID, passive.Stat)
+    local isPassiveSafe, passiveMessages = IsPassiveSelectable(playerInfo, passiveID, passive.Stat)
     if not isPassiveSafe then
         UI_Disable(checkBoxControl)
     else
@@ -153,7 +88,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
     local passiveID = passive.ID
     local iconId = passive.Icon
     local iconControl = nil
-    local isPassiveSafe, passiveMessages = IsPassiveSafe(playerInfo, passiveID, passive.Stat)
+    local isPassiveSafe, passiveMessages = IsPassiveSelectable(playerInfo, passiveID, passive.Stat)
     if not isPassiveSafe then
         iconControl = renderState.CenterCell:AddImage(iconId, DefaultIconSize)
         UI_Disable(iconControl)
