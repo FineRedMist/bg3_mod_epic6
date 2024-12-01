@@ -424,6 +424,7 @@ local function E6_ApplyFeatAbilityConstraints(feat)
         ---@return FeatMessageType The message to display to the player about why the requirement failed.
         local function validateAbilityBoosts(entity, playerInfo)
             local abilityScores = playerInfo.Abilities
+            local totalBoosts = 0
             for ability,delta in pairs(abilityBoosts) do
                 if not abilityScores then
                     return false, ToMessageLoca("h3ee30c4bg920fg46fdga857g21d9a21b5bb5") -- An error occurred getting the player's ability scores.
@@ -435,8 +436,13 @@ local function E6_ApplyFeatAbilityConstraints(feat)
                 if not CanApplyAbilityBoost(abilityScore, delta) then
                     return false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf") -- This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).
                 end
+                totalBoosts = totalBoosts + delta.Current
             end
-            return true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7") -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).
+            local successMessage = ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7") -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).
+            if totalBoosts == 0 then
+                successMessage = RequirementsMet
+            end
+            return true, successMessage
         end
 
         E6_AddFeatRequirement(feat, validateAbilityBoosts)
