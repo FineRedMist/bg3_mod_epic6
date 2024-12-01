@@ -67,7 +67,9 @@ function NetServerHandlers.ExportEpicSix(_, payload, peerId)
         PlayerInfo = playerInfo,
         SelectedFeats = entity.Vars.E6_Feats
     }
-    E6_ToFile(data, playerInfo.Name .. "-EpicSix-Export.json", {})
+    local filename = playerInfo.Name .. "-EpicSix-Export.json"
+    Ext.IO.SaveFile(filename, Ext.Json.Stringify(data))
+    _E6P("Json data saved to %LOCALAPPDATA%\\Larian Studios\\Baldur's Gate 3\\Script Extender\\" .. filename .. ".")
 end
 
 ---Handles applying the selected feat for the current player.
