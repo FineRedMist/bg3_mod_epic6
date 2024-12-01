@@ -1,3 +1,7 @@
+-- The feat filtering functions generally return one of two possible results:
+--      boolean, FeatMessageType: mapping to whether the feat passes the filter and a reasons why it doesn't (or warning why it might not in the future)
+--      boolean, FeatMessageType[]: mapping to whether the feat passes the filter and any reasons why it doesn't (or warnings why it might not in the future)
+
 ---Adds a requirement for the feat.
 ---@param feat FeatType The feat to add the requirement to.
 ---@param testFunc function the function to test the requirement.
@@ -16,7 +20,20 @@ function ToMessageLoca(message, args)
     return { MessageLoca = message, Args = args }
 end
 
-local RequirementsMet = ToMessageLoca("h35115c97g6f5bg4ba5gad35gfdba5e7e1d51") -- Requirements met
+---Iterates through each message in the messages. Note messages may be just one message, not in
+---an array. So we have to test for the scenario.
+---@param messages FeatMessageType|FeatMessageType[] The message or messages to iterate through.
+function ForEachMessage(messages, callback)
+    if messages.MessageLoca then
+        callback(messages)
+    else
+        for _,message in ipairs(messages) do
+            callback(message)
+        end
+    end
+end
+
+RequirementsMet = ToMessageLoca("h35115c97g6f5bg4ba5gad35gfdba5e7e1d51") -- Requirements met
 
 ---Returns true if selecting the passive won't cause the player to lose out on something important (like saving throw proficiency, stat increase, etc)
 ---@param playerInfo PlayerInformationType The player info to query against
@@ -172,25 +189,34 @@ local function E6_ApplySelectPassiveRequirement(feat)
             table.insert(passiveNames, passiveName)
         end
 
-        -- Number of passives to choose.
+        -- Number of passives to choose from the selection.
         local passiveCount = passive.Count
+
+        local isSelectable = function(playerInfo, passiveName)
+            ---@type PassiveData Data for the passive
+            local stat = Ext.Stats.Get(passiveName, -1, true, true)
+            if not stat then
+                return false
+            end
+            return IsPassiveSelectable(playerInfo, passiveName, stat)
+        end
 
         ---@param entity EntityHandle The entity to test the requirement against.
         ---@param playerInfo PlayerFeatRequirementInformationType Information about what the player has for abilities, proficiencies, etc.
         ---@return boolean Whether the feat has enough passives remaining to select.
         ---@return FeatMessageType The message to display to the player about why the requirement failed.
         local passiveRequirement = function(entity, playerInfo)
-            local playerPassives = playerInfo.PlayerPassives
             local missingPassives = 0
             for _,passiveName in ipairs(passiveNames) do
-                if not playerPassives[passiveName] then
+                if isSelectable(playerInfo, passiveName) then
                     missingPassives = missingPassives + 1
                 end
+                -- The player must be able to select at least as many passives as the feat offers.
                 if missingPassives >= passiveCount then
                     return true, RequirementsMet
                 end
             end
-            return false, ToMessageLoca("h8b51336eg9283g49acgb856g30ab5c92524c") -- There aren't enough unselected passives to choose from.
+            return false, ToMessageLoca("h8b51336eg9283g49acgb856g30ab5c92524c") -- There aren't enough selectable features to choose from.
         end
         E6_AddFeatRequirement(feat, passiveRequirement)
     end

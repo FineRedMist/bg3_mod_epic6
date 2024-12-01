@@ -232,9 +232,11 @@ local function FeatRequirementTest(feat, entity, playerInfo, filterOnPass, onMet
 
     local isMet = true
     for _, req in ipairs(feat.HasRequirements) do
-        local met, message = req(entity, playerInfo)
+        local met, messages = req(entity, playerInfo)
         if filterOnPass or not met then
-            onFilter(feat, message)
+            ForEachMessage(messages, function(message)
+                onFilter(feat, message)
+            end)
             isMet = isMet and met
         end
     end

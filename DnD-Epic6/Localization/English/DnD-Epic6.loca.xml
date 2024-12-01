@@ -29,7 +29,7 @@ Note: this operation is time consuming and the game may be unresponsive.</conten
 	<content contentuid="h3ee30c4bg920fg46fdga857g21d9a21b5bb5" version="1">An error occurred getting the player's ability scores.</content>
 	<content contentuid="h54868782g1a0bg4f36g8e13gc6f4adfccfc4" version="1">An error occurred getting the player's proficiencies.</content>
 	<content contentuid="h2e9bd450g5df3g4075ga81eg29eef9f9f4a4" version="1">The feat grants more points than can be applied to abilities.</content>
-	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough unselected passives to choose from.</content>
+	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough selectable features to choose from.</content>
 	<content contentuid="h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7" version="1">The ability list [2] wasn't found.</content>
 	<content contentuid="h31df0045ge2e3g453bga538ga0a618a38844" version="1">The pasive list [2] wasn't found.</content>
 	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>
