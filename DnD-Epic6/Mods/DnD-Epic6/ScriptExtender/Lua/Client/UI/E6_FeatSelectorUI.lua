@@ -328,40 +328,40 @@ local function AddSettings(win, windowDimensions, playerInfo)
     settings.DefaultOpen = #playerInfo.SelectableFeats == 0
     settings.SpanFullWidth = true
 
+    local slider = settings:AddSliderInt("", playerInfo.XPPerFeat, 100, 20000)
+    AddTooltip(slider):AddText("hcbbf8d49g36fbg496bga9beg275c367f94c0")
+    slider.AlwaysClamp = true
+    slider.OnChange = function()
+        local rounded = 100 * math.floor(slider.Value[1]/100 + 0.5)
+        slider.Value = {rounded, rounded, rounded, rounded}
+    end
+
+    local saveSlider = settings:AddButton(Ext.Loca.GetTranslatedString("h21681079gab67g4ea5ga4dfg88f40d38818a")) -- Save
+    AddTooltip(saveSlider):AddText("hf2b3a061gbf90g48cbg8defg30ec6aef6159")
+    saveSlider.SameLine = true
+    saveSlider.OnClick = function()
+        local payload = {
+            PlayerId = playerInfo.UUID,
+            XPPerFeat = slider.Value[1]
+        }
+        local payloadStr = Ext.Json.Stringify(payload)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
+
+        -- If the slider value increases more than the XPPerFeat, the player may end up without having enough
+        -- XP for the next feat, so we should close if there are feats to select, just in case.
+        if #playerInfo.SelectableFeats > 0 and slider.Value[1] > playerInfo.XPPerFeat then
+            E6_CloseUI()
+        end
+    end
+
     -- Only the host can modify the amount of XP per feat.
     if not playerInfo.IsHost then
-        local slider = settings:AddSliderInt("", playerInfo.XPPerFeat, 100, 20000)
-        AddTooltip(slider):AddText("hcbbf8d49g36fbg496bga9beg275c367f94c0")
-        slider.AlwaysClamp = true
-        slider.OnChange = function()
-            local rounded = 100 * math.floor(slider.Value[1]/100 + 0.5)
-            slider.Value = {rounded, rounded, rounded, rounded}
-        end
-
-        local saveSlider = settings:AddButton(Ext.Loca.GetTranslatedString("h21681079gab67g4ea5ga4dfg88f40d38818a")) -- Save
-        AddTooltip(saveSlider):AddText("hf2b3a061gbf90g48cbg8defg30ec6aef6159")
-        saveSlider.SameLine = true
-        saveSlider.OnClick = function()
-            local payload = {
-                PlayerId = playerInfo.UUID,
-                XPPerFeat = slider.Value[1]
-            }
-            local payloadStr = Ext.Json.Stringify(payload)
-            Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
-
-            -- If the slider value increases more than the XPPerFeat, the player may end up without having enough
-            -- XP for the next feat, so we should close if there are feats to select, just in case.
-            if #playerInfo.SelectableFeats > 0 and slider.Value[1] > playerInfo.XPPerFeat then
-                E6_CloseUI()
-            end
-        end
-
-        slider.Disabled = true
-        saveSlider.Disabled = true
-
-        win:AddSpacing()
-        win:AddSpacing()
+        UI_Disable(slider)
+        UI_Disable(saveSlider)
     end
+
+    win:AddSpacing()
+    win:AddSpacing()
 
     local showFilteredCheckbox = SpicyCheckbox(settings, Ext.Loca.GetTranslatedString("hbc9684d8gca58g4210gb373gb55e83cc0081")) -- Show filtered feats
     AddTooltip(showFilteredCheckbox):AddText("ha087585cgc6beg407ega903g92b69efc6e9b") -- Show feats that were filtered because requirements were not met.
