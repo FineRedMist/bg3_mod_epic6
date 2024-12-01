@@ -306,10 +306,10 @@ end
 ---Gathers the ability scores from the ability boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@return table<string, AbilityScoreType>? The ability scores and their maximums, or nil if it could not be determined.
+---@return table<string, AbilityScoreType> The ability scores and their maximums, or nil if it could not be determined.
 local function GatherAbilityScoresFromBoosts(entity, boosts)
     if boosts == nil then
-        return nil
+        return {}
     end
 
     ---@type table<string, AbilityScoreType>
@@ -330,23 +330,23 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
 end
 
 ---Gathers the ability scores for the given character, without magical modifications
----@param entity EntityHandle
----@return table<string, AbilityScoreType>?
+---@param entity EntityHandle The character entity handle
+---@return table<string, AbilityScoreType> The ability scores and their maximums, or the empty set if it could not be determined.
 local function GatherAbilityScores(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
-        return nil
+        return {}
     end
     local boosts = boostContainer.Boosts
     if boosts == nil then
-        return nil
+        return {}
     end
     for _,boost in ipairs(boosts) do
         if boost.Type and boost.Type.Label == "Ability" then
             return GatherAbilityScoresFromBoosts(entity, boost.Boosts)
         end
     end
-    return nil
+    return {}
 end
 
 ---Gathers the proficiencies from the proficiency boosts.
@@ -431,16 +431,16 @@ end
 
 
 ---Gathers the ability scores for the given character, without magical modifications
----@param entity EntityHandle
----@return ProficiencyInformationType?
+---@param entity EntityHandle The character entity handle
+---@return ProficiencyInformationType The proficiency information (skills, saving throws, weapons, armour, items), or EMPTY if it could not be determined.
 local function GatherProficiencies(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
-        return nil
+        return {}
     end
     local boosts = boostContainer.Boosts
     if boosts == nil then
-        return nil
+        return {}
     end
     -- table structure
     -- {
@@ -451,6 +451,7 @@ local function GatherProficiencies(entity)
     -- }
     -- Proficiency for saving throws and skills are stored in the ProficiencyBonus boosts.
     -- Expertise is stored in the ExpertiseBonus boosts.
+    ---@type ProficiencyInformationType
     local proficiencies = {
         SavingThrows = {},
         Skills = {},
