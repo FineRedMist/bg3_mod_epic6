@@ -33,7 +33,7 @@ function NetServerHandlers.SelectedFeatSpecification(_, payload, peerId)
     end
 end
 
----Handles applying the selected feat for the current player.
+---Exports the character's profile information to the file system as json. It skips numerous fields to avoid to much data (and redundancy).
 ---@param _ string The network message channel.
 ---@param payload any The selected feat.
 ---@param peerId integer The peer ID of the player.
@@ -42,8 +42,32 @@ function NetServerHandlers.ExportCharacter(_, payload, peerId)
     if entity ~= nil then
         --local datePrefix = os.date("%Y-%m-%d")
         local character = GetCharacterName(entity)
-        E6_ToFile(entity, character .. "-Export.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer", "ServerRecruitedBy", "ServerOwneeHistory", "StatusManager"})
+        E6_ToFile(entity, character .. "-Character-Export.json", {"Party", "ServerReplicationDependencyOwner", "InventoryContainer", "ServerRecruitedBy", "ServerOwneeHistory", "StatusManager"})
     end
+end
+
+---Exports the character's Epic 6 data to the file system as json.
+---@param _ string The network message channel.
+---@param payload any The selected feat.
+---@param peerId integer The peer ID of the player.
+function NetServerHandlers.ExportEpicSix(_, payload, peerId)
+    local entity = Ext.Entity.Get(payload)
+    if not entity then
+        _E6Error("Failed to get the entity for the id:" .. payload)
+        return
+    end
+
+    --local datePrefix = os.date("%Y-%m-%d")
+    local playerInfo = GetFullPlayerInfo(entity)
+    if not playerInfo then
+        _E6Error("Failed to get the player info for: " .. payload)
+        return
+    end
+    local data = {
+        PlayerInfo = playerInfo,
+        SelectedFeats = entity.Vars.E6_Feats
+    }
+    E6_ToFile(data, playerInfo.Name .. "-EpicSix-Export.json", {})
 end
 
 ---Handles applying the selected feat for the current player.

@@ -10,6 +10,8 @@ NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI = "E6_Server_To_Client_Close_UI"
 NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC = "E6_Client_To_Server_Selected_Feat_Spec"
 -- Client to server message to export the character (expensive)
 NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER = "E6_Client_To_server_Export_Character"
+-- Client to server mesage to export the epic six data, including what is sent from server to client for feat evaluation, the feat and passives for the player, and the feat point count.
+NetChannels.E6_CLIENT_TO_SERVER_EXPORT_EPIC6 = "E6_Client_To_server_Export_EpicSix"
 -- Client to server message to set the amount of experience to use per feat.
 NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT = "E6_Client_To_Server_Set_XP_Per_Feat"
 -- Client to server message to switch the character to show feats for.

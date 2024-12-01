@@ -67,7 +67,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     local description = TextBuilder:new(childWin, windowDimensions[1] - 60)
     description:AddText(TidyDescription(feat.Description))
 
-    local playerEntity = Ext.Entity.Get(playerInfo.ID)
+    local playerEntity = Ext.Entity.Get(playerInfo.UUID)
     local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
     AddTooltipMessageDetails(description, reqs, MakeWarningText)
 
@@ -176,7 +176,7 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
 
         ---@type SelectedFeatPayloadType
         local payload = {
-            PlayerId = playerInfo.ID,
+            PlayerId = playerInfo.UUID,
             Feat = {
                 FeatId = feat.ID,
                 Boosts = boosts,
@@ -214,7 +214,7 @@ local function MakeFeatButton(win, buttonWidth, playerInfo, feat, isFiltered)
         end
     end
 
-    local playerEntity = Ext.Entity.Get(playerInfo.ID)
+    local playerEntity = Ext.Entity.Get(playerInfo.UUID)
     local reqs = GatherFailedFeatRequirements(feat, playerEntity, playerInfo)
     AddTooltipMessageDetails(tooltip, reqs, transform)
 
@@ -268,25 +268,39 @@ local function AddResetFeatsButton(win, windowDimensions, playerInfo)
     local resetFeatsButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h3b4438fbg6a49g46c0g8346g372def6b2b77")) -- Reset Feats
     AddTooltip(resetFeatsButton):AddText("h7b3c6823g7bf9g4eaag8078g644e1ba33f33") -- Reset all feats and feat points for the character.
     resetFeatsButton.OnClick = function()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RESET_FEATS, playerInfo.ID)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RESET_FEATS, playerInfo.UUID)
     end
 end
 
----Adds a button to reset the character's feats.
+---Adds a button to export the character's Epic 6 information.
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param windowDimensions integer[] The dimensions of the window.
 ---@param playerInfo PlayerInformationType The player information.
-local function AddExportCharacterButton(win, windowDimensions, playerInfo)
-    local centerCell = CreateCenteredControlCell(win, "ExportCell", windowDimensions[1] - 30)
-    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h27d08b54g94d5g405cga8c6g57231379a05f")) -- Export Character
-    AddTooltip(exportButton):AddText("h5cb70d0agc32bg49d6g96f1gdd2daa2ac545") -- Export the character to a file.
+local function AddExportCharacterEpic6Button(win, windowDimensions, playerInfo)
+    local centerCell = CreateCenteredControlCell(win, "ExportEpic6Cell", windowDimensions[1] - 30)
+    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("hc1014814g1ab8g4a6dg93e9g0e4667bb18b7")) -- Export Character Epic 6 Data
+    AddTooltip(exportButton):AddText("he6d7a765g378ag4eceg9618ge42bf8c7878d") -- Export the character to a file.
     exportButton.OnClick = function()
         E6_CloseUI()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER, playerInfo.ID)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_EPIC6, playerInfo.UUID)
     end
 end
 
----Adds a button to reset the character's feats.
+---Adds a button to export the character entity data.
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param playerInfo PlayerInformationType The player information.
+local function AddExportCharacterGameButton(win, windowDimensions, playerInfo)
+    local centerCell = CreateCenteredControlCell(win, "ExportGameCell", windowDimensions[1] - 30)
+    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h27d08b54g94d5g405cga8c6g57231379a05f")) -- Export Character Game Data
+    AddTooltip(exportButton):AddText("h5cb70d0agc32bg49d6g96f1gdd2daa2ac545") -- Export the character to a file.
+    exportButton.OnClick = function()
+        E6_CloseUI()
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_EPIC6, playerInfo.UUID)
+    end
+end
+
+---Adds a button to test some functionality (varies with usage/need).
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param windowDimensions integer[] The dimensions of the window.
 ---@param playerInfo PlayerInformationType The player information.
@@ -296,7 +310,7 @@ local function AddRunTestButton(win, windowDimensions, playerInfo)
     AddTooltip(runTestButton):AddText("Runs a test regarding Minsc and Jaheira")
     runTestButton.OnClick = function()
         E6_CloseUI()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RUN_TEST, playerInfo.ID)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RUN_TEST, playerInfo.UUID)
     end
 end
 
@@ -329,7 +343,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
         saveSlider.SameLine = true
         saveSlider.OnClick = function()
             local payload = {
-                PlayerId = playerInfo.ID,
+                PlayerId = playerInfo.UUID,
                 XPPerFeat = slider.Value[1]
             }
             local payloadStr = Ext.Json.Stringify(payload)
@@ -362,7 +376,11 @@ local function AddSettings(win, windowDimensions, playerInfo)
 
     win:AddSpacing()
     win:AddSpacing()
-    AddExportCharacterButton(settings, windowDimensions, playerInfo)
+    AddExportCharacterEpic6Button(settings, windowDimensions, playerInfo)
+
+    win:AddSpacing()
+    win:AddSpacing()
+    AddExportCharacterGameButton(settings, windowDimensions, playerInfo)
 
     --win:AddSpacing()
     --win:AddSpacing()
@@ -371,7 +389,7 @@ end
 
 local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}
 local function SetWindowTitle(playerInfo)
-    local playerEntity = Ext.Entity.Get(playerInfo.ID)
+    local playerEntity = Ext.Entity.Get(playerInfo.UUID)
     local playerName = GetCharacterName(playerEntity, false)
     featUI.Label = SubstituteParameters(windowTitle, {CharacterName = playerName})
 end
@@ -409,7 +427,7 @@ end
 local function AddExpInfo(win, windowDimensions, playerInfo)
     local centerCell = CreateCenteredControlCell(win, "ExpInfo", windowDimensions[1] - 30)
 
-    local ent = Ext.Entity.Get(playerInfo.ID)
+    local ent = Ext.Entity.Get(playerInfo.UUID)
     local level6Exp = E6_GetLevel6XP()
     local xpDiff = level6Exp - ent.Experience.TotalExperience
     local progressText = nil
