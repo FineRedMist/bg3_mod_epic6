@@ -306,10 +306,10 @@ end
 ---Gathers the ability scores from the ability boosts.
 ---@param entity EntityHandle The character entity handle
 ---@param boosts EntityHandle There isn't a specific type for the boost container, so we'll just use the entity handle.
----@return table<string, AbilityScoreType>? The ability scores and their maximums, or nil if it could not be determined.
+---@return table<string, AbilityScoreType> The ability scores and their maximums, or nil if it could not be determined.
 local function GatherAbilityScoresFromBoosts(entity, boosts)
     if boosts == nil then
-        return nil
+        return {}
     end
 
     ---@type table<string, AbilityScoreType>
@@ -330,23 +330,23 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
 end
 
 ---Gathers the ability scores for the given character, without magical modifications
----@param entity EntityHandle
----@return table<string, AbilityScoreType>?
+---@param entity EntityHandle The character entity handle
+---@return table<string, AbilityScoreType> The ability scores and their maximums, or the empty set if it could not be determined.
 local function GatherAbilityScores(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
-        return nil
+        return {}
     end
     local boosts = boostContainer.Boosts
     if boosts == nil then
-        return nil
+        return {}
     end
     for _,boost in ipairs(boosts) do
         if boost.Type and boost.Type.Label == "Ability" then
             return GatherAbilityScoresFromBoosts(entity, boost.Boosts)
         end
     end
-    return nil
+    return {}
 end
 
 ---Gathers the proficiencies from the proficiency boosts.
@@ -431,16 +431,16 @@ end
 
 
 ---Gathers the ability scores for the given character, without magical modifications
----@param entity EntityHandle
----@return ProficiencyInformationType?
+---@param entity EntityHandle The character entity handle
+---@return ProficiencyInformationType The proficiency information (skills, saving throws, weapons, armour, items), or EMPTY if it could not be determined.
 local function GatherProficiencies(entity)
     local boostContainer = entity.BoostsContainer
     if boostContainer == nil then
-        return nil
+        return {}
     end
     local boosts = boostContainer.Boosts
     if boosts == nil then
-        return nil
+        return {}
     end
     -- table structure
     -- {
@@ -451,6 +451,7 @@ local function GatherProficiencies(entity)
     -- }
     -- Proficiency for saving throws and skills are stored in the ProficiencyBonus boosts.
     -- Expertise is stored in the ExpertiseBonus boosts.
+    ---@type ProficiencyInformationType
     local proficiencies = {
         SavingThrows = {},
         Skills = {},
@@ -701,39 +702,14 @@ local function SendShowFeatSelector(caster, playerInfo)
     Ext.Net.PostMessageToClient(caster, NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR, str)
 end
 
----Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
----@param caster string
-function OnEpic6FeatSelectorSpell(caster)
-    ---@type EntityHandle
-    local ent = Ext.Entity.Get(caster)
-    local charname = GetCharacterName(ent)
-
-    local uuid = GetEntityID(ent)
-    local isHost = IsHost(uuid)
-    local featPoints = E6_GetFeatPointBoostAmount(caster)
-    -- Show the feat selector without any feats to show settings.
-    if featPoints == 0 then
-        ---@type PlayerInformationType
-        local playerInfoLite = {
-            ID = caster,
-            UUID = uuid,
-            Name = charname,
-            PlayerFeats = {},
-            PlayerPassives = {},
-            SelectableFeats = {},
-            FilteredFeats = {},
-            Abilities = {}, -- we need their current scores and maximums to display UI
-            Proficiencies = nil, -- gathered so we know what they are proficient in and what could be granted
-            Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
-            ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
-            XPPerFeat = GetEpicFeatXP(),
-            IsHost = isHost,
-            FeatPoints = featPoints
-        }
-        SendShowFeatSelector(caster, playerInfoLite)
-        return
-    end
-
+---Gathers the full player information for the given entity and returns the data.
+---@param ent EntityHandle The entity to gather the information for.
+---@param uuid GUIDSTRING The UUID of the entity.
+---@param charname string The name of the character.
+---@param isHost boolean True if the player is the host, false otherwise.
+---@param featPoints integer The number of feat points the player has.
+---@return PlayerInformationType
+local function GetExtendedPlayerInfo(ent, uuid, charname, isHost, featPoints)
     local playerFeats = GatherPlayerFeats(ent)
     local abilityScores = GatherAbilityScores(ent)
     local proficiencies = GatherProficiencies(ent)
@@ -753,8 +729,7 @@ function OnEpic6FeatSelectorSpell(caster)
     local selectableFeats, filteredFeats = GatherSelectableFeatsForPlayer(ent, featRequirementInfo)
 
     ---@type PlayerInformationType
-    local message = {
-        ID = caster,
+    return {
         UUID = uuid,
         Name = charname,
         PlayerLevels = levels,
@@ -770,9 +745,57 @@ function OnEpic6FeatSelectorSpell(caster)
         IsHost = isHost,
         FeatPoints = featPoints
     }
+end
+
+---Retrieves the full player info sent to the client for feat selection for diagnostics.
+---@param ent EntityHandle The entity to gather the information for.
+---@return PlayerInformationType? The player information, or nil if it could not be determined.
+function GetFullPlayerInfo(ent)
+    local uuid = GetEntityID(ent)
+    if not uuid then
+        return nil
+    end
+    local charname = GetCharacterName(ent)
+    local isHost = IsHost(uuid)
+    local featPoints = E6_GetFeatPointBoostAmount(uuid)
+    return GetExtendedPlayerInfo(ent, uuid, charname, isHost, featPoints)
+end
+
+---Handles when the Epic6 Feat spell is cast to bring up the UI on the client to select a feat.
+---@param caster string
+function OnEpic6FeatSelectorSpell(caster)
+    ---@type EntityHandle
+    local ent = Ext.Entity.Get(caster)
+    local charname = GetCharacterName(ent)
+
+    local uuid = GetEntityID(ent)
+    local isHost = IsHost(uuid)
+    local featPoints = E6_GetFeatPointBoostAmount(uuid)
+    -- Show the feat selector without any feats to show settings.
+    if featPoints == 0 then
+        ---@type PlayerInformationType
+        local playerInfoLite = {
+            UUID = uuid,
+            Name = charname,
+            PlayerFeats = {},
+            PlayerPassives = {},
+            SelectableFeats = {},
+            FilteredFeats = {},
+            Abilities = {}, -- we need their current scores and maximums to display UI
+            Proficiencies = {}, -- gathered so we know what they are proficient in and what could be granted
+            Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
+            ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
+            XPPerFeat = GetEpicFeatXP(),
+            IsHost = isHost,
+            FeatPoints = featPoints
+        }
+        SendShowFeatSelector(caster, playerInfoLite)
+        return
+    end
+
 
     --_E6P("Player Info: " .. Ext.Json.Stringify(message))
-
+    local message = GetExtendedPlayerInfo(ent, uuid, charname, isHost, featPoints)
     SendShowFeatSelector(caster, message)
 end
 

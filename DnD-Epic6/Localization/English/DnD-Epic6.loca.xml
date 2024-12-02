@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="hc1014814g1ab8g4a6dg93e9g0e4667bb18b7" version="1">Export Character Epic 6 Data</content>
+	<content contentuid="he6d7a765g378ag4eceg9618ge42bf8c7878d" version="1">Exports the data sent from server to client for showing the feat selector, along with the list of already selected feats. The data is written to toe '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-EpicSix-Export.json.</content>
 	<content contentuid="hb22ba8fege28fg4863ga54eg005886d16a6b" version="1">You already have this proficiency.</content>
 	<content contentuid="h6376efd2gf22cg47d9ga024gd8f39a0541c2" version="1">You already have proficiency for this saving throw.</content>
 	<content contentuid="h45303d74g2579g454ag9662g31dcf74794d7" version="1">This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).</content>
 	<content contentuid="h941fb918g8e78g4c41ga66fg1d14cd0f77cf" version="1">This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).</content>
 	<content contentuid="hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6" version="1">This feature has already been selected.</content>
-	<content contentuid="h27d08b54g94d5g405cga8c6g57231379a05f" version="1">Export Character</content>
-	<content contentuid="h5cb70d0agc32bg49d6g96f1gdd2daa2ac545" version="1">Exports the character to the server's '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-Export.json. 
+	<content contentuid="h27d08b54g94d5g405cga8c6g57231379a05f" version="1">Export Character Game Data</content>
+	<content contentuid="h5cb70d0agc32bg49d6g96f1gdd2daa2ac545" version="1">Exports the character to the server's '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-Character-Export.json. 
 Note: this operation is time consuming and the game may be unresponsive.</content>
 	<content contentuid="h95f979dcg69e9g464fgb943gf2559470bcc1" version="1">Level 6: [1] XP</content>
 	<content contentuid="hbd475c8ega2dcg4491ga9a9gabbe7a9c8216" version="1">Next feat: [1] XP</content>
@@ -29,7 +31,7 @@ Note: this operation is time consuming and the game may be unresponsive.</conten
 	<content contentuid="h3ee30c4bg920fg46fdga857g21d9a21b5bb5" version="1">An error occurred getting the player's ability scores.</content>
 	<content contentuid="h54868782g1a0bg4f36g8e13gc6f4adfccfc4" version="1">An error occurred getting the player's proficiencies.</content>
 	<content contentuid="h2e9bd450g5df3g4075ga81eg29eef9f9f4a4" version="1">The feat grants more points than can be applied to abilities.</content>
-	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough unselected passives to choose from.</content>
+	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough selectable features to choose from.</content>
 	<content contentuid="h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7" version="1">The ability list [2] wasn't found.</content>
 	<content contentuid="h31df0045ge2e3g453bga538ga0a618a38844" version="1">The pasive list [2] wasn't found.</content>
 	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>

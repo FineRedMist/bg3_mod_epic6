@@ -96,11 +96,10 @@
 ---@field PlayerLevels table<string, number> The mapping of class names to the number of levels in the class.
 ---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.
 ---@field PlayerFeats table<string, number> The mapping of feat IDs to the number of times the feat has been taken by the player.
----@field Proficiencies ProficiencyInformationType? The proficiency information for the player.
----@field Abilities table<string, AbilityScoreType>? The mapping of ability names to the ability score information.
+---@field Proficiencies ProficiencyInformationType The proficiency information for the player.
+---@field Abilities table<string, AbilityScoreType> The mapping of ability names to the ability score information.
 
 ---@class PlayerInformationType : PlayerFeatRequirementInformationType Information about the player for determine what is legal to select for the feat.
----@field ID string The unique id of the player
 ---@field UUID GUIDSTRING The UUID of the player
 ---@field Name string? The name of the character the player is playing
 ---@field PlayerPassives table<string, number> The mapping of passive IDs to the number of times the passive has been taken by the player.

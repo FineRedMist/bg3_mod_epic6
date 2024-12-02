@@ -18,7 +18,7 @@
         <node id="ModuleInfo">
           <attribute id="Author" type="LSString" value="Rationist" />
           <attribute id="CharacterCreationLevelName" type="FixedString" value="" />
-          <attribute id="Description" type="LSString" value="Play at another level of difficulty: the level cap is 6th level after which you earn feats for every 5000 experience (configurable)." />
+          <attribute id="Description" type="LSString" value="Play at another level of difficulty: the level cap is 6th level after which you earn feats for every 8,000 experience (configurable)." />
           <attribute id="Folder" type="LSString" value="DnD-Epic6" />
           <attribute id="GMTemplate" type="FixedString" value="" />
           <attribute id="LobbyLevelName" type="FixedString" value="" />
@@ -32,10 +32,10 @@
           <attribute id="Tags" type="LSWString" value="XP;Progression;Leveling" />
           <attribute id="Type" type="FixedString" value="Add-on" />
           <attribute id="UUID" type="FixedString" value="c8ecf3dd-b5ab-4041-b2e0-d2197845342f" />
-          <attribute id="Version64" type="int64" value="36169568867059041" />
+          <attribute id="Version64" type="int64" value="36169571014542693" />
           <children>
             <node id="PublishVersion">
-              <attribute id="Version64" type="int64" value="36169568867059041" />
+              <attribute id="Version64" type="int64" value="36169571014542693" />
             </node>
             <node id="Scripts" />
             <node id="TargetModes">
