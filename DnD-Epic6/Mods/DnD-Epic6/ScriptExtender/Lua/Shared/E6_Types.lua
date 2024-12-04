@@ -133,6 +133,7 @@
 ---@class ExtraPassiveType The extra passive information to track on the client for UI
 ---@field DisplayName string The display name of the passive.
 ---@field Description string The description of the passive.
+---@field DescriptionParams string[]? The description parameters of the passive.
 ---@field Icon string The icon of the passive.
 ---@field Boosts? string[] The boosts to apply as part of the extra passive.
 
