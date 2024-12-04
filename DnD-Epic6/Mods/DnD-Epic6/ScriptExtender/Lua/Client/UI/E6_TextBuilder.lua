@@ -65,9 +65,10 @@ end
 ---If the width is set and less than zero, the line is split into parts to hopefully wrap correctly, using SameLine = true.
 ---If the width is set and greater than zero, a single text control with the width and text wrap position is created.
 ---In both cases, each text element has the corresponding onText member called.
+---@param formatter function? The formatter to use to format the text.
 ---@param ... any The texts to add. Note: these can be localization ids.
 ---@return TextBuilder The current text builder.
-function TextBuilder:AddText(...)
+function TextBuilder:AddFormattedText(formatter, ...)
     local textParts = {...}
     if self:UseParentWrapping() then
         textParts = self:SplitFlattenText(textParts)
@@ -87,6 +88,9 @@ function TextBuilder:AddText(...)
             self.parent:AddSpacing()
         else
             local textElement = self.parent:AddText(TidyDescription(part))
+            if formatter then
+                formatter(textElement)
+            end
             if self:UseTextWrapping() then
                 textElement.ItemWidth = ScaleToViewportWidth(self.width)
                 textElement.TextWrapPos = textElement.ItemWidth
@@ -100,6 +104,15 @@ function TextBuilder:AddText(...)
     end
 
     return self
+end
+---Adds text to the parent ui element.
+---If the width is set and less than zero, the line is split into parts to hopefully wrap correctly, using SameLine = true.
+---If the width is set and greater than zero, a single text control with the width and text wrap position is created.
+---In both cases, each text element has the corresponding onText member called.
+---@param ... any The texts to add. Note: these can be localization ids.
+---@return TextBuilder The current text builder.
+function TextBuilder:AddText(...)
+    return self:AddFormattedText(nil, ...)
 end
 
 ---Adds a spacing element to the parent ui element.
@@ -116,7 +129,7 @@ end
 ---@param textId string The localization id of the text to add.
 ---@param textArgs string[]? The arguments to pass to the localization.
 ---@return TextBuilder The current text builder.
-function TextBuilder:AddLoca(textId, textArgs)
+function TextBuilder:AddFormattedLoca(formatter, textId, textArgs)
     local newArgs = DeepCopy(textArgs)
     if newArgs == nil then
         newArgs = {}
@@ -126,7 +139,7 @@ function TextBuilder:AddLoca(textId, textArgs)
     end
     if self:UseParentWrapping() then
         ProcessParameterizedLoca(textId, newArgs, function(text)
-            self:AddText(text)
+            self:AddFormattedText(formatter, text)
         end)
     else
         local result = ""
@@ -134,9 +147,19 @@ function TextBuilder:AddLoca(textId, textArgs)
             result = result .. text
         end
         ProcessParameterizedLoca(textId, newArgs, GatherText)
-        self:AddText(result)
+        self:AddFormattedText(formatter, result)
     end
     return self
+end
+---Adds text corresponding to the localization id to the parent ui element.
+---If the width is set and less than zero, the line is split into parts to hopefully wrap correctly, using SameLine = true.
+---If the width is set and greater than zero, a single text control with the width and text wrap position is created.
+---In both cases, each text element has the corresponding onText member called.
+---@param textId string The localization id of the text to add.
+---@param textArgs string[]? The arguments to pass to the localization.
+---@return TextBuilder The current text builder.
+function TextBuilder:AddLoca(textId, textArgs)
+    return self:AddFormattedLoca(nil, textId, textArgs)
 end
 
 ---Creates an image element for the parent ui element.
