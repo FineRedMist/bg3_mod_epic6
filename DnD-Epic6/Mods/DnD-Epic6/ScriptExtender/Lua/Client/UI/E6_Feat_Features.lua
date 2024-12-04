@@ -26,6 +26,18 @@ local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
             avoidDupes[key] = true
         end
     end
+    ---@param spell SelectSpellInfoUIType? The spell data.
+    local function AddSpell(spell)
+        if not spell then
+            return
+        end
+        local key = spell.DisplayName .. "|" .. spell.Description .. "|" .. spell.Icon
+        if not avoidDupes[key] then
+            local icon = AddSpellIcon(centeredCell, spell, playerInfo, false)
+            icon.SameLine = true
+            avoidDupes[key] = true
+        end
+    end
 
     local firstSectionCount = #feat.PassivesAdded + #extraPassives
     if firstSectionCount > 0 then
@@ -45,7 +57,7 @@ local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
         end
     end
     for _,passive in ipairs(extraPassives) do
-        AddPassiveIcon(passive.Icon, passive.DisplayName, passive.Description, nil)
+        AddPassiveIcon(passive.Icon, passive.DisplayName, passive.Description, passive.DescriptionParams)
     end
 
     if #feat.AddSpells ~= 0 then
@@ -62,11 +74,7 @@ local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
             local spells = Ext.StaticData.Get(addSpells.SpellsId, Ext.Enums.ExtResourceManagerType.SpellList)
             if spells then
                 for _,spellId in pairs(spells.Spells) do -- not ipairs intentionally, it doesn't handle Array_FixedString for some reason.
-                    ---@type SpellData The spell data.
-                    local spellStat = Ext.Stats.Get(spellId, -1, true, true)
-                    if spellStat then
-                        AddPassiveIcon(spellStat.Icon, spellStat.DisplayName, spellStat.Description, SplitString(spellStat.DescriptionParams, ";"))
-                    end
+                    AddSpell(SpellInfoFromSpellCollection(addSpells, spellId, playerInfo))
                 end
             end
         end

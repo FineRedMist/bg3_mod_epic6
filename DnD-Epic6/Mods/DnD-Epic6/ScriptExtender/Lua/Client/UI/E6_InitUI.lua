@@ -1,5 +1,6 @@
 Ext.Require("Client/UI/E6_TextBuilder.lua")
 Ext.Require("Client/UI/E6_CommonUI.lua")
+Ext.Require("Client/UI/E6_CommonSpellUI.lua")
 Ext.Require("Client/UI/E6_ParameterResolver.lua")
 Ext.Require("Client/UI/E6_Feat_Features.lua")
 Ext.Require("Client/UI/E6_Feat_Abilities.lua")
