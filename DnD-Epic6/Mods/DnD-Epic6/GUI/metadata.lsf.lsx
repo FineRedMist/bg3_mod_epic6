@@ -27,6 +27,36 @@
               </children>
             </node>
             <node id="Object">
+              <attribute id="MapKey" type="FixedString" value="Assets/ActionResources_c/Icons/Resources/Highlight/FeatPoint.png" />
+              <children>
+                <node id="entries">
+                  <attribute id="h" type="int16" value="64" />
+                  <attribute id="mipcount" type="int8" value="1" />
+                  <attribute id="w" type="int16" value="64" />
+                </node>
+              </children>
+            </node>
+            <node id="Object">
+              <attribute id="MapKey" type="FixedString" value="Assets/ActionResources_c/Icons/Resources/Missing/FeatPoint.png" />
+              <children>
+                <node id="entries">
+                  <attribute id="h" type="int16" value="64" />
+                  <attribute id="mipcount" type="int8" value="1" />
+                  <attribute id="w" type="int16" value="64" />
+                </node>
+              </children>
+            </node>
+            <node id="Object">
+              <attribute id="MapKey" type="FixedString" value="Assets/ActionResources_c/Icons/Resources/Used/FeatPoint.png" />
+              <children>
+                <node id="entries">
+                  <attribute id="h" type="int16" value="64" />
+                  <attribute id="mipcount" type="int8" value="1" />
+                  <attribute id="w" type="int16" value="64" />
+                </node>
+              </children>
+            </node>
+            <node id="Object">
               <attribute id="MapKey" type="FixedString" value="Assets/CC/icons_resources/FeatPoint.png" />
               <children>
                 <node id="entries">
