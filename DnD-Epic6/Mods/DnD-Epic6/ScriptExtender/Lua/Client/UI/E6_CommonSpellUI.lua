@@ -1,9 +1,3 @@
-
----@class ApplyStatusStateType
----@field Icon string The icon of the status effect.
----@field Loca string The localization id of the status effect.
----@field Params string[] The parameters for the status effect.
-
 ---@class SelectSpellInfoUIType : SelectSpellInfoType
 ---@field IsSelected boolean Whether the spell is enabled.
 ---@field CanSelect boolean Whether the spell can be selected (if you already have it, you can't select it again).
@@ -99,46 +93,6 @@ local function HasSpellFlag(spellStat, flag)
     return false
 end
 
----Parses the apply status and returns formatted data.
----@param statusApply string? The status to apply in text.
----@return ApplyStatusStateType? The status effect applied by the spell to show in the tooltip.
-function ParseApplyStatus(statusApply)
-    if not statusApply or string.len(statusApply) == 0 then
-        return nil
-    end
-
-    ---@type string?
-    local icon = nil
-    ---@type number?
-    local duration = nil
-
-    local function GetDuration(inStatus, inAmount, inDuration)
-        local status = Ext.Stats.Get(inStatus, -1, true, true)
-        if not status then
-            return ""
-        end
-        if not status.Icon then
-            return ""
-        end
-        icon = status.Icon
-        duration = tonumber(inDuration)
-        return ""
-    end
-
-    string.gsub(statusApply, "%s*ApplyStatus%s*%(%s*([^, ]+)%s*,%s*([%-%d%.]+)%s*,%s*([%-%d%.]+).*%)%s*", GetDuration)
-
-    if icon == nil or duration == nil then
-        return nil
-    end
-    if duration == -1 then
-        return {Icon = icon, Loca = "h50ea69dagf61eg466fga47eg530c55933114", Params = {}} -- Until Long Rest
-    end
-    if duration > 0 then
-        return {Icon = icon, Loca = "h6e1e86b5g98f8g42c8ga383gf770838ca349", Params = {tostring(duration)}} -- [1] turns
-    end
-    -- Zero duration, not interesting as far as I know.
-    return nil
-end
 
 ---Creates a spell information UI type for a givne spell id in the add spells collection
 ---@param spellCollection SelectSpellBaseType The spell collection information (AddSpellsType or SelectSpellsType)
@@ -230,11 +184,10 @@ function AddSpellIcon(parent, spell, playerInfo, isButton)
         modifier = tostring(GetAbilityModifier(abilityValue.Current))
     end
 
-    -- MeleeMainWeaponRange, RangedMainWeaponRange
-    local resolver = ParameterResolver:new(playerInfo, { SpellCastingAbility=modifier, SpellCastingAbilityModifier=modifier })
+    local resolver = ParameterResolver:update(playerInfo.Resolver, { SpellCastingAbility=modifier, SpellCastingAbilityModifier=modifier })
     local builder = AddTooltip(icon)
     builder.preText = { function(text) return resolver:Resolve(text) end }
-    builder:AddFormattedText(SetWhiteText, spell.DisplayName)
+    builder:AddFormattedLoca(SetWhiteText, spell.DisplayName)
 
     local school = spell.School
     if school and school ~= "None" then
@@ -249,18 +202,25 @@ function AddSpellIcon(parent, spell, playerInfo, isButton)
         end
     end
 
+    if spell.TooltipDamageList and #spell.TooltipDamageList > 0 then
+        builder:AddSpacing()
+        builder:AddSpacing()
+
+        for _,damage in ipairs(spell.TooltipDamageList) do
+            builder:AddFormattedText(SetWhiteText, builder:RunPreText(damage))
+        end
+    end
+
+    builder:AddSpacing()
     builder:AddSpacing()
     builder:AddLoca(spell.Description, spell.DescriptionParams)
 
-    if spell.TooltipStatusApply then
-        builder:AddSpacing()
-        builder:AddSpacing()
-        local _, statusImage = builder:AddImage(spell.TooltipStatusApply.Icon, TooltipIconSize)
-        statusImage.SameLine = true
-        builder:AddFormattedLoca(SameLineFormatter, spell.TooltipStatusApply.Loca, spell.TooltipStatusApply.Params)
-    end
-
     local metaRow = {
+        { spell.TooltipStatusApply, function()
+                local _, statusImage = builder:AddImage(spell.TooltipStatusApply.Icon, TooltipIconSize)
+                statusImage.SameLine = true
+                builder:AddFormattedLoca(SameLineFormatter, spell.TooltipStatusApply.Loca, spell.TooltipStatusApply.Params)
+            end},
         { spell.Range and spell.Range > 0, function()
                 local _, range = builder:AddImage("E6_Range", TooltipIconSize)
                 range.SameLine = true

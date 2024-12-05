@@ -18,9 +18,8 @@ local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
         local key = displayNameId .. "|" .. descriptionId .. "|" .. iconId
         if not avoidDupes[key] then
             local icon = centeredCell:AddImage(iconId, DefaultIconSize)
-            local resolver = ParameterResolver:new(playerInfo)
             local builder = AddTooltip(icon)
-            builder.preText = { function(text) return resolver:Resolve(text) end }
+            builder.preText = { function(text) return playerInfo.Resolver:Resolve(text) end }
             builder:AddText(displayNameId):AddSpacing():AddLoca(descriptionId, descriptionParams)
             icon.SameLine = true
             avoidDupes[key] = true

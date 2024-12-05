@@ -110,6 +110,8 @@
 ---@field XPPerFeat integer The amount of experience required per feat.
 ---@field IsHost boolean Whether the current player is the host of the session.
 ---@field FeatPoints integer How many feat points the player currently has.
+---@field ResolveMap table<string, string> The mapping of strings to resolved strings for the player.
+---@field Resolve function? The function to resolve strings for the player. This is client side only.
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Selected Feat Information

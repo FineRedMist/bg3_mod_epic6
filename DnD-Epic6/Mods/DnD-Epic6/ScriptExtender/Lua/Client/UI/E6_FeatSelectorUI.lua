@@ -445,10 +445,19 @@ local function AddExpInfo(win, windowDimensions, playerInfo)
     centerCell:AddText(progressText)
 end
 
+local function AddResolver(playerInfo)
+    playerInfo.Resolver = ParameterResolver:new(playerInfo, playerInfo.ResolveMap)
+    playerInfo.Resolve = function(text)
+        return playerInfo.Resolver:Resolve(text)
+    end
+end
+
 ---Shows the Feat Selector UI
 ---@param playerInfo PlayerInformationType
 function E6_FeatSelectorUI(playerInfo)
     local windowDimensions = FeatUIDimensions
+
+    AddResolver(playerInfo)
 
     ---@type ExtuiWindow
     local win = ConfigureFeatSelectorUI(windowDimensions)

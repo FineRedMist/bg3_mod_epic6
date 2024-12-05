@@ -694,7 +694,67 @@ local function GatherSpells(entity)
     return result
 end
 
----comment
+---Gathers strings to resolve on the client.
+---@param entityId GUIDSTRING
+---@param abilities table<string, AbilityScoreType>
+local function GatherResolverStringMap(entityId, abilities)
+    local map = {}
+    local function GetItem(kind)
+        local id = Osi.GetEquippedItem(entityId, kind .. " Main Weapon")
+        if not id then
+            return
+        end
+        local ent = Ext.Entity.Get(id)
+        if not ent then
+            return
+        end
+        local damage, damageType, damageRange
+        if ent.ServerBaseWeapon and ent.ServerBaseWeapon.DamageList and #ent.ServerBaseWeapon.DamageList > 0 then
+            local first = ent.ServerBaseWeapon.DamageList[1]
+            damageType = first.DamageType.Label
+            if first.Roll then
+                damage = tostring(first.Roll.AmountOfDices) .. "d" .. first.Roll.DiceValue.Label
+                if first.Roll.DiceAdditionalValue then
+                    damage = damage .. "+" .. tostring(first.Roll.DiceAdditionalValue)
+                end
+            end
+        end
+        if ent.Weapon then
+            if ent.Weapon.Rolls and #ent.Weapon.Rolls > 0 then
+                damage = ""
+                for ability, rollSet in pairs(ent.Weapon.Rolls) do
+                    for _, roll in ipairs(rollSet) do
+                        damage = damage .. "+" .. tostring(roll.AmountOfDices) .. roll.DiceValue.Label
+                        if roll.DiceAdditionalValue then
+                            damage = damage .. "+" .. tostring(roll.DiceAdditionalValue)
+                        end
+                    end
+                    local modifier = GetAbilityModifier(abilities[ability].Current)
+                    if modifier > 0 then
+                        damage = damage .. "+" .. tostring(modifier)
+                    else
+                        damage = damage .. "-" .. tostring(math.abs(modifier))
+                    end
+                end
+            end
+            if ent.Weapon.WeaponRange then
+                damageRange = ent.Weapon.WeaponRange
+            end
+        end
+
+        if damage then
+            map["Main" .. kind .. "Weapon"] = damage
+            map["Main" .. kind .. "WeaponDamageType"] = damageType
+            map[kind .. "MainWeaponRange"] = damageRange
+        end
+    end
+    -- MainMeleeWeapon, MainMeleeWeaponDamageType, MeleeMainWeaponRange, RangedMainWeaponRange
+    GetItem("Melee")
+    GetItem("Ranged")
+    return map
+end
+
+---Sends a message to the client corresponding to the given caster.
 ---@param caster GUIDSTRING
 ---@param playerInfo PlayerInformationType
 local function SendShowFeatSelector(caster, playerInfo)
@@ -743,7 +803,8 @@ local function GetExtendedPlayerInfo(ent, uuid, charname, isHost, featPoints)
         ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
         XPPerFeat = GetEpicFeatXP(),
         IsHost = isHost,
-        FeatPoints = featPoints
+        FeatPoints = featPoints,
+        ResolveMap = GatherResolverStringMap(uuid, abilityScores)
     }
 end
 
@@ -787,7 +848,8 @@ function OnEpic6FeatSelectorSpell(caster)
             ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
             XPPerFeat = GetEpicFeatXP(),
             IsHost = isHost,
-            FeatPoints = featPoints
+            FeatPoints = featPoints,
+            ResolveMap = {}
         }
         SendShowFeatSelector(caster, playerInfoLite)
         return
