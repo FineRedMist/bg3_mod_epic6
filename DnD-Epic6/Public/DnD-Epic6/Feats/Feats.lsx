@@ -59,6 +59,11 @@
             <attribute id="UUID" type="guid" value="2f89ad28-0f76-49fd-b3cd-6c2828a6446b"/>
         </node>
         <node id="Feat">
+            <attribute id="Name" type="FixedString" value="E6_PotentSpellcasting"/>
+            <attribute id="Selectors" type="LSString" value="SelectPassives(cb513d6f-7e2e-431e-a1ae-650be154330c,1);SelectPassives(657e40aa-239f-4a7f-8a8b-a3969cd89715,1)"/>
+            <attribute id="UUID" type="guid" value="5b6ba628-68d6-436b-906b-cfaeb723aaea"/>
+        </node>
+        <node id="Feat">
           <attribute id="Name" type="FixedString" value="LightlyArmored"/>
           <attribute id="PassivesAdded" type="LSString" value="LightlyArmored"/>
           <attribute id="Requirements" type="LSString" value="FeatRequirementNonProficiency(&apos;LightArmor&apos;)"/>

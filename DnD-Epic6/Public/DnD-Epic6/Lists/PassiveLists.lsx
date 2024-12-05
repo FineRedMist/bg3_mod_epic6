@@ -20,6 +20,10 @@
                     <attribute id="Passives" type="LSString" value="E6_Ability_Cap_Minor_Strength_Passive,E6_Ability_Cap_Minor_Dexterity_Passive,E6_Ability_Cap_Minor_Constitution_Passive,E6_Ability_Cap_Minor_Intelligence_Passive,E6_Ability_Cap_Minor_Wisdom_Passive,E6_Ability_Cap_Minor_Charisma_Passive"/>
                     <attribute id="UUID" type="guid" value="e428cd22-1887-49cc-8a9f-e851c666cdb0"/>
                 </node>
+                <node id="PassiveList"> <!-- Potent spellcasting list -->
+                    <attribute id="Passives" type="LSString" value="E6_PotentSpellcasting_Intelligence,E6_PotentSpellcasting_Wisdom,E6_PotentSpellcasting_Charisma"/>
+                    <attribute id="UUID" type="guid" value="657e40aa-239f-4a7f-8a8b-a3969cd89715"/>
+                </node>
             </children>
         </node>
     </region>
