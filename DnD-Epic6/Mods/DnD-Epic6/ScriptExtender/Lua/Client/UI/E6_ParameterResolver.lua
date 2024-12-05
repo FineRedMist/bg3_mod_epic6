@@ -213,23 +213,121 @@ local function GetValue(originalFormula)
     return tonumber(formula)
 end
 
-local function ComputeFormula(formula)
-    formula = TripleCheck(formula, "Level", "6")
+---Computes the formula range based on the dice and modifiers.
+---@param formula string The formula to compute the range for.
+---@return string The low range of the formula
+---@return string? The high range of the formula, or nil if it couldn't be computed.
+local function GetFormulaRange(formula)
     local lowText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceLowest)
     local highText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceHighest)
 
     local low = GetValue(lowText)
     local high = GetValue(highText)
 
+    -- Couldn't figure it out, return the string
     if low == nil or high == nil then
-        return formula
+        return formula, nil
     end
 
     if low == high then
-        return tostring(low)
+        return tostring(low), nil
     end
 
-    return tostring(low) .. "~" .. tostring(high)
+    return tostring(low), tostring(high)
+end
+
+---@class RollTermType
+---@field IsPositive boolean Whether the term is positive or negative.
+---@field DiceCount number The number of dice in the term.
+---@field DiceSides number The number of sides on the dice (zero for constant terms).
+
+---Merges and collects like terms in the formula based on dice and constants.
+---@param formula string The formula to collect terms for.
+---@return string The result with consolidated terms.
+local function ConsolidateTerms(formula)
+    -- split the formula at + and - signs, then identify dice and constants, then merge terms.
+    local terms = SplitString(formula, "+-", true)
+
+    -- Collect the terms by dice side count.
+    local isPositive = true
+    local collector = {}
+    for i,v in ipairs(terms) do
+        local term = Trim(v)
+        if term == "+" then
+            isPositive = true
+        elseif term == "-" then
+            isPositive = false
+        else
+            local diceCount, diceSides = string.match(term, "(%d+)[Dd](%d+)")
+            ---@type RollTermType?
+            local roll = nil
+            if diceCount and diceSides then
+                roll = {IsPositive = isPositive, DiceCount = tonumber(diceCount), DiceSides = tonumber(diceSides)}
+            else
+                roll = {IsPositive = isPositive, DiceCount = tonumber(term), DiceSides = 0}
+            end
+            diceSides = roll.DiceSides
+            local collection = collector[diceSides]
+            if not collection then
+                collection = {}
+                collector[diceSides] = collection
+            end
+            table.insert(collection, roll)
+        end
+    end
+
+    -- Gather the dice sides, and process them from highest to lowest.
+    local diceSides = {}
+    for k,v in pairs(collector) do
+        table.insert(diceSides, k)
+    end
+
+    table.sort(diceSides, function(a, b) return a > b end)
+
+    -- Generate the result string
+    local result = ""
+    for _,sides in ipairs(diceSides) do
+        local collection = collector[sides]
+        local diceCount = 0
+        for _,roll in ipairs(collection) do
+            if roll.IsPositive then
+                diceCount = diceCount + roll.DiceCount
+            else
+                diceCount = diceCount - roll.DiceCount
+            end
+        end
+        if diceCount > 0 then
+            if #result > 0 then
+                result = result .. "+" .. tostring(diceCount)
+            else
+                result = tostring(diceCount)
+            end
+        elseif diceCount < 0 then
+            result = result .. "-" .. tostring(-diceCount)
+        end
+        if diceCount ~= 0 and sides > 0 then
+            result = result .. "d" .. tostring(sides)
+        end
+    end
+    return result
+end
+
+---Computes the dice range based on the formula.
+---@param formula string The string representation of the formula to perform substitutions with.
+---@param keep boolean? Whether to keep the base formula in terms of dice values and consolidate terms, or just the damage range.
+---@return string The computed formula for human readability.
+local function ComputeFormula(formula, keep)
+    formula = TripleCheck(formula, "Level", "6")
+
+    local low, high = GetFormulaRange(formula)
+    if not high or not keep then
+        return low
+    elseif not keep then
+        return low .. "~" .. high
+    end
+
+    return ConsolidateTerms(formula) .. " (" .. low .. "~" .. high .. ")"
+    
 end
 
 local function GetDistance(distance)
@@ -237,12 +335,12 @@ local function GetDistance(distance)
 end
 
 local function GetTemporaryHitPoints(formula)
-    local formula = ComputeFormula(formula)
+    local formula = ComputeFormula(formula, true)
     return GetParameterizedLoca("hdabb2235ge870g409bg8e02g1ebc41f8f81d", {formula})
 end
 
 local function RegainHitPoints(formula)
-    local formula = ComputeFormula(formula)
+    local formula = ComputeFormula(formula, true)
     return GetParameterizedLoca("he982505bgbb90g46e6g999fg82d159022d1b", {formula})
 end
 
@@ -264,8 +362,13 @@ local damageTypeLoca = {
     Thunder = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_5",
     Weapon = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_14"
 }
+
+---Computes the deal damage scenario
+---@param formula string The formula to compute
+---@param damageType string The type of the damage applied
+---@return string The replacement string for the matched text
 local function DealDamage(formula, damageType)
-    local formula = ComputeFormula(formula)
+    local formula = ComputeFormula(formula, true)
     if damageTypeLoca[damageType] then
         damageType = damageTypeLoca[damageType]
     end
@@ -302,7 +405,11 @@ function ParameterResolver:RunReplacements(playerInfo, text)
     text = TripleCheck(text, "GainTemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
     text = TripleCheck(text, "TemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
     text = TripleCheck(text, "RegainHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", RegainHitPoints)
-    text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*([%a]+).*%)", DealDamage)
+    -- Lua doesn't have or (|) available for regex, so check each damage type. Otherwise, we have a problem with
+    -- expressions like "DealDamage(1d6,Necrotic,,,,ad727a13-c6f0-4b5b-aefd-aac79c6ed46e)" (from Hex)
+    for k, _ in pairs(damageTypeLoca) do
+        text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*(" .. k .. ").*%)", DealDamage)
+    end
 
     text = Trim(text)
 
