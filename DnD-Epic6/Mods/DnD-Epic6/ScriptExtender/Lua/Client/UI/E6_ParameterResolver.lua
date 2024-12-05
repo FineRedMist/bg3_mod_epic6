@@ -327,21 +327,6 @@ local function ComputeFormula(formula, keep)
     end
 
     return ConsolidateTerms(formula) .. " (" .. low .. "~" .. high .. ")"
-    
-end
-
-local function GetDistance(distance)
-   return GetParameterizedLoca("h3798d21bgceccg4e7cg8044g29b0cf015717", {distance})
-end
-
-local function GetTemporaryHitPoints(formula)
-    local formula = ComputeFormula(formula, true)
-    return GetParameterizedLoca("hdabb2235ge870g409bg8e02g1ebc41f8f81d", {formula})
-end
-
-local function RegainHitPoints(formula)
-    local formula = ComputeFormula(formula, true)
-    return GetParameterizedLoca("he982505bgbb90g46e6g999fg82d159022d1b", {formula})
 end
 
 local damageTypeLoca = {
@@ -360,25 +345,74 @@ local damageTypeLoca = {
     Slashing = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_1",
     Spell = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_15",
     Thunder = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_5",
-    Weapon = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_14"
+    Weapon = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_14",
+    TemporaryHitPoints = "h8aaf9bf5g6eb5g4417g9a93g89319d3c7c41",
+    Other = ""
 }
 
----Computes the deal damage scenario
----@param formula string The formula to compute
----@param damageType string The type of the damage applied
----@return string The replacement string for the matched text
-local function DealDamage(formula, damageType)
-    local formula = ComputeFormula(formula, true)
-    if damageTypeLoca[damageType] then
-        damageType = damageTypeLoca[damageType]
+---Handles the special replacements that can have a type for the sake of coloration in the UI
+---@param text string The text to run replacements on.
+---@return string The text with the replacements.
+---@return string? The type of the dice range, or nil if it couldn't be computed.
+local function RunReplacementsSpecial(text)
+
+    local diceRangeType = nil
+    local function UpdateDiceRangeType(rangeType)
+        if diceRangeType and diceRangeType ~= rangeType then
+            diceRangeType = "Other"
+        else
+            diceRangeType = rangeType
+        end
     end
-    return GetParameterizedLoca("ha7eeaa4ag452bg469dg9127gaa4afb1e3abc", {formula, damageType})
+
+    local function GetDistance(distance)
+        UpdateDiceRangeType("Other")
+        return GetParameterizedLoca("h3798d21bgceccg4e7cg8044g29b0cf015717", {distance})
+    end
+
+    local function GetTemporaryHitPoints(formula)
+        UpdateDiceRangeType("TemporaryHitPoints")
+        local formula = ComputeFormula(formula, true)
+        return GetParameterizedLoca("hdabb2235ge870g409bg8e02g1ebc41f8f81d", {formula})
+    end
+
+    local function RegainHitPoints(formula)
+        UpdateDiceRangeType("Healing")
+        local formula = ComputeFormula(formula, true)
+        return GetParameterizedLoca("he982505bgbb90g46e6g999fg82d159022d1b", {formula})
+    end
+
+    ---Computes the deal damage scenario
+    ---@param formula string The formula to compute
+    ---@param damageType string The type of the damage applied
+    ---@return string The replacement string for the matched text
+    local function DealDamage(formula, damageType)
+        local formula = ComputeFormula(formula, true)
+        UpdateDiceRangeType(damageType)
+        if damageTypeLoca[damageType] then
+            damageType = damageTypeLoca[damageType]
+        end
+        return GetParameterizedLoca("ha7eeaa4ag452bg469dg9127gaa4afb1e3abc", {formula, damageType})
+    end
+
+    text = TripleCheck(text, "Distance%s*%(%s*([%d%.]+)%s*%)", GetDistance)
+    text = TripleCheck(text, "GainTemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
+    text = TripleCheck(text, "TemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
+    text = TripleCheck(text, "RegainHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", RegainHitPoints)
+    -- Lua doesn't have or (|) available for regex, so check each damage type. Otherwise, we have a problem with
+    -- expressions like "DealDamage(1d6,Necrotic,,,,ad727a13-c6f0-4b5b-aefd-aac79c6ed46e)" (from Hex)
+    for k, _ in pairs(damageTypeLoca) do
+        text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*(" .. k .. ").*%)", DealDamage)
+    end
+
+    return Trim(text), diceRangeType
 end
 
 ---Performs replacements against the text to resolve the parameters.
----@param playerInfo PlayerInformationType
----@param text string
----@return string
+---@param playerInfo PlayerInformationType The player information to resolve parameters for.
+---@param text string The text to run replacements on.
+---@return string The text with replacements applied.
+---@return string? The type of the dice range, or nil if it couldn't be computed.
 function ParameterResolver:RunReplacements(playerInfo, text)
     local orig = text
     text = TripleCheck(text, "ProficiencyBonus", tostring(playerInfo.ProficiencyBonus))
@@ -401,19 +435,15 @@ function ParameterResolver:RunReplacements(playerInfo, text)
         return key
     end)
 
-    text = TripleCheck(text, "Distance%s*%(%s*([%d%.]+)%s*%)", GetDistance)
-    text = TripleCheck(text, "GainTemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
-    text = TripleCheck(text, "TemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
-    text = TripleCheck(text, "RegainHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", RegainHitPoints)
-    -- Lua doesn't have or (|) available for regex, so check each damage type. Otherwise, we have a problem with
-    -- expressions like "DealDamage(1d6,Necrotic,,,,ad727a13-c6f0-4b5b-aefd-aac79c6ed46e)" (from Hex)
-    for k, _ in pairs(damageTypeLoca) do
-        text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*(" .. k .. ").*%)", DealDamage)
-    end
-
-    text = Trim(text)
+    local rangeType
+    text, rangeType = RunReplacementsSpecial(text)
 
     if damageTypeLoca[text] then
+        if rangeType and rangeType ~= text then
+            rangeType = "Other"
+        else
+            rangeType = text
+        end 
         text = damageTypeLoca[text]
     end
 
@@ -451,21 +481,23 @@ function ParameterResolver:RunReplacements(playerInfo, text)
     -- Slashing
     -- WeaponDamage(1d4, Poison)
 
-    return text
+    return text, rangeType
 end
 
 ---Resolve the text that can represent functions or relations into something human readable.
----@param text string
----@return string
+---@param text string The text to run replacements against.
+---@return string The resolved text.
+---@return string? The type of the dice range, or nil if it couldn't be computed.
 function ParameterResolver:Resolve(text)
-    local success, result = pcall(function ()
-        return self:RunReplacements(self.playerInfo, text)
+    local result, rangeType
+    local success = pcall(function ()
+        result, rangeType = self:RunReplacements(self.playerInfo, text)
     end)
     if not success then
         _E6Error("Error resolving: " .. text .. " -> " .. result)
         return text
     end
-    return result
+    return result, rangeType
 end
 
 return ParameterResolver
