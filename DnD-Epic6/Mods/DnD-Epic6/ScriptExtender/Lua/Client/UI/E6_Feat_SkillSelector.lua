@@ -36,7 +36,7 @@ local imageLookup = {
 local function AddSkillImage(parent, name)
     local imageInfo = imageLookup[name]
     local image = parent:AddImage(imageInfo.ImageName, DefaultIconSize)
-    AddTooltip(image):AddText(imageInfo.Title):AddSpacing():AddText(imageInfo.Description)
+    AddTooltip(image):AddFormattedText(SetWhiteText, imageInfo.Title):AddSpacing():AddText(imageInfo.Description)
 end
 
 local function AddProficiencyImage(parent, isProficient, isExpert)

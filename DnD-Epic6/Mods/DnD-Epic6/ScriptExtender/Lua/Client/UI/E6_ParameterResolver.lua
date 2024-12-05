@@ -213,37 +213,120 @@ local function GetValue(originalFormula)
     return tonumber(formula)
 end
 
-local function ComputeFormula(formula)
-    formula = TripleCheck(formula, "Level", "6")
+---Computes the formula range based on the dice and modifiers.
+---@param formula string The formula to compute the range for.
+---@return string The low range of the formula
+---@return string? The high range of the formula, or nil if it couldn't be computed.
+local function GetFormulaRange(formula)
     local lowText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceLowest)
     local highText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceHighest)
 
     local low = GetValue(lowText)
     local high = GetValue(highText)
 
+    -- Couldn't figure it out, return the string
     if low == nil or high == nil then
-        return formula
+        return formula, nil
     end
 
     if low == high then
-        return tostring(low)
+        return tostring(low), nil
     end
 
-    return tostring(low) .. "~" .. tostring(high)
+    return tostring(low), tostring(high)
 end
 
-local function GetDistance(distance)
-   return GetParameterizedLoca("h3798d21bgceccg4e7cg8044g29b0cf015717", {distance})
+---@class RollTermType
+---@field IsPositive boolean Whether the term is positive or negative.
+---@field DiceCount number The number of dice in the term.
+---@field DiceSides number The number of sides on the dice (zero for constant terms).
+
+---Merges and collects like terms in the formula based on dice and constants.
+---@param formula string The formula to collect terms for.
+---@return string The result with consolidated terms.
+local function ConsolidateTerms(formula)
+    -- split the formula at + and - signs, then identify dice and constants, then merge terms.
+    local terms = SplitString(formula, "+-", true)
+
+    -- Collect the terms by dice side count.
+    local isPositive = true
+    local collector = {}
+    for i,v in ipairs(terms) do
+        local term = Trim(v)
+        if term == "+" then
+            isPositive = true
+        elseif term == "-" then
+            isPositive = false
+        else
+            local diceCount, diceSides = string.match(term, "(%d+)[Dd](%d+)")
+            ---@type RollTermType?
+            local roll = nil
+            if diceCount and diceSides then
+                roll = {IsPositive = isPositive, DiceCount = tonumber(diceCount), DiceSides = tonumber(diceSides)}
+            else
+                roll = {IsPositive = isPositive, DiceCount = tonumber(term), DiceSides = 0}
+            end
+            diceSides = roll.DiceSides
+            local collection = collector[diceSides]
+            if not collection then
+                collection = {}
+                collector[diceSides] = collection
+            end
+            table.insert(collection, roll)
+        end
+    end
+
+    -- Gather the dice sides, and process them from highest to lowest.
+    local diceSides = {}
+    for k,v in pairs(collector) do
+        table.insert(diceSides, k)
+    end
+
+    table.sort(diceSides, function(a, b) return a > b end)
+
+    -- Generate the result string
+    local result = ""
+    for _,sides in ipairs(diceSides) do
+        local collection = collector[sides]
+        local diceCount = 0
+        for _,roll in ipairs(collection) do
+            if roll.IsPositive then
+                diceCount = diceCount + roll.DiceCount
+            else
+                diceCount = diceCount - roll.DiceCount
+            end
+        end
+        if diceCount > 0 then
+            if #result > 0 then
+                result = result .. "+" .. tostring(diceCount)
+            else
+                result = tostring(diceCount)
+            end
+        elseif diceCount < 0 then
+            result = result .. "-" .. tostring(-diceCount)
+        end
+        if diceCount ~= 0 and sides > 0 then
+            result = result .. "d" .. tostring(sides)
+        end
+    end
+    return result
 end
 
-local function GetTemporaryHitPoints(formula)
-    local formula = ComputeFormula(formula)
-    return GetParameterizedLoca("hdabb2235ge870g409bg8e02g1ebc41f8f81d", {formula})
-end
+---Computes the dice range based on the formula.
+---@param formula string The string representation of the formula to perform substitutions with.
+---@param keep boolean? Whether to keep the base formula in terms of dice values and consolidate terms, or just the damage range.
+---@return string The computed formula for human readability.
+local function ComputeFormula(formula, keep)
+    formula = TripleCheck(formula, "Level", "6")
 
-local function RegainHitPoints(formula)
-    local formula = ComputeFormula(formula)
-    return GetParameterizedLoca("he982505bgbb90g46e6g999fg82d159022d1b", {formula})
+    local low, high = GetFormulaRange(formula)
+    if not high or not keep then
+        return low
+    elseif not keep then
+        return low .. "~" .. high
+    end
+
+    return ConsolidateTerms(formula) .. " (" .. low .. "~" .. high .. ")"
 end
 
 local damageTypeLoca = {
@@ -262,20 +345,74 @@ local damageTypeLoca = {
     Slashing = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_1",
     Spell = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_15",
     Thunder = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_5",
-    Weapon = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_14"
+    Weapon = "hc3cd9b4eg4ea4g4438gbfbbg493c0abb6dd7_14",
+    TemporaryHitPoints = "h8aaf9bf5g6eb5g4417g9a93g89319d3c7c41",
+    Other = ""
 }
-local function DealDamage(formula, damageType)
-    local formula = ComputeFormula(formula)
-    if damageTypeLoca[damageType] then
-        damageType = damageTypeLoca[damageType]
+
+---Handles the special replacements that can have a type for the sake of coloration in the UI
+---@param text string The text to run replacements on.
+---@return string The text with the replacements.
+---@return string? The type of the dice range, or nil if it couldn't be computed.
+local function RunReplacementsSpecial(text)
+
+    local diceRangeType = nil
+    local function UpdateDiceRangeType(rangeType)
+        if diceRangeType and diceRangeType ~= rangeType then
+            diceRangeType = "Other"
+        else
+            diceRangeType = rangeType
+        end
     end
-    return GetParameterizedLoca("ha7eeaa4ag452bg469dg9127gaa4afb1e3abc", {formula, damageType})
+
+    local function GetDistance(distance)
+        UpdateDiceRangeType("Other")
+        return GetParameterizedLoca("h3798d21bgceccg4e7cg8044g29b0cf015717", {distance})
+    end
+
+    local function GetTemporaryHitPoints(formula)
+        UpdateDiceRangeType("TemporaryHitPoints")
+        local formula = ComputeFormula(formula, true)
+        return GetParameterizedLoca("hdabb2235ge870g409bg8e02g1ebc41f8f81d", {formula})
+    end
+
+    local function RegainHitPoints(formula)
+        UpdateDiceRangeType("Healing")
+        local formula = ComputeFormula(formula, true)
+        return GetParameterizedLoca("he982505bgbb90g46e6g999fg82d159022d1b", {formula})
+    end
+
+    ---Computes the deal damage scenario
+    ---@param formula string The formula to compute
+    ---@param damageType string The type of the damage applied
+    ---@return string The replacement string for the matched text
+    local function DealDamage(formula, damageType)
+        local formula = ComputeFormula(formula, true)
+        UpdateDiceRangeType(damageType)
+        if damageTypeLoca[damageType] then
+            damageType = damageTypeLoca[damageType]
+        end
+        return GetParameterizedLoca("ha7eeaa4ag452bg469dg9127gaa4afb1e3abc", {formula, damageType})
+    end
+
+    text = TripleCheck(text, "Distance%s*%(%s*([%d%.]+)%s*%)", GetDistance)
+    text = TripleCheck(text, "GainTemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
+    text = TripleCheck(text, "TemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
+    text = TripleCheck(text, "RegainHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", RegainHitPoints)
+    -- Lua doesn't have or (|) available for regex, so check each damage type. Otherwise, we have a problem with
+    -- expressions like "DealDamage(1d6,Necrotic,,,,ad727a13-c6f0-4b5b-aefd-aac79c6ed46e)" (from Hex)
+    for k, _ in pairs(damageTypeLoca) do
+        text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*(" .. k .. ").*%)", DealDamage)
+    end
+
+    return Trim(text), diceRangeType
 end
 
 ---Performs replacements against the text to resolve the parameters.
----@param playerInfo PlayerInformationType
----@param text string
----@return string
+---@param playerInfo PlayerInformationType The player information to resolve parameters for.
+---@param text string The text to run replacements on.
+---@return string The text with replacements applied.
+---@return string? The type of the dice range, or nil if it couldn't be computed.
 function ParameterResolver:RunReplacements(playerInfo, text)
     local orig = text
     text = TripleCheck(text, "ProficiencyBonus", tostring(playerInfo.ProficiencyBonus))
@@ -298,15 +435,15 @@ function ParameterResolver:RunReplacements(playerInfo, text)
         return key
     end)
 
-    text = TripleCheck(text, "Distance%s*%(%s*([%d%.]+)%s*%)", GetDistance)
-    text = TripleCheck(text, "GainTemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
-    text = TripleCheck(text, "TemporaryHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", GetTemporaryHitPoints)
-    text = TripleCheck(text, "RegainHitPoints%s*%(%s*([%w_%+%-%*%./, ]+)%s*%)", RegainHitPoints)
-    text = TripleCheck(text, "DealDamage%s*%(%s*([%w_%+%-%*%./,%(%) ]+)%s*,%s*([%a]+).*%)", DealDamage)
-
-    text = Trim(text)
+    local rangeType
+    text, rangeType = RunReplacementsSpecial(text)
 
     if damageTypeLoca[text] then
+        if rangeType and rangeType ~= text then
+            rangeType = "Other"
+        else
+            rangeType = text
+        end 
         text = damageTypeLoca[text]
     end
 
@@ -344,21 +481,23 @@ function ParameterResolver:RunReplacements(playerInfo, text)
     -- Slashing
     -- WeaponDamage(1d4, Poison)
 
-    return text
+    return text, rangeType
 end
 
 ---Resolve the text that can represent functions or relations into something human readable.
----@param text string
----@return string
+---@param text string The text to run replacements against.
+---@return string The resolved text.
+---@return string? The type of the dice range, or nil if it couldn't be computed.
 function ParameterResolver:Resolve(text)
-    local success, result = pcall(function ()
-        return self:RunReplacements(self.playerInfo, text)
+    local result, rangeType
+    local success = pcall(function ()
+        result, rangeType = self:RunReplacements(self.playerInfo, text)
     end)
     if not success then
         _E6Error("Error resolving: " .. text .. " -> " .. result)
         return text
     end
-    return result
+    return result, rangeType
 end
 
 return ParameterResolver

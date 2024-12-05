@@ -117,7 +117,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
 
     local tooltip = AddTooltip(iconControl)
     tooltip.preText = { playerInfo.Resolve }
-    tooltip:AddText(passive.DisplayName):AddSpacing():AddLoca(passive.Description, passive.DescriptionParams)
+    tooltip:AddFormattedText(SetWhiteText, passive.DisplayName):AddSpacing():AddLoca(passive.Description, passive.DescriptionParams)
 
     local transform = MakeErrorText
     if isPassiveSafe then

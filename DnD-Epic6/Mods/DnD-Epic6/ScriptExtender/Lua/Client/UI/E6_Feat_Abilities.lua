@@ -73,7 +73,7 @@ local function AddAbilityControl(parent, sharedResource, pointInfo, state, abili
     SetSizeToViewport(win, 100, 200)
     win.SameLine = true
     local passiveInfo = AbilityPassives[abilityName]
-    local passiveTooltip = AddTooltip(win):AddText(passiveInfo.DisplayName):AddSpacing():AddText(passiveInfo.Description)
+    local passiveTooltip = AddTooltip(win):AddFormattedText(SetWhiteText, passiveInfo.DisplayName):AddSpacing():AddText(passiveInfo.Description)
     AddLocaTitle(win, AbilityPassives[abilityName].ShortName)
 
     passiveTooltip:AddSpacing()

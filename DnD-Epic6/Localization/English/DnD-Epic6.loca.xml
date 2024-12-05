@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="h99435baagca21g46a3g945ag47643bc53c30" version="1">You can add one of your Intelligence, Wisdom, or Charisma &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="he952fcd8ga679g416cg8967g1302c33cac77" version="1">You can add your Wisdom &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="hbce79202g327eg45f4g9e06g3b35cc966b24" version="1">You can add your Intelligence &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="hf50a8899g9260g4c1dg8deag5194542a3336" version="1">You can add your Charisma &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
 	<content contentuid="h05cbc2b5ga5bag459fg91a0g22f6c4dd630b" version="1">[1]
 
 [2]</content>

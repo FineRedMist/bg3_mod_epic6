@@ -164,6 +164,27 @@ local function SameLineFormatter(control)
     control.SameLine = true
 end
 
+---Based on what I could sample for colors in the game.
+---@type table<string,number[]>
+local RangeTypeColorMap = {
+    Acid = NormalizedRGBA(239, 246, 10, 1),
+    Bludgeoning = NormalizedRGBA(170, 170, 170, 1),
+    Cold = NormalizedRGBA(63, 153, 185, 1),
+    Fire = NormalizedRGBA(255, 102, 0, 1),
+    Force = NormalizedRGBA(220, 28, 36, 1),
+    Healing = NormalizedRGBA(73, 203, 193, 1),
+    Lightning = NormalizedRGBA(66, 125, 227, 1),
+    Necrotic = NormalizedRGBA(165, 242, 128, 1),
+    Piercing = NormalizedRGBA(170, 170, 170, 1),
+    Poison = NormalizedRGBA(200, 240, 0, 1),
+    Psychic = NormalizedRGBA(239, 172, 223, 1),
+    Radiant = NormalizedRGBA(255, 192, 0, 1),
+    Slashing = NormalizedRGBA(170, 170, 170, 1),
+    Thunder = NormalizedRGBA(125, 96, 165, 1),
+    Weapon = NormalizedRGBA(170, 170, 170, 1),
+    TemporaryHitPoints = NormalizedRGBA(192, 180, 122, 1),
+}
+
 ---Adds an icon for a spell to the given parent. This centralizes logic for spells always added and those that can be selected.
 ---@param parent ExtuiTreeParent The control to add the spell image (button) to.
 ---@param spell SelectSpellInfoUIType The spell to add.
@@ -207,7 +228,19 @@ function AddSpellIcon(parent, spell, playerInfo, isButton)
         builder:AddSpacing()
 
         for _,damage in ipairs(spell.TooltipDamageList) do
-            builder:AddFormattedText(SetWhiteText, builder:RunPreText(damage))
+            local resolved, rangeType = resolver:Resolve(damage)
+            if not rangeType then
+                rangeType = "Other"
+            end
+            ---@type number[]?
+            local color = RangeTypeColorMap[rangeType]
+            if not color then
+                color = WhiteColor
+            end
+            local function SetColor(text)
+                return SetTextColor(text, color)
+            end
+            builder:AddFormattedText(SetColor, resolved)
         end
     end
 
