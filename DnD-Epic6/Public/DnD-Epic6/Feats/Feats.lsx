@@ -15,13 +15,13 @@
           <attribute id="UUID" type="guid" value="623a5c6f-71eb-46be-b253-8bc977faece9"/>
           <attribute id="Requirements" type="LSString" value="CharacterLevelGreaterThan(5)"/>
         </node>
-		    <node id="Feat">
+        <node id="Feat">
           <attribute id="Name" type="FixedString" value="E6_Legendary"/>
           <attribute id="Requirements" type="LSString" value="CharacterLevelGreaterThan(5)"/>
           <attribute id="Selectors" type="LSString" value="SelectPassives(ad216bb8-16d1-4d95-ad5b-272e390e2bd7,1);SelectPassives(3fa0f903-5226-4b12-aae4-622071760cec,1);SelectPassives(e428cd22-1887-49cc-8a9f-e851c666cdb0,1)"/>
           <attribute id="UUID" type="guid" value="0fafb9b3-15f2-45ad-ad22-fd96e7ea8ce5"/>
         </node>
-		    <node id="Feat">
+        <node id="Feat">
           <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
           <attribute id="Name" type="FixedString" value="E6_AvidLearner"/>
           <attribute id="PassivesAdded" type="LSString" value="E6_AvidLearner_Passive"/>
@@ -58,7 +58,7 @@
             <attribute id="Selectors" type="LSString" value="SelectPassives(cb513d6f-7e2e-431e-a1ae-650be154330c,1)"/>
             <attribute id="UUID" type="guid" value="2f89ad28-0f76-49fd-b3cd-6c2828a6446b"/>
         </node>
-    		<node id="Feat">
+        <node id="Feat">
           <attribute id="Name" type="FixedString" value="LightlyArmored"/>
           <attribute id="PassivesAdded" type="LSString" value="LightlyArmored"/>
           <attribute id="Requirements" type="LSString" value="FeatRequirementNonProficiency(&apos;LightArmor&apos;)"/>
