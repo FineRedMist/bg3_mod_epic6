@@ -20,7 +20,7 @@ local function AddFeaturesToCell(parent, playerInfo, feat, extraPassives)
             local icon = centeredCell:AddImage(iconId, DefaultIconSize)
             local builder = AddTooltip(icon)
             builder.preText = { function(text) return playerInfo.Resolver:Resolve(text) end }
-            builder:AddText(displayNameId):AddSpacing():AddLoca(descriptionId, descriptionParams)
+            builder:AddFormattedText(SetWhiteText, displayNameId):AddSpacing():AddLoca(descriptionId, descriptionParams)
             icon.SameLine = true
             avoidDupes[key] = true
         end
