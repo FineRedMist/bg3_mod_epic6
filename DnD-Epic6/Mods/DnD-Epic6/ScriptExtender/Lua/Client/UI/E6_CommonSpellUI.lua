@@ -164,6 +164,7 @@ local function SameLineFormatter(control)
     control.SameLine = true
 end
 
+---Based on what I could sample for colors in the game.
 ---@type table<string,number[]>
 local RangeTypeColorMap = {
     Acid = NormalizedRGBA(239, 246, 10, 1),
@@ -179,7 +180,7 @@ local RangeTypeColorMap = {
     Psychic = NormalizedRGBA(239, 172, 223, 1),
     Radiant = NormalizedRGBA(255, 192, 0, 1),
     Slashing = NormalizedRGBA(170, 170, 170, 1),
-    Thunder = NormalizedRGBA(105, 76, 145, 1),
+    Thunder = NormalizedRGBA(125, 96, 165, 1),
     Weapon = NormalizedRGBA(170, 170, 170, 1),
     TemporaryHitPoints = NormalizedRGBA(192, 180, 122, 1),
 }

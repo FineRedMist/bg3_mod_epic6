@@ -234,9 +234,9 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
     EnableOnAllResourcesAllocated(control, sharedResources)
 end
 
-WhiteColor = NormalizedRGBA(255, 255, 255, 0.76)
-local DunRedColor = NormalizedRGBA(198, 56, 74, 0.76)
-local DunYellowColor = NormalizedRGBA(198, 170, 20, 0.76)
+WhiteColor = NormalizedRGBA(255, 255, 255, 1)
+local DunRedColor = NormalizedRGBA(198, 56, 74, 1)
+local DunYellowColor = NormalizedRGBA(198, 170, 20, 1)
 local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
 local selectedColors = {Border = NormalizedRGBA(255, 215, 0, 0.76), BorderShadow = NormalizedRGBA(192, 159, 106, 0.76)}
 local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
