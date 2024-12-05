@@ -1,3 +1,9 @@
+
+---@class ApplyStatusStateType
+---@field Icon string The icon of the status effect.
+---@field Loca string The localization id of the status effect.
+---@field Params string[] The parameters for the status effect.
+
 ---@class SelectSpellInfoUIType : SelectSpellInfoType
 ---@field IsSelected boolean Whether the spell is enabled.
 ---@field CanSelect boolean Whether the spell can be selected (if you already have it, you can't select it again).
@@ -5,7 +11,14 @@
 ---@field Description string The description of the spell.
 ---@field DescriptionParams string[]? The parameters for the description.
 ---@field Icon string The icon of the spell.
----@field Stat SpellData The spell data for the spell.
+---@field School string The spell school.
+---@field TooltipDamageList string[]? The list of damage effects for the spell to show in the tooltip.
+---@field TooltipAttackSave string? The attack or save for the spell to show in the tooltip.
+---@field TooltipStatusApply ApplyStatusStateType? The status effect applied by the spell to show in the tooltip.
+---@field TooltipOnSave string? The effect of the spell on a successful saving throw to show in the tooltip.
+---@field IsConcentation boolean Whether the spell requires concentration.
+---@field IsRitual boolean Whether the spell can be cast as a ritual.
+---@field Range number? The range of the spell.
 
 ---Checks the player's grant map for either added or selected spells to determine if the spell can be selected.
 ---To be denied granting, the spell must match the resource and ability of the spell grant.
@@ -73,12 +86,67 @@ local function CanSelectSpell(unlockSpell, playerInfo)
     return true
 end
 
+---comment
+---@param spellStat SpellData
+---@param flag SpellFlags
+---@return boolean
+local function HasSpellFlag(spellStat, flag)
+    for _,spellFlag in ipairs(spellStat.SpellFlags) do
+        if spellFlag == flag then
+            return true
+        end
+    end
+    return false
+end
+
+---Parses the apply status and returns formatted data.
+---@param statusApply string? The status to apply in text.
+---@return ApplyStatusStateType? The status effect applied by the spell to show in the tooltip.
+function ParseApplyStatus(statusApply)
+    if not statusApply or string.len(statusApply) == 0 then
+        return nil
+    end
+
+    ---@type string?
+    local icon = nil
+    ---@type number?
+    local duration = nil
+
+    local function GetDuration(inStatus, inAmount, inDuration)
+        local status = Ext.Stats.Get(inStatus, -1, true, true)
+        if not status then
+            return ""
+        end
+        if not status.Icon then
+            return ""
+        end
+        icon = status.Icon
+        duration = tonumber(inDuration)
+        return ""
+    end
+
+    string.gsub(statusApply, "%s*ApplyStatus%s*%(%s*([^, ]+)%s*,%s*([%-%d%.]+)%s*,%s*([%-%d%.]+).*%)%s*", GetDuration)
+
+    if icon == nil or duration == nil then
+        return nil
+    end
+    if duration == -1 then
+        return {Icon = icon, Loca = "h50ea69dagf61eg466fga47eg530c55933114", Params = {}} -- Until Long Rest
+    end
+    if duration > 0 then
+        return {Icon = icon, Loca = "h6e1e86b5g98f8g42c8ga383gf770838ca349", Params = {tostring(duration)}} -- [1] turns
+    end
+    -- Zero duration, not interesting as far as I know.
+    return nil
+end
+
 ---Creates a spell information UI type for a givne spell id in the add spells collection
 ---@param spellCollection SelectSpellBaseType The spell collection information (AddSpellsType or SelectSpellsType)
 ---@param spellId string The id of the spell.
 ---@param playerInfo PlayerInformationType? The player information type to know whether the spell is selectable.
 ---@return SelectSpellInfoUIType? The spell information for the UI
 function SpellInfoFromSpellCollection(spellCollection, spellId, playerInfo)
+    ---@type SpellData
     local spellStat = Ext.Stats.Get(spellId, -1, true, true)
     if not spellStat then
         return nil
@@ -91,8 +159,18 @@ function SpellInfoFromSpellCollection(spellCollection, spellId, playerInfo)
     result.Description = spellStat.Description
     result.DescriptionParams = SplitString(spellStat.DescriptionParams, ";")
     result.Icon = spellStat.Icon
-    result.Stat = spellStat
-    
+    result.School = tostring(spellStat.SpellSchool)
+    result.TooltipDamageList = SplitString(spellStat.TooltipDamageList, ";")
+    result.TooltipAttackSave = spellStat.TooltipAttackSave
+    result.TooltipStatusApply = ParseApplyStatus(spellStat.TooltipStatusApply)
+    result.TooltipOnSave = spellStat.TooltipOnSave
+    result.IsConcentation = HasSpellFlag(spellStat, "IsConcentration")
+    result.IsRitual = spellStat.RitualCosts and string.len(spellStat.RitualCosts) > 0
+    result.Range = spellStat.Range
+    if not result.Range or result.Range == 0 and spellStat.TargetRadius and string.len(spellStat.TargetRadius) then
+        result.Range = tonumber(spellStat.TargetRadius)
+    end
+
     if playerInfo then
         result.IsSelected = false
         result.CanSelect = CanSelectSpell(result, playerInfo)
@@ -126,6 +204,12 @@ local levelSpellSchoolText = {
     Transmutation = 'had85051cg9819g432ag8014gcd586df07944',
 }
 
+---Formatter to put a control on the same line.
+---@param control ExtuiStyledRenderable
+local function SameLineFormatter(control)
+    control.SameLine = true
+end
+
 ---Adds an icon for a spell to the given parent. This centralizes logic for spells always added and those that can be selected.
 ---@param parent ExtuiTreeParent The control to add the spell image (button) to.
 ---@param spell SelectSpellInfoUIType The spell to add.
@@ -146,12 +230,13 @@ function AddSpellIcon(parent, spell, playerInfo, isButton)
         modifier = tostring(GetAbilityModifier(abilityValue.Current))
     end
 
+    -- MeleeMainWeaponRange, RangedMainWeaponRange
     local resolver = ParameterResolver:new(playerInfo, { SpellCastingAbility=modifier, SpellCastingAbilityModifier=modifier })
     local builder = AddTooltip(icon)
     builder.preText = { function(text) return resolver:Resolve(text) end }
     builder:AddFormattedText(SetWhiteText, spell.DisplayName)
 
-    local school = spell.Stat.SpellSchool.Label
+    local school = spell.School
     if school and school ~= "None" then
         local schoolText = nil
         if spell.Level == 0 then
@@ -160,10 +245,53 @@ function AddSpellIcon(parent, spell, playerInfo, isButton)
             schoolText = levelSpellSchoolText[school]
         end
         if schoolText then
-            builder:AddText(schoolText, spell.Level)
+            builder:AddLoca(schoolText, { tostring(spell.Level) })
         end
     end
+
     builder:AddSpacing()
     builder:AddLoca(spell.Description, spell.DescriptionParams)
+
+    if spell.TooltipStatusApply then
+        builder:AddSpacing()
+        builder:AddSpacing()
+        local _, statusImage = builder:AddImage(spell.TooltipStatusApply.Icon, TooltipIconSize)
+        statusImage.SameLine = true
+        builder:AddFormattedLoca(SameLineFormatter, spell.TooltipStatusApply.Loca, spell.TooltipStatusApply.Params)
+    end
+
+    local metaRow = {
+        { spell.Range and spell.Range > 0, function()
+                local _, range = builder:AddImage("E6_Range", TooltipIconSize)
+                range.SameLine = true
+                builder:AddFormattedLoca(SameLineFormatter, "h3798d21bgceccg4e7cg8044g29b0cf015717", { tostring(spell.Range) }) -- [1]m
+            end},
+        { spell.IsConcentation, function()
+                local _, concentration = builder:AddImage("E6_Concentration", TooltipIconSize)
+                concentration.SameLine = true
+                builder:AddFormattedLoca(SameLineFormatter, "h7e8c24aeg8d1ag401ag9feag4fbb7cbde48d") -- Concentration
+            end},
+        { spell.IsRitual, function()
+                local _, ritual = builder:AddImage("E6_Ritual", TooltipIconSize)
+                ritual.SameLine = true
+                builder:AddFormattedLoca(SameLineFormatter, "h5615f8c3gb113g45dagada6gaf1794083c92") -- Ritual
+            end},
+    }
+    local hasMetaInfo = false
+    for _,row in ipairs(metaRow) do
+        if row[1] then
+            hasMetaInfo = true
+        end
+    end
+    if hasMetaInfo then
+        builder:AddSpacing()
+        builder:AddSpacing()
+        for _,row in ipairs(metaRow) do
+            if row[1] then
+                row[2]()
+            end
+        end
+    end
+
     return icon
 end

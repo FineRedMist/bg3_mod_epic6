@@ -165,10 +165,10 @@ end
 ---Creates an image element for the parent ui element.
 ---If the width is set and less than zero, the image is placed with SameLine set to true.
 ---@param imageName string The name of the image.
----@param size integer[] The size the image should be.
+---@param size number[] The size the image should be.
 ---@return TextBuilder The current text builder.
 ---@return ExtuiImage The image element created.
-function TextBuilder:addImage(imageName, size)
+function TextBuilder:AddImage(imageName, size)
     local imageElement = self.parent:AddImage(imageName, size)
     if self:UseParentWrapping() then
         imageElement.SameLine = true
