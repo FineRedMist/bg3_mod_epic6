@@ -68,12 +68,12 @@ function IsPassiveSelectable(playerInfo, passive, passiveStat)
     for _,boost in ipairs(boosts) do
         -- Check ability scores
         local ability, score = ParseAbilityBoost(boost)
-        if ability and score then
+        if ability and score and score.Current > 0 then
             local playerAbility = playerInfo.Abilities[ability]
             if not CanApplyAbilityBoost(playerAbility, score) then
-                AddResultMessage(false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf")) -- This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).
+                AddResultMessage(false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf")) -- This feature boosts an ability that is already at 20 (Legendary doesn't work for this feature).
             else
-                AddResultMessage(true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7")) -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).
+                AddResultMessage(true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7")) -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for this feature).
             end
         end
     
@@ -503,11 +503,11 @@ local function E6_ApplyFeatAbilityConstraints(feat)
                     return false, MissingAbilityLoca(ability)
                 end
                 if not CanApplyAbilityBoost(abilityScore, delta) then
-                    return false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf") -- This feature boosts an ability that is already at 20 (Legendary doesn't work for feature).
+                    return false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf") -- This feature boosts an ability that is already at 20 (Legendary doesn't work for this feature).
                 end
                 totalBoosts = totalBoosts + delta.Current
             end
-            local successMessage = ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7") -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for feature).
+            local successMessage = ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7") -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for this feature).
             if totalBoosts == 0 then
                 successMessage = RequirementsMet
             end

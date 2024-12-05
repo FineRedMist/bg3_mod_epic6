@@ -42,32 +42,35 @@ local viewportWidth = Ext.IMGUI.GetViewportSize()[1]
 local viewportHeight = Ext.IMGUI.GetViewportSize()[2]
 
 ---Scale from 3840 width to the current viewport width.
----@param width integer The source control width to scale.
----@return integer The scaled width to render with.
+---@param width number The source control width to scale.
+---@return number The scaled width to render with.
 function ScaleToViewportWidth(width)
     return (width * viewportWidth) // 3840
 end
 
 ---Scale from 2160 height to the current viewport height.
----@param height integer The source control height to scale.
----@return integer The scaled height to render with.
+---@param height number The source control height to scale.
+---@return number The scaled height to render with.
 function ScaleToViewportHeight(height)
     return (height * viewportHeight) // 2160
 end
 
 ---Scale from 3840x2160 to the current viewport dimensions.
----@param dimensions integer[] The source control dimensions to scale.
----@return integer The scaled dimensions to render with.
+---@param dimensions number[] The source control dimensions to scale.
+---@return number[] The scaled dimensions to render with.
 function ScaleToViewport(dimensions)
     return { ScaleToViewportWidth(dimensions[1]), ScaleToViewportHeight(dimensions[2]) }
 end
 
 ---The default icon size to use for UI elements at 3840x2160.
+---@type number[]
 DefaultIconSize = ScaleToViewport({48, 48})
+---@type number[]
+TooltipIconSize = ScaleToViewport({40, 40})
 
 ---Scale from viewport width to the 3840 width for doing adjustments.
----@param width integer The source control width to scale.
----@return integer The scaled width to computed size.
+---@param width number The source control width to scale.
+---@return number The scaled width to computed size.
 function ScaleFromViewportWidth(width)
     return (width * 3840) // viewportWidth
 end
@@ -81,22 +84,22 @@ end
 
 ---Sets the size of the control to the width and height based on 3840x2160.
 ---@param control ExtuiTable|ExtuiButton|ExtuiChildWindow|ExtuiImageReference|ExtuiProgressBar The control to set the size of.
----@param width integer The width based on 3840x2160.
----@param Height integer The height based on 3840x2160.
+---@param width number The width based on 3840x2160.
+---@param Height number The height based on 3840x2160.
 function SetSizeToViewport(control, width, Height)
     control.Size = { ScaleToViewportWidth(width), ScaleToViewportHeight(Height) }
 end
 
 ---Retrieves the size from the control and scales it to 3840x2160.
 ---@param control ExtuiTable|ExtuiButton|ExtuiChildWindow|ExtuiImageReference|ExtuiProgressBar The control to get the size of.
----@return integer[] The scaled size based on 3840x2160.
+---@return number[] The scaled size based on 3840x2160.
 function GetSizeFromViewport(control)
     return { ScaleFromViewportWidth(control.Size[1]), ScaleFromViewportHeight(control.Size[2]) }
 end
 
 ---Uses a couple of different methods to get the width of the control, which could be based on the Size or ItemWidth.
 ---@param control ExtuiRenderable The control to get the width of.
----@return integer The width of the control based on 3840x2160.
+---@return number The width of the control based on 3840x2160.
 function GetWidthFromViewport(control)
     local success, result = pcall(function()
         if control.Size then
@@ -111,7 +114,7 @@ end
 
 ---Retrieves the size from the control and scales it to 3840x2160.
 ---@param control ExtuiTable|ExtuiButton|ExtuiChildWindow|ExtuiImageReference|ExtuiProgressBar The control to get the size of.
----@return integer The height scaled to 3840x2160.
+---@return number The height scaled to 3840x2160.
 function GetHeightFromViewport(control)
     return ScaleFromViewportHeight(control.Size[2])
 end
@@ -231,27 +234,37 @@ function ConfigureEnableOnAllResourcesAllocated(control, sharedResources)
     EnableOnAllResourcesAllocated(control, sharedResources)
 end
 
-local textRedColor = {Text = NormalizedRGBA(198, 56, 74, 0.76)}
-local textYellowColor = {Text = NormalizedRGBA(198, 170, 20, 0.76)}
+local WhiteColor = NormalizedRGBA(255, 255, 255, 0.76)
+local DunRedColor = NormalizedRGBA(198, 56, 74, 0.76)
+local DunYellowColor = NormalizedRGBA(198, 170, 20, 0.76)
 local checkBoxColors = {Border = NormalizedRGBA(110, 91, 83, 0.76), BorderShadow = NormalizedRGBA(60, 50, 46, 0.76)}
 local selectedColors = {Border = NormalizedRGBA(255, 215, 0, 0.76), BorderShadow = NormalizedRGBA(192, 159, 106, 0.76)}
 local checkBoxBorder = {ChildBorderSize = 1.0, FrameBorderSize = 1.0}
 local checkBoxBorderBland = {ChildBorderSize = 0.0, FrameBorderSize = 0.0}
 
+---Sets the text color of the target object.
+---@param target ExtuiStyledRenderable The object with text to change the color of.
+---@param color table<number> The color to set the text to.
+function SetTextColor(target, color)
+    target:SetColor('Text', color)
+end
+
+---Sets the text color to white for the control.
+---@param target ExtuiStyledRenderable The object with text to make white.
+function SetWhiteText(target)
+    SetTextColor(target, WhiteColor)
+end
+
 ---Sets the text color to red to indicate an error
 ---@param target ExtuiStyledRenderable The object with text to make red.
 function MakeErrorText(target)
-    for k, v in pairs(textRedColor) do
-        target:SetColor(k, v)
-    end
+    SetTextColor(target, DunRedColor)
 end
 
 ---Sets the text color to red to indicate an error
 ---@param target ExtuiStyledRenderable The object with text to make red.
 function MakeWarningText(target)
-    for k, v in pairs(textYellowColor) do
-        target:SetColor(k, v)
-    end
+    SetTextColor(target, DunYellowColor)
 end
 
 ---Adds a border around the target object.
@@ -348,5 +361,4 @@ function AddTooltipMessageDetails(tooltip, messages, tooltipTransform)
     for _, message in ipairs(messages) do
         tooltip:AddText(" - "):AddLoca(message.MessageLoca, message.Args)
     end
-
 end

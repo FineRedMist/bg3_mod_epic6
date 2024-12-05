@@ -1,3 +1,9 @@
+
+---@class ApplyStatusStateType
+---@field Icon string The icon of the status effect.
+---@field Loca string The localization id of the status effect.
+---@field Params string[] The parameters for the status effect.
+
 ---Parses an ability boost into its component ability and amount.
 ---@param boost string The boost string from a passive or feat.
 ---@return string? The name of the ability being boosted if present, nil otherwise.
@@ -37,3 +43,43 @@ function ParseProficiencyBoost(boost)
     return parts[1]
 end
 
+---Parses the apply status and returns formatted data.
+---@param statusApply string? The status to apply in text.
+---@return ApplyStatusStateType? The status effect applied by the spell to show in the tooltip.
+function ParseApplyStatus(statusApply)
+    if not statusApply or string.len(statusApply) == 0 then
+        return nil
+    end
+
+    ---@type string?
+    local icon = nil
+    ---@type number?
+    local duration = nil
+
+    local function GetDuration(inStatus, inAmount, inDuration)
+        local status = Ext.Stats.Get(inStatus, -1, true, true)
+        if not status then
+            return ""
+        end
+        if not status.Icon then
+            return ""
+        end
+        icon = status.Icon
+        duration = tonumber(inDuration)
+        return ""
+    end
+
+    string.gsub(statusApply, "%s*ApplyStatus%s*%(%s*([^, ]+)%s*,%s*([%-%d%.]+)%s*,%s*([%-%d%.]+).*%)%s*", GetDuration)
+
+    if icon == nil or duration == nil then
+        return nil
+    end
+    if duration == -1 then
+        return {Icon = icon, Loca = "h50ea69dagf61eg466fga47eg530c55933114", Params = {}} -- Until Long Rest
+    end
+    if duration > 0 then
+        return {Icon = icon, Loca = "h6e1e86b5g98f8g42c8ga383gf770838ca349", Params = {tostring(duration)}} -- [1] turns
+    end
+    -- Zero duration, not interesting as far as I know.
+    return nil
+end

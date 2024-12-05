@@ -110,6 +110,8 @@
 ---@field XPPerFeat integer The amount of experience required per feat.
 ---@field IsHost boolean Whether the current player is the host of the session.
 ---@field FeatPoints integer How many feat points the player currently has.
+---@field ResolveMap table<string, string> The mapping of strings to resolved strings for the player.
+---@field Resolve function? The function to resolve strings for the player. This is client side only.
 
 -----------------------------------------------------------------------------------------------------------------------
 -- Selected Feat Information
@@ -133,6 +135,7 @@
 ---@class ExtraPassiveType The extra passive information to track on the client for UI
 ---@field DisplayName string The display name of the passive.
 ---@field Description string The description of the passive.
+---@field DescriptionParams string[]? The description parameters of the passive.
 ---@field Icon string The icon of the passive.
 ---@field Boosts? string[] The boosts to apply as part of the extra passive.
 

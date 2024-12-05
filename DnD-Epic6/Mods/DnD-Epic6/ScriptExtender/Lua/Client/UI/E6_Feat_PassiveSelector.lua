@@ -50,9 +50,8 @@ local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveInd
             end
         end)
     end
-    local resolver = ParameterResolver:new(playerInfo)
     local tooltip = AddTooltip(checkBoxControl)
-    tooltip.preText = { function(text) return resolver:Resolve(text) end }
+    tooltip.preText = { playerInfo.Resolve }
     tooltip:AddLoca(passive.Description, passive.DescriptionParams)
 
     local transform = MakeErrorText
@@ -116,9 +115,8 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
 
     iconControl.SameLine = true
 
-    local resolver = ParameterResolver:new(playerInfo)
     local tooltip = AddTooltip(iconControl)
-    tooltip.preText = { function(text) return resolver:Resolve(text) end }
+    tooltip.preText = { playerInfo.Resolve }
     tooltip:AddText(passive.DisplayName):AddSpacing():AddLoca(passive.Description, passive.DescriptionParams)
 
     local transform = MakeErrorText

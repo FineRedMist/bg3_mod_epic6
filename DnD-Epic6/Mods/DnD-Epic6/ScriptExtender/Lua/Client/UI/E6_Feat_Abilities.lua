@@ -41,7 +41,13 @@ function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
                 local abilityName = ability.Name
                 table.insert(extraPassives, {
                     DisplayName = AbilityPassives[abilityName].DisplayName,
-                    Description = AbilityPassives[abilityName].Description,
+                    Description = "h05cbc2b5ga5bag459fg91a0g22f6c4dd630b", -- [1]\n[2]
+                    DescriptionParams = {
+                        AbilityPassives[abilityName].Description,
+                        "hddb8e266g3b9dg4d9cgb132gcc4d933e234a", -- [3] [4]
+                        "+" .. tostring(pointCount),
+                        AbilityPassives[abilityName].DisplayName
+                    },
                     Icon = AbilityPassives[abilityName].Icon,
                     Boosts = { GetAbilityBoostPassive(abilityName, pointCount) },
                 })

@@ -20,6 +20,22 @@ function ParameterResolver:new(playerInfo, replacementMap)
     return res
 end
 
+---Creates an updated instance of the parameter resolver with additional replacment map settings
+---@param prevResolver ParameterResolver The player information to resolve parameters for.
+---@param replacementMap table<string, string>? The map of replacements to use.
+---@return ParameterResolver The new instance of the parameter resolver.
+function ParameterResolver:update(prevResolver, replacementMap)
+    local res = setmetatable({}, self)
+    res.playerInfo = prevResolver.playerInfo
+    res.replacementMap = DeepCopy(prevResolver.replacementMap)
+    if replacementMap then
+        for key,value in pairs(replacementMap) do
+            res.replacementMap[key] = value
+        end
+    end
+    return res
+end
+
 ---Performs a triple check to replace the text with the given search and replace values.
 ---@param text string The text to search and replace.
 ---@param search string The text to search for.
