@@ -13,15 +13,19 @@ local FeatUIPosition = {1000, 100}
 local FeatUIDetailsDimensions = {1000, 1450}
 local FeatUIDetailsPosition = {1600, 100}
 
+---Close feat detail UI and set focus on the feat UI.
 local function E6_CloseFeatDetailsUI()
-    if featDetailUI then
+    if featDetailUI and featDetailUI.Open then
         featDetailUI.Open = false
+        if not featUIClosed then
+            featUI:SetFocus()
+        end
     end
 end
 
 ---Closes the UI
 function E6_CloseUI()
-    if featUI then
+    if featUI and not featUIClosed then
         -- Instead of actually closing the window, we are going to empty it and move it elsewhere.
         -- This way it is around to for interactions, but uninteractible.
         ClearChildren(featUI)
@@ -55,8 +59,6 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     featDetailUI.NoResize = true
     featDetailUI.NoCollapse = true
     featDetailUI.Open = true
-
-    featDetailUI:SetFocus()
 
     ClearChildren(featDetailUI)
 
@@ -190,6 +192,8 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
     end
 
     ConfigureEnableOnAllResourcesAllocated(select, sharedResources)
+
+    featDetailUI:SetFocus()
 end
 
 ---Creates a button in the feat selection window for the feat.
@@ -414,6 +418,8 @@ local function ConfigureFeatSelectorUI(windowDimensions)
     featUI.NoMove = true
     featUI.NoResize = true
     featUI.NoCollapse = true
+    featUI.Open = true
+    featUIClosed = false
     featUI:SetSize(ScaleToViewport(windowDimensions))
     featUI:SetPos(ScaleToViewport(FeatUIPosition))
 
@@ -464,8 +470,6 @@ function E6_FeatSelectorUI(playerInfo)
 
     SetWindowTitle(playerInfo)
 
-    win.Open = true
-    featUIClosed = false
     featPlayerUI = playerInfo.UUID
     win:SetFocus()
 
@@ -524,12 +528,65 @@ local function E6_OnTick_UpdateFeatUI(tickParams)
     end
 end
 
+local function E6_OnCloseWindow()
+    if featDetailUI and featDetailUI.Open then
+        E6_CloseFeatDetailsUI()
+    else
+        E6_CloseUI()
+    end
+end
+
+---Captures the controller axis events and attempts to supress them while the UI is up.
+---@param e EclLuaControllerButtonEvent
+local function E6_OnControllerAxis(e)
+    if not featUIClosed then
+        e:PreventAction()
+        e:StopPropagation()
+    end
+    return 0
+end
+
+---Captures the controller button event to close the UI on 'Y' (first feat details, then the feat list)
+---@param e EclLuaControllerButtonEvent
+local function E6_OnControllerButton(e)
+    local wasOpen = not featUIClosed
+    if e.Event == "KeyDown" and e.Button == "Y" then
+        E6_OnCloseWindow()
+    end
+
+    if wasOpen then
+        e:PreventAction()
+        e:StopPropagation()
+    end
+    return 0
+end
+
+---Captures the keyboard event looking for escape while the UI is up to close the windows.
+---@param e EclLuaKeyInputEvent
+local function E6_OnKey(e)
+    local wasOpen = not featUIClosed
+    if e.Event == "KeyDown" and e.Key == "ESCAPE" then
+        E6_OnCloseWindow()
+    end
+
+    if wasOpen then
+        e:PreventAction()
+        e:StopPropagation()
+    end
+    return 0
+end
+
 -- Ensure the UI is closed when the game mode changes out of Running.
 Ext.Events.GameStateChanged:Subscribe(E6_ManageUI)
 
 -- Checking every tick seems less than optimal, but I'm not sure where I can hook for
 -- when the selected character changes.
 Ext.Events.Tick:Subscribe(E6_OnTick_UpdateFeatUI)
+
+---Subscribe to events for controller buttons so we can close the windows on 'Y'
+Ext.Events.ControllerButtonInput:Subscribe(E6_OnControllerButton)
+--Ext.Events.ControllerAxisInput:Subscribe(E6_OnControllerAxis) Can't suppress the axis events while the UI is up :(
+Ext.Events.KeyInput:Subscribe(E6_OnKey)
 
 featUI = ConfigureFeatSelectorUI({1, 1})
 E6_CloseUI()
