@@ -5,6 +5,9 @@
 ParameterResolver = {}
 ParameterResolver.__index = ParameterResolver
 
+---Whether to trace resolving the values for debugging purposes.
+local traceResolve = false
+
 ---Creates a new instance of the parameter resolver
 ---@param playerInfo PlayerInformationType The player information to resolve parameters for.
 ---@param replacementMap table<string, string>? The map of replacements to use.
@@ -43,6 +46,7 @@ end
 ---@param includeBase boolean? Whether to include the base search or not.
 ---@return string The text with the replacements.
 local function TripleCheck(text, search, replace, includeBase)
+    local oldText = text
     if includeBase == nil then
         includeBase = true
     end
@@ -50,6 +54,9 @@ local function TripleCheck(text, search, replace, includeBase)
         if includeBase or string.len(prefix) ~= 0 then
             text = string.gsub(text, prefix .. search, replace)
         end
+    end
+    if traceResolve and oldText ~= text then
+        _E6P("TripleCheck: " .. oldText .. " -> " .. text)
     end
     return text
 end
@@ -90,6 +97,9 @@ local function GetLevelMapValue(key)
     end
     local value = levelMapValueCache[key]
     if value then
+        if traceResolve then
+            _E6P("GetLevelMapValue: " .. key .. " -> " .. value)
+        end
         return value
     end
     _E6Error("GetLevelMapValue: " .. key .. " not found!")
@@ -111,6 +121,9 @@ end
 local function GetClassLevel(playerInfo, className)
     local level = playerInfo.PlayerLevels[className]
     if level then
+        if traceResolve then
+            _E6P("GetClassLevel: " .. className .. " -> " .. tostring(level))
+        end
         return level
     end
     return 0
@@ -133,6 +146,8 @@ local function GetDiceHighest(count, sides)
 end
 
 local function CleanSigns(formula)
+    local oldFormula = formula
+
     formula = string.gsub(formula, "%+%s*%-", "-") -- replace + - with just -
     formula = string.gsub(formula, "%+%s*%+", "+") -- replace + + with just +
     formula = string.gsub(formula, "%-%s*%+", "-") -- replace - + with just -
@@ -140,6 +155,9 @@ local function CleanSigns(formula)
 
     formula = Trim(formula)
 
+    if traceResolve and oldFormula ~= formula then
+        _E6P("CleanSigns: " .. oldFormula .. " -> " .. formula)
+    end
     return formula
 end
 
@@ -150,13 +168,21 @@ end
 ---@param collapse function? Post cleanup function
 ---@return string The reduced formula
 local function ResolveStep(formula, search, replFunc, collapse)
+    local oldFormula = formula
+
     local last = formula
     repeat
         last = formula
         formula = CleanSigns(formula)
         formula = string.gsub(formula, search, replFunc)
+        formula = CleanSigns(formula)
         formula = Trim(formula)
     until formula == last
+
+    if traceResolve and oldFormula ~= formula then
+        _E6P("ResolveStep: " .. oldFormula .. " -> " .. formula)
+    end
+
     return formula
 end
 
@@ -210,6 +236,10 @@ local function GetValue(originalFormula)
     if string.find(formula, "[^%-%d%.]") then
         return nil
     end
+
+    if traceResolve and originalFormula ~= formula then
+        _E6P("GetValue: " .. originalFormula .. " -> " .. formula)
+    end
     return tonumber(formula)
 end
 
@@ -218,6 +248,7 @@ end
 ---@return string The low range of the formula
 ---@return string? The high range of the formula, or nil if it couldn't be computed.
 local function GetFormulaRange(formula)
+
     local lowText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceLowest)
     local highText = string.gsub(formula, "(%d+)[Dd](%d+)", GetDiceHighest)
 
@@ -226,14 +257,23 @@ local function GetFormulaRange(formula)
 
     -- Couldn't figure it out, return the string
     if low == nil or high == nil then
+        if traceResolve then
+            _E6P("GetValue: " .. formula .. " -> " .. formula .. ", nil")
+        end
         return formula, nil
     end
 
     if low == high then
+        if traceResolve then
+            _E6P("GetValue: " .. formula .. " -> " .. tostring(low) .. ", nil")
+        end
         return tostring(low), nil
     end
 
-    return tostring(low), tostring(high)
+    if traceResolve then
+        _E6P("GetValue: " .. formula .. " -> " .. tostring(low) .. ", " .. tostring(high))
+    end
+return tostring(low), tostring(high)
 end
 
 ---@class RollTermType
@@ -245,6 +285,10 @@ end
 ---@param formula string The formula to collect terms for.
 ---@return string The result with consolidated terms.
 local function ConsolidateTerms(formula)
+    formula = CleanSigns(formula)
+
+    local oldFormula = formula
+
     -- split the formula at + and - signs, then identify dice and constants, then merge terms.
     local terms = SplitString(formula, "+-", true)
 
@@ -265,6 +309,9 @@ local function ConsolidateTerms(formula)
                 roll = {IsPositive = isPositive, DiceCount = tonumber(diceCount), DiceSides = tonumber(diceSides)}
             else
                 roll = {IsPositive = isPositive, DiceCount = tonumber(term), DiceSides = 0}
+            end
+            if not roll.DiceCount then
+                _E6Error("Invalid dice count for: '" .. term .. "' in forumula: " .. formula)
             end
             diceSides = roll.DiceSides
             local collection = collector[diceSides]
@@ -308,6 +355,9 @@ local function ConsolidateTerms(formula)
         if diceCount ~= 0 and sides > 0 then
             result = result .. "d" .. tostring(sides)
         end
+    end
+    if traceResolve and oldFormula ~= result then
+        _E6P("GetValue: " .. oldFormula .. " -> " .. result)
     end
     return result
 end
@@ -494,7 +544,8 @@ function ParameterResolver:Resolve(text)
         result, rangeType = self:RunReplacements(self.playerInfo, text)
     end)
     if not success then
-        _E6Error("Error resolving: " .. text .. " -> " .. result)
+        _E6Error("Error resolving: " .. text .. " -> " .. tostring(result))
+        result, rangeType = self:RunReplacements(self.playerInfo, text)
         return text
     end
     return result, rangeType

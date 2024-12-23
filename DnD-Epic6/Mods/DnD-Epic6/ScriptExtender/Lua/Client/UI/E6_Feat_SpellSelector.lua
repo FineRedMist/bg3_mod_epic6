@@ -84,12 +84,26 @@ local function AddSpellSelector(parent, id, selectSpells, playerInfo, selectedSp
     local spellsPerRow = ComputeIconsPerRow(spellCount)
     local spellsInRow = 0
     for _,unlockSpell in ipairs(selectedSpells) do
-        AddSpellButton(centeredCell, playerInfo, sharedResource, unlockSpell)
-        spellsInRow = spellsInRow + 1
-        if spellsInRow >= spellsPerRow then
-            rowNumber = rowNumber + 1
-            centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_" .. tostring(rowNumber), GetWidthFromViewport(parent) - 60)
-            spellsInRow = 0
+        unlockSpell.DescriptionText = Ext.Loca.GetTranslatedString(unlockSpell.Description)
+        if unlockSpell.DescriptionParams then
+            unlockSpell.DescriptionParamsText = {}
+            for i,v in ipairs(unlockSpell.DescriptionParams) do
+                unlockSpell.DescriptionParamsText[i] = Ext.Loca.GetTranslatedString(v)
+            end
+        end
+        local function PositionNewSpellButton()
+            AddSpellButton(centeredCell, playerInfo, sharedResource, unlockSpell)
+            spellsInRow = spellsInRow + 1
+            if spellsInRow >= spellsPerRow then
+                rowNumber = rowNumber + 1
+                centeredCell = CreateCenteredControlCell(parent, "SelectSpells_" .. id .. "_Row_" .. tostring(rowNumber), GetWidthFromViewport(parent) - 60)
+                spellsInRow = 0
+            end
+        end
+        local spellAdded = pcall(PositionNewSpellButton)
+        if not spellAdded then
+            _E6Error("Failed to add spell to selector: " .. Ext.Json.Stringify(unlockSpell))
+            PositionNewSpellButton()
         end
     end
     
