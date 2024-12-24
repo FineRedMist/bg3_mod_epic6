@@ -186,6 +186,8 @@ local function ResolveStep(formula, search, replFunc, collapse)
     return formula
 end
 
+local MaxRegex = "max%s*%(%s*([%d%+%-%*/%. ]+)%s*,%s*([%d%+%-%*/%. ]+)%s*%)"
+
 ---Computes the given formula. Note: 'load' isn't an options, so we have to do it manually.
 ---@param originalFormula string The formula to compute.
 ---@return number? The computed value or nil if it couldn't be computed.
@@ -208,7 +210,7 @@ local function GetValue(originalFormula)
     end
 
     -- Resolve max first
-    formula = ResolveStep(formula, "max%s*%(%s*([%d%+%-%*/%. ]+)%s*,%s*([%d%+%-%*/%. ]+)%s*%)", function(aText, bText)
+    formula = ResolveStep(formula, MaxRegex, function(aText, bText)
             return ComputeWrapper(aText, bText, math.max)
         end)
 
@@ -302,6 +304,14 @@ local function ConsolidateTerms(formula)
         elseif term == "-" then
             isPositive = false
         else
+            term = ResolveStep(term, MaxRegex, function(aText, bText)
+                local a = tonumber(aText)
+                local b = tonumber(bText)
+                if a == nil or b == nil then
+                    return "nil"
+                end
+                return tostring(math.max(a, b))
+            end)
             local diceCount, diceSides = string.match(term, "(%d+)[Dd](%d+)")
             ---@type RollTermType?
             local roll = nil
@@ -311,7 +321,7 @@ local function ConsolidateTerms(formula)
                 roll = {IsPositive = isPositive, DiceCount = tonumber(term), DiceSides = 0}
             end
             if not roll.DiceCount then
-                _E6Error("Invalid dice count for: '" .. term .. "' in forumula: " .. formula)
+                _E6Error("Invalid dice count for: '" .. term .. "' in formula: " .. formula)
             end
             diceSides = roll.DiceSides
             local collection = collector[diceSides]
