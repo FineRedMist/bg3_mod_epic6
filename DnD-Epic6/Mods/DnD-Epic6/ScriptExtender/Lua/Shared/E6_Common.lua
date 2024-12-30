@@ -384,6 +384,80 @@ function GetEpicFeatXP()
     return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXP
 end
 
+---Retrieves the amount of experience required for the character to earn a feat.
+---@return number
+function GetEpicFeatXPIncrease()
+    local setting = Ext.Vars.GetModVariables(ModuleUUID).E6_XPPerFeatIncrease
+    if type(setting) == "number" and setting >= 0 and setting <= 5000 then
+        return setting
+    end
+    return Ext.Stats.GetStatsManager().ExtraData.Epic6FeatXPIncrease
+end
+
+---Determines the number of feats the character should have with the given amount of experience.
+---Factored out for testing.
+---@param xp number The amount of experience.
+---@param epic6FeatXP number Amount of experience required per feat. 
+---@param epic6FeatXPIncrease number Amount the experience required per feat changes.
+---@return integer The number of feats the character can earn with the given experience.
+function GetFeatCountForXPBase(xp, epic6FeatXP, epic6FeatXPIncrease)
+    if xp < epic6FeatXP then
+        return 0
+    end
+
+    if epic6FeatXPIncrease == 0 then
+        return math.floor(xp / epic6FeatXP)
+    end
+    
+    -- Each feat costs more than the last, by epic6FeatXPIncrease, so it looks like:
+    --  epic6FeatXP for the first one
+    --  epic6FeatXP + epic6FeatXPIncrease for the second one
+    --  epic6FeatXP + 2 * epic6FeatXPIncrease for the third one
+    --  etc
+    -- The formula then is n * epic6FeatXP + (n-1) * n / 2 * epic6FeatXPIncrease <= xp
+    -- This simplifies to n^2 * epic6FeatXPIncrease + n * (2 * epic6FeatXP - epic6FeatXPIncrease) <= 2 * xp
+    -- Reducing to a quadratic formula, we get:
+    -- n = (-b +/- sqrt(b^2 - 4ac)) / 2a
+    -- where a = epic6FeatXPIncrease
+    --       b = 2 * epic6FeatXP - epic6FeatXPIncrease
+    --       c = -2 * xp
+    local a = epic6FeatXPIncrease
+    local b = 2 * epic6FeatXP - epic6FeatXPIncrease
+    local c = -2 * xp
+    local n = math.floor((-b + math.sqrt(b * b - 4 * a * c)) / (2 * a)) -- We only care about the positive root
+    return n
+end
+
+---Determines the experience required to earn the next feat, based on the current experience.
+---@param xp number The amount of experience.
+---@param epic6FeatXP number Amount of experience required per feat. 
+---@param epic6FeatXPIncrease number Amount the experience required per feat changes.
+---@return number The amount of experience required to get the next feat point.
+function GetXPForNextFeatBase(xp, epic6FeatXP, epic6FeatXPIncrease)
+    local featCount = GetFeatCountForXPBase(xp, epic6FeatXP, epic6FeatXPIncrease) + 1
+    local nextFeatXP = featCount * epic6FeatXP + (featCount - 1) * featCount * epic6FeatXPIncrease / 2
+    return nextFeatXP - xp
+end
+
+---Determines the number of feats the character should have with the given amount of experience.
+---@param xp number The amount of experience (after level 6) the player has.
+---@return number The number of feats the character can earn with the given experience.
+function GetFeatCountForXP(xp)
+    local epic6FeatXP = GetEpicFeatXP()
+    local epic6FeatXPIncrease = GetEpicFeatXPIncrease()
+
+    return GetFeatCountForXPBase(xp, epic6FeatXP, epic6FeatXPIncrease)
+end
+
+---Determines how much experience is required for the next feat point based on the current experience.
+---@param xp number The amount of experience (after level 6) the player has.
+---@return number The amount of experience required to get the next feat point.
+function GetXPForNextFeat(xp)
+    local epic6FeatXP = GetEpicFeatXP()
+    local epic6FeatXPIncrease = GetEpicFeatXPIncrease()
+    return GetXPForNextFeatBase(xp, epic6FeatXP, epic6FeatXPIncrease)
+end
+
 ---Returns the maximum of a and b if they are numbers. If nil, either returns the other.
 ---@param a number?
 ---@param b number?

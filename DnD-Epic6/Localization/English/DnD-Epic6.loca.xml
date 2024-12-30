@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
+	<content contentuid="h8696ea66g34feg41f9gb02fg341ebae2b08e" version="1">XP</content>
+	<content contentuid="h70ae1e71ga8edg4563gb8e2g7e6b7d818f51" version="1">Delta</content>
+	<content contentuid="h501f5bc3g191bg4051g8dccgb2e004ae69a6" version="1">How much to increase the XP required to earn a feat (not saved until Save is clicked).</content>
 	<content contentuid="h99435baagca21g46a3g945ag47643bc53c30" version="1">You can add one of your Intelligence, Wisdom, or Charisma &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
 	<content contentuid="he952fcd8ga679g416cg8967g1302c33cac77" version="1">You can add your Wisdom &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
 	<content contentuid="hbce79202g327eg45f4g9e06g3b35cc966b24" version="1">You can add your Intelligence &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>

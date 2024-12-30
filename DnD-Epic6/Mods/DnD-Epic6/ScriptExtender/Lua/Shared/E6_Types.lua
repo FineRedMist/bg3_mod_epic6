@@ -108,6 +108,7 @@
 ---@field ProficiencyBonus integer The proficiency bonus for the player.
 ---@field Spells SelectedSpellsType The selected spells for the player.
 ---@field XPPerFeat integer The amount of experience required per feat.
+---@field XPPerFeatIncrease integer The amount to increase their experience required per feat. 
 ---@field IsHost boolean Whether the current player is the host of the session.
 ---@field FeatPoints integer How many feat points the player currently has.
 ---@field ResolveMap table<string, string> The mapping of strings to resolved strings for the player.
@@ -146,3 +147,4 @@
 ---@class SetXPPerFeatPayloadType The payload for setting the XP per feat.
 ---@field PlayerId string The player id for the feat.
 ---@field XPPerFeat integer The XP per feat to set.
+---@field XPPerFeatIncrease integer The XP per feat to set.

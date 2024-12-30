@@ -802,6 +802,7 @@ local function GetExtendedPlayerInfo(ent, uuid, charname, isHost, featPoints)
         Spells = spells, -- The mapping of class to spell list.
         ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
         XPPerFeat = GetEpicFeatXP(),
+        XPPerFeatIncrease = GetEpicFeatXPIncrease(),
         IsHost = isHost,
         FeatPoints = featPoints,
         ResolveMap = GatherResolverStringMap(uuid, abilityScores)
@@ -839,6 +840,7 @@ function OnEpic6FeatSelectorSpell(caster)
             UUID = uuid,
             Name = charname,
             PlayerFeats = {},
+            PlayerLevels = {},
             PlayerPassives = {},
             SelectableFeats = {},
             FilteredFeats = {},
@@ -847,6 +849,7 @@ function OnEpic6FeatSelectorSpell(caster)
             Spells = {Added={}, Selected={}}, -- The mapping of class to spell list.
             ProficiencyBonus = ent.Stats.ProficiencyBonus, -- to show skill bonuses
             XPPerFeat = GetEpicFeatXP(),
+            XPPerFeatIncrease = GetEpicFeatXPIncrease(),
             IsHost = isHost,
             FeatPoints = featPoints,
             ResolveMap = {}

@@ -346,9 +346,8 @@ function FeatPointTracker:Update(ent)
         xpToNextLevel = ent.Experience.CurrentLevelExperience
     end
 
-    local epic6FeatXP = GetEpicFeatXP()
     -- Number of feats and feat points we should have.
-    local totalFeatCount = math.floor(xpToNextLevel/epic6FeatXP)
+    local totalFeatCount = GetFeatCountForXP(xpToNextLevel)
 
     -- Number of feat points used in feats.
     local usedFeatCount = E6_GetUsedFeatCount(ent)

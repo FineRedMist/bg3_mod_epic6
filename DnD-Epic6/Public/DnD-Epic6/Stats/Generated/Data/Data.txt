@@ -1,3 +1,4 @@
 key "MaximumXPCap","4000000"
 
-key "Epic6FeatXP","8000"
+key "Epic6FeatXP","5000"
+key "Epic6FeatXPIncrease","1000"

@@ -318,6 +318,98 @@ local function AddRunTestButton(win, windowDimensions, playerInfo)
     end
 end
 
+---Creates a slider that clamps the value and increments in 100's
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param sliderName string The name of the slider
+---@param sliderValue number The initial value of the slider.
+---@param minValue number The minimum value for the slider
+---@param maxValue number The maximum value for the slider
+---@param tooltipText string The loc text for the tooltip
+---@return ExtuiSliderInt The slider created.
+local function AddSlider(win, width, sliderName, sliderValue, minValue, maxValue, tooltipText)
+    local slider = win:AddSliderInt(sliderName, sliderValue, minValue, maxValue)
+    slider.ItemWidth = width
+    AddTooltip(slider):AddText(tooltipText)
+    slider.AlwaysClamp = true
+    slider.OnChange = function()
+        local rounded = 100 * math.floor(slider.Value[1]/100 + 0.5)
+        slider.Value = {rounded, rounded, rounded, rounded}
+    end
+
+    return slider
+end
+
+---Adds the XP & XP Delta sliders
+---@param cell ExtuiTreeParent
+---@param playerInfo PlayerInformationType
+---@return ExtuiSliderInt
+---@return ExtuiSliderInt
+local function AddSliders(cell, playerInfo, sliderTableWidth)
+    local table = cell:AddTable("Settings_XP_Sliders", 2)
+    table.ItemWidth = sliderTableWidth
+    table:AddColumn("XPSliders_Column_Name", Ext.Enums.GuiTableColumnFlags.WidthFixed)
+    table:AddColumn("XPTable_Column_Slider", Ext.Enums.GuiTableColumnFlags.WidthStretched)
+
+    local sliderWidth = math.floor(3 * sliderTableWidth / 4)
+    local xpRow = table:AddRow()
+    xpRow:AddCell():AddText(Ext.Loca.GetTranslatedString("h8696ea66g34feg41f9gb02fg341ebae2b08e"))
+    local xpSlider = AddSlider(xpRow:AddCell(), sliderWidth, "", playerInfo.XPPerFeat, 100, 20000, "hcbbf8d49g36fbg496bga9beg275c367f94c0") -- The amount of experience required to earn a feat. The change is not committed until Save is clicked.
+
+    local xpDeltaRow = table:AddRow()
+    xpDeltaRow:AddCell():AddText(Ext.Loca.GetTranslatedString("h70ae1e71ga8edg4563gb8e2g7e6b7d818f51"))
+    local xpDeltaSlider = AddSlider(xpDeltaRow:AddCell(), sliderWidth, "", playerInfo.XPPerFeatIncrease, 0, 5000, "h501f5bc3g191bg4051g8dccgb2e004ae69a6") -- How much to increase the XP required to earn a feat, per feat(not saved until Save is clicked).
+
+    return xpSlider, xpDeltaSlider
+end
+
+---Adds the save button for the sliders.
+---@param cell ExtuiTreeParent
+---@param playerInfo PlayerInformationType The player information.
+---@param xpSlider ExtuiSliderInt
+---@param xpDeltaSlider ExtuiSliderInt
+---@return ExtuiButton
+local function AddSaveSettingsButton(cell, playerInfo, xpSlider, xpDeltaSlider)
+    local saveSlider = cell:AddButton(Ext.Loca.GetTranslatedString("h21681079gab67g4ea5ga4dfg88f40d38818a")) -- Save
+    AddTooltip(saveSlider):AddText("hf2b3a061gbf90g48cbg8defg30ec6aef6159")
+    saveSlider.SameLine = true
+    saveSlider.OnClick = function()
+        local payload = {
+            PlayerId = playerInfo.UUID,
+            XPPerFeat = xpSlider.Value[1],
+            XPPerFeatIncrease = xpDeltaSlider.Value[1]
+        }
+        local payloadStr = Ext.Json.Stringify(payload)
+        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
+
+        E6_CloseUI()
+    end
+    return saveSlider
+end
+
+---Adds slider configuration settings to the settings drop down.
+---@param win ExtuiTreeParent The parent to add the button to.
+---@param windowDimensions integer[] The dimensions of the window.
+---@param playerInfo PlayerInformationType The player information.
+local function AddSliderSettings(win, windowDimensions, playerInfo)
+    local xpTable = win:AddTable("XPTable", 2)
+    xpTable.ItemWidth = ScaleToViewportWidth(windowDimensions[1] - 30)
+    
+    xpTable:AddColumn("XPTable_Column_Sliders", Ext.Enums.GuiTableColumnFlags.WidthStretch)
+    xpTable:AddColumn("XPTable_Column_Save", Ext.Enums.GuiTableColumnFlags.WidthFixed)
+
+    local xpRow = xpTable:AddRow()
+
+    local xpSlider, xpDeltaSlider = AddSliders(xpRow:AddCell(), playerInfo, math.floor(4 * xpTable.ItemWidth / 5))
+    local xpSave = AddSaveSettingsButton(xpRow:AddCell(), playerInfo, xpSlider, xpDeltaSlider)
+
+    -- Only the host can modify the amount of XP per feat.
+    if not playerInfo.IsHost then
+        UI_Disable(xpSlider)
+        UI_Disable(xpDeltaSlider)
+        UI_Disable(xpSave)
+    end
+end
+
 ---Adds configuration settings under a collapsible header.
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param windowDimensions integer[] The dimensions of the window.
@@ -332,37 +424,7 @@ local function AddSettings(win, windowDimensions, playerInfo)
     settings.DefaultOpen = #playerInfo.SelectableFeats == 0
     settings.SpanFullWidth = true
 
-    local slider = settings:AddSliderInt("", playerInfo.XPPerFeat, 100, 20000)
-    AddTooltip(slider):AddText("hcbbf8d49g36fbg496bga9beg275c367f94c0")
-    slider.AlwaysClamp = true
-    slider.OnChange = function()
-        local rounded = 100 * math.floor(slider.Value[1]/100 + 0.5)
-        slider.Value = {rounded, rounded, rounded, rounded}
-    end
-
-    local saveSlider = settings:AddButton(Ext.Loca.GetTranslatedString("h21681079gab67g4ea5ga4dfg88f40d38818a")) -- Save
-    AddTooltip(saveSlider):AddText("hf2b3a061gbf90g48cbg8defg30ec6aef6159")
-    saveSlider.SameLine = true
-    saveSlider.OnClick = function()
-        local payload = {
-            PlayerId = playerInfo.UUID,
-            XPPerFeat = slider.Value[1]
-        }
-        local payloadStr = Ext.Json.Stringify(payload)
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT, payloadStr)
-
-        -- If the slider value increases more than the XPPerFeat, the player may end up without having enough
-        -- XP for the next feat, so we should close if there are feats to select, just in case.
-        if #playerInfo.SelectableFeats > 0 and slider.Value[1] > playerInfo.XPPerFeat then
-            E6_CloseUI()
-        end
-    end
-
-    -- Only the host can modify the amount of XP per feat.
-    if not playerInfo.IsHost then
-        UI_Disable(slider)
-        UI_Disable(saveSlider)
-    end
+    AddSliderSettings(settings, windowDimensions, playerInfo)
 
     win:AddSpacing()
     win:AddSpacing()
@@ -439,13 +501,13 @@ local function AddExpInfo(win, windowDimensions, playerInfo)
     local progressText = nil
     if ent.EocLevel.Level >= 6 then
         local xpToNextLevel = ent.Experience.CurrentLevelExperience
-        local remainingExp = playerInfo.XPPerFeat - math.fmod(xpToNextLevel, playerInfo.XPPerFeat)
-        progressText = GetParameterizedLoca("hbd475c8ega2dcg4491ga9a9gabbe7a9c8216", {string.format("%.0f", remainingExp)}) -- Level 6: [1] XP
+        local remainingExp = GetXPForNextFeatBase(xpToNextLevel, playerInfo.XPPerFeat, playerInfo.XPPerFeatIncrease)
+        progressText = GetParameterizedLoca("hbd475c8ega2dcg4491ga9a9gabbe7a9c8216", {string.format("%.0f", remainingExp)}) -- Next feat: [1] XP
     else
         if xpDiff < 0 then
             xpDiff = 0
         end
-        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {string.format("%.0f", xpDiff)}) -- Next feat: [1] XP
+        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {string.format("%.0f", xpDiff)}) -- Level 6: [1] XP
     end
 
     centerCell:AddText(progressText)

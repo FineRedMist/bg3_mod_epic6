@@ -80,7 +80,11 @@ function NetServerHandlers.SetXPPerFeat(_, payload, peerId)
     ---@type SetXPPerFeatPayloadType
     local message = Ext.Json.Parse(payload)
     local entity = Ext.Entity.Get(message.PlayerId)
-    if entity ~= nil and type(message.XPPerFeat) == "number" then
+    if entity == nil then
+        _E6Error("Failed to get the entity for the id:" .. message.PlayerId)
+        return
+    end
+    if type(message.XPPerFeat) == "number" then
         _E6P("Setting XP Per Feat to: " .. tostring(message.XPPerFeat))
         Ext.Vars.GetModVariables(ModuleUUID).E6_XPPerFeat = message.XPPerFeat
         -- We don't want to accumulate the greant feat point and remove feat point statuses ad nauseum.
@@ -89,6 +93,16 @@ function NetServerHandlers.SetXPPerFeat(_, payload, peerId)
     else
         _E6Error("Failed to set XP Per Feat. Got the value: '" .. tostring(message.XPPerFeat) .. "'")
     end
+    if type(message.XPPerFeatIncrease) == "number" then
+        _E6P("Setting XP Per Feat Increase to: " .. tostring(message.XPPerFeatIncrease))
+        Ext.Vars.GetModVariables(ModuleUUID).E6_XPPerFeatIncrease = message.XPPerFeatIncrease
+        -- We don't want to accumulate the greant feat point and remove feat point statuses ad nauseum.
+        -- Reset them when the feat point count changes.
+        FeatPointTracker:ResetAll()
+    else
+        _E6Error("Failed to set XP Per Feat Increase. Got the value: '" .. tostring(message.XPPerFeatIncrease) .. "'")
+    end
+    FeatPointTracker:OnStableCallback(message.PlayerId, OnEpic6FeatSelectorSpell)
 end
 
 ---Trigger sending an updated feat list from the server to the client on switching.
