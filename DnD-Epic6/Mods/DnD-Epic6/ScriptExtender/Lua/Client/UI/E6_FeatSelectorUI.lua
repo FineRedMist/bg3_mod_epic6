@@ -276,48 +276,6 @@ local function AddResetFeatsButton(win, windowDimensions, playerInfo)
     end
 end
 
----Adds a button to export the character's Epic 6 information.
----@param win ExtuiTreeParent The parent to add the button to.
----@param windowDimensions integer[] The dimensions of the window.
----@param playerInfo PlayerInformationType The player information.
-local function AddExportCharacterEpic6Button(win, windowDimensions, playerInfo)
-    local centerCell = CreateCenteredControlCell(win, "ExportEpic6Cell", windowDimensions[1] - 30)
-    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("hc1014814g1ab8g4a6dg93e9g0e4667bb18b7")) -- Export Character Epic 6 Data
-    AddTooltip(exportButton):AddText("he6d7a765g378ag4eceg9618ge42bf8c7878d") -- Export the character to a file.
-    exportButton.OnClick = function()
-        E6_CloseUI()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_EPIC6, playerInfo.UUID)
-    end
-end
-
----Adds a button to export the character entity data.
----@param win ExtuiTreeParent The parent to add the button to.
----@param windowDimensions integer[] The dimensions of the window.
----@param playerInfo PlayerInformationType The player information.
-local function AddExportCharacterGameButton(win, windowDimensions, playerInfo)
-    local centerCell = CreateCenteredControlCell(win, "ExportGameCell", windowDimensions[1] - 30)
-    local exportButton = centerCell:AddButton(Ext.Loca.GetTranslatedString("h27d08b54g94d5g405cga8c6g57231379a05f")) -- Export Character Game Data
-    AddTooltip(exportButton):AddText("h5cb70d0agc32bg49d6g96f1gdd2daa2ac545") -- Export the character to a file.
-    exportButton.OnClick = function()
-        E6_CloseUI()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_EXPORT_EPIC6, playerInfo.UUID)
-    end
-end
-
----Adds a button to test some functionality (varies with usage/need).
----@param win ExtuiTreeParent The parent to add the button to.
----@param windowDimensions integer[] The dimensions of the window.
----@param playerInfo PlayerInformationType The player information.
-local function AddRunTestButton(win, windowDimensions, playerInfo)
-    local centerCell = CreateCenteredControlCell(win, "RunTest", windowDimensions[1] - 30)
-    local runTestButton = centerCell:AddButton("Run Test")
-    AddTooltip(runTestButton):AddText("Runs a test regarding Minsc and Jaheira")
-    runTestButton.OnClick = function()
-        E6_CloseUI()
-        Ext.Net.PostMessageToServer(NetChannels.E6_CLIENT_TO_SERVER_RUN_TEST, playerInfo.UUID)
-    end
-end
-
 ---Creates a slider that clamps the value and increments in 100's
 ---@param win ExtuiTreeParent The parent to add the button to.
 ---@param sliderName string The name of the slider
@@ -439,18 +397,6 @@ local function AddSettings(win, windowDimensions, playerInfo)
     win:AddSpacing()
     win:AddSpacing()
     AddResetFeatsButton(settings, windowDimensions, playerInfo)
-
-    win:AddSpacing()
-    win:AddSpacing()
-    AddExportCharacterEpic6Button(settings, windowDimensions, playerInfo)
-
-    win:AddSpacing()
-    win:AddSpacing()
-    AddExportCharacterGameButton(settings, windowDimensions, playerInfo)
-
-    --win:AddSpacing()
-    --win:AddSpacing()
-    --AddRunTestButton(settings, windowDimensions, playerInfo)
 end
 
 local windowTitle = Ext.Loca.GetTranslatedString("hb09763begcf50g4351gb1f1gd39ec792509b") -- Feats: {CharacterName}

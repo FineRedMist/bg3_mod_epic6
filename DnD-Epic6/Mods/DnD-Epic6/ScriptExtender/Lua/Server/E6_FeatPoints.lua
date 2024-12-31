@@ -3,7 +3,8 @@
 ---Closes the UI for the given character.
 ---@param char string The character ID
 function E6_NetCloseUI(char)
-    Ext.Net.PostMessageToClient(char, NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI, char)
+    local result = Ext.Net.PostMessageToClient(char, NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI, char)
+    _E6P("E6_NetCloseUI result: " .. tostring(result))
 end
 
 ---Ensure that the character's level limit is constrained to 6.
@@ -127,7 +128,7 @@ local function E6_OnRespecStart(characterGuid)
         return
     end
 
-    E6_NetCloseUI(characterGuid)
+    E6_NetCloseUI(GetEntityID(char))
     FeatPointTracker:OnRespecBegin(char)
 end
 
