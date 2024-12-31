@@ -155,9 +155,63 @@ local function FixParty(_, charId)
     end)
 end
 
+---Prints the number of feats that can be granted for the given XP.
+---@param _ string The command
+---@param xp string|number? The XP to calculate the feat count for.
+---@param xpPerFeat string|number? The XP per feat to use. If not provided, the mod's value is used.
+---@param xpPerFeatIncrease string|number? The XP per feat increase to use. If not provided, the mod's value is used.
+local function GetFeatCount(_, xp, xpPerFeat, xpPerFeatIncrease)
+    local savedXP = xp
+    local savedXPPerFeat = xpPerFeat
+    local savedXPPerFeatIncrease = xpPerFeatIncrease
+    if xp == nil then
+        local entityId = Osi.GetHostCharacter()
+        local entity = Ext.Entity.Get(entityId)
+        if not entity then
+            _E6Error("Failed to get the entity for the id: " .. entityId)
+            return
+        end
+        if entity.EocLevel.Level < 6 then
+            _E6Error("The character isn't level 6 yet to get epic feats.")
+            return
+        end
+        xp = entity.Experience.CurrentLevelExperience
+        if xp == nil then
+            _E6Error("XP is required.")
+            return
+        end
+    end
+    xp = tonumber(xp)
+    if xp == nil then
+        _E6Error("The XP '" .. savedXP .. "' is invalid.")
+        return
+    end
+    if xpPerFeat == nil then
+        xpPerFeat = GetEpicFeatXP()
+    else
+        xpPerFeat = tonumber(xpPerFeat)
+    end
+    if xpPerFeat == nil then
+        _E6Error("The xpPerFeat '" .. savedXPPerFeat .. "' is invalid.")
+        return
+    end
+    if xpPerFeatIncrease == nil then
+        xpPerFeatIncrease = GetEpicFeatXPIncrease()
+    else
+        xpPerFeatIncrease = tonumber(xpPerFeatIncrease)
+    end
+    if xpPerFeatIncrease == nil then
+        _E6Error("The xpPerFeatDelta '" .. savedXPPerFeatIncrease .. "' is invalid.")
+        return
+    end
+    local count = GetFeatCountForXPBase(xp, xpPerFeat, xpPerFeatIncrease)
+    local nextFeatXP = GetXPForNextFeatBase(xp, xpPerFeat, xpPerFeatIncrease)
+    _E6P("XP=" .. tostring(xp) .. ", XP/feat=" .. tostring(xpPerFeat) .. ", XP/feat delta=" .. tostring(xpPerFeatIncrease) .. ", feat count=" .. tostring(count) .. ", XP required for next feat: " .. tostring(nextFeatXP))
+end
+
 local function TestFeatCount(xp, featXP, featXPDelta, expectedCount)
     local count = GetFeatCountForXPBase(xp, featXP, featXPDelta)
-    local result = "XP=" .. tostring(xp) .. ", featXP=" .. tostring(featXP) .. ", featXPDelta=" .. tostring(featXPDelta) .. ", expected " .. tostring(expectedCount) .. " but got " .. tostring(count)
+    local result = "XP=" .. tostring(xp) .. ", XP/feat=" .. tostring(featXP) .. ", XP/feat delta=" .. tostring(featXPDelta) .. ", expected " .. tostring(expectedCount) .. " but got " .. tostring(count)
     if count ~= expectedCount then
         _E6Error(result)
     else
@@ -178,4 +232,5 @@ Ext.RegisterConsoleCommand("E6_ExportCharacter", ExportCharacter)
 Ext.RegisterConsoleCommand("E6_ExportEpicSix", ExportEpicSix)
 Ext.RegisterConsoleCommand("E6_DumpParty", DumpParty)
 Ext.RegisterConsoleCommand("E6_FixParty", FixParty)
+Ext.RegisterConsoleCommand("E6_GetFeatCount", GetFeatCount)
 Ext.RegisterConsoleCommand("E6_TestXPCalc", TestXPCalc)

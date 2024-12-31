@@ -54,3 +54,23 @@ New Feats:
  * **Fast Hands**: An additional bonus action and the rogue class tag.
  * **Potent Cantrip**: Cantrip saving throws still deal 1/2 damage, plus a spellcaster class tag.
  * **Potent Spellcasting**: Cantrip damage can be increased by one of your intelligence, wisdom, or charisma modifier. Select a spellcaster class tag.
+
+## Commands
+
+I moved the buttons for exporting the character (either in general or Epic 6 data) to commands. I have also added a few others:
+ * `!E6_ExportCharacter <characterid>`: Exports the character to "%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender\\&lt;character name&gt;-Character-Export.json"
+ * `!E6_ExportEpicSix <characterid>`: Exports the character to "%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender\\&lt;character name&gt;-EpicSix-Export.json"
+ * `!E6_DumpParty <characterid>`: Dumps the party view to the console, including summons and their levels.
+ * `!E6_FixParty <characterid>`: Attempts to change the party's available and eoc levels if they exceed six. However, it has no effect on summons and numerous other entities that can be followers. Kept for sample code (or if I want to experiement further later).
+ * `!E6_TestXPCalc`: Runs a basic test with known numbers and expected results to ensure the calculations work.
+ * `!E6_GetFeatCount [<xp>] [<xp per feat>] [<xp per feat delta>]`: Calculates the number of feats based on the experience, the xp per feat, and the xp per feat delta. If xp isn't provided, it will get it from the current character. If the latter two aren't provided, it will retrieve the values from the current settings.
+
+Note: You can get &lt;characterid&gt; from using `_P(GetHostCharacter())` in the console.
+
+Example Output from !E6_GetFeatCount:
+```
+S >> !E6_GetFeatCount
+E6[Server]: XP=230731, XP/feat=5000, XP/feat delta=500, feat count=22, XP required for next feat: 10769
+S >> !E6_GetFeatCount 230731 5000 1000
+E6[Server]: XP=230731, XP/feat=5000, XP/feat delta=1000, feat count=17, XP required for next feat: 12269
+```
