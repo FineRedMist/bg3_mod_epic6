@@ -8,10 +8,6 @@ NetChannels.E6_SERVER_TO_CLIENT_SHOW_FEAT_SELECTOR = "E6_Server_To_Client_Show_F
 NetChannels.E6_SERVER_TO_CLIENT_CLOSE_UI = "E6_Server_To_Client_Close_UI"
 -- Client to server message that contains the player id and the selected boosts to apply for the feat.
 NetChannels.E6_CLIENT_TO_SERVER_SELECTED_FEAT_SPEC = "E6_Client_To_Server_Selected_Feat_Spec"
--- Client to server message to export the character (expensive)
-NetChannels.E6_CLIENT_TO_SERVER_EXPORT_CHARACTER = "E6_Client_To_server_Export_Character"
--- Client to server mesage to export the epic six data, including what is sent from server to client for feat evaluation, the feat and passives for the player, and the feat point count.
-NetChannels.E6_CLIENT_TO_SERVER_EXPORT_EPIC6 = "E6_Client_To_server_Export_EpicSix"
 -- Client to server message to set the amount of experience to use per feat.
 NetChannels.E6_CLIENT_TO_SERVER_SET_XP_PER_FEAT = "E6_Client_To_Server_Set_XP_Per_Feat"
 -- Client to server message to switch the character to show feats for.
@@ -20,4 +16,5 @@ NetChannels.E6_CLIENT_TO_SERVER_SWITCH_CHARACTER = "E6_Client_To_Server_Switch_C
 NetChannels.E6_CLIENT_TO_SERVER_RESET_FEATS = "E6_Client_To_Server_Reset_Feats"
 ---Client to server message to run tests.
 NetChannels.E6_CLIENT_TO_SERVER_RUN_TEST = "E6_Client_To_Server_Run_Tests"
+
 return NetChannels

@@ -20,23 +20,4 @@ local function DnDEpic6Init()
     Ext.Vars.RegisterModVariable(ModuleUUID, "E6_XPPerFeatIncrease", {Server = true, Client = false, SyncToClient = false})
 end
 
-local function TestFeatCount(xp, featXP, featXPDelta, expectedCount)
-    local count = GetFeatCountForXPBase(xp, featXP, featXPDelta)
-    local result = "XP=" .. tostring(xp) .. ", featXP=" .. tostring(featXP) .. ", featXPDelta=" .. tostring(featXPDelta) .. ", expected " .. tostring(expectedCount) .. " but got " .. tostring(count)
-    if count ~= expectedCount then
-        _E6Error(result)
-    else
-        _E6P(result)
-    end
-end
-
-local function TextFeatXP()
-    TestFeatCount(0, 1000, 0, 0)
-    TestFeatCount(1000, 1000, 0, 1)
-    TestFeatCount(1000, 1000, 1000, 1)
-    TestFeatCount(2000, 1000, 1, 1)
-    TestFeatCount(2001, 1000, 1, 2)
-end
-
 DnDEpic6Init()
---TextFeatXP()
