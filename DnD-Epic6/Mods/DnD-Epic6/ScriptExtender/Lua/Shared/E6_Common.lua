@@ -432,11 +432,11 @@ end
 ---@param xp number The amount of experience.
 ---@param epic6FeatXP number Amount of experience required per feat. 
 ---@param epic6FeatXPIncrease number Amount the experience required per feat changes.
----@return number The amount of experience required to get the next feat point.
+---@return integer The amount of experience required to get the next feat point.
 function GetXPForNextFeatBase(xp, epic6FeatXP, epic6FeatXPIncrease)
     local featCount = GetFeatCountForXPBase(xp, epic6FeatXP, epic6FeatXPIncrease) + 1
     local nextFeatXP = featCount * epic6FeatXP + (featCount - 1) * featCount * epic6FeatXPIncrease / 2
-    return nextFeatXP - xp
+    return math.ceil(nextFeatXP - xp)
 end
 
 ---Determines the number of feats the character should have with the given amount of experience.
