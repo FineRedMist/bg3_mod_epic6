@@ -694,6 +694,24 @@ local function GatherSpells(entity)
     return result
 end
 
+---@param abilities table<string, AbilityScoreType>
+local function GetAbilityModifierFromAbilities(abilities, abilityId)
+    local ability = abilityId.Label
+    if not ability then
+        _E6Error("Failed to identify AbilityId to generate ability modifiers.")
+        return 0
+    end
+    if not abilities[ability] then
+        _E6Error("Ability " .. ability .. " not found in abilities.")
+        return 0
+    end
+    local score = abilities[ability].Current
+    if not score then
+        return 0
+    end
+    return GetAbilityModifier(score)
+end
+
 ---Gathers strings to resolve on the client.
 ---@param entityId GUIDSTRING
 ---@param abilities table<string, AbilityScoreType>
@@ -729,7 +747,7 @@ local function GatherResolverStringMap(entityId, abilities)
                             damage = damage .. "+" .. tostring(roll.DiceAdditionalValue)
                         end
                     end
-                    local modifier = GetAbilityModifier(abilities[ability].Current)
+                    local modifier = GetAbilityModifierFromAbilities(abilities, ability)
                     if modifier > 0 then
                         damage = damage .. "+" .. tostring(modifier)
                     else
