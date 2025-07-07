@@ -25,13 +25,13 @@
           <attribute id="MD5" type="LSString" value="" />
           <attribute id="MainMenuBackgroundVideo" type="FixedString" value="" />
           <attribute id="MenuLevelName" type="FixedString" value="" />
-          <attribute id="Name" type="FixedString" value="DnD-Epic6" />
+          <attribute id="Name" type="FixedString" value="DnD-Epic20" />
           <attribute id="NumPlayers" type="uint8" value="4" />
           <attribute id="PhotoBooth" type="FixedString" value="" />
           <attribute id="StartupLevelName" type="FixedString" value="" />
           <attribute id="Tags" type="LSWString" value="XP;Progression;Leveling" />
           <attribute id="Type" type="FixedString" value="Add-on" />
-          <attribute id="UUID" type="FixedString" value="c8ecf3dd-b5ab-4041-b2e0-d2197845342f" />
+          <attribute id="UUID" type="FixedString" value="ccb8f1a1-6ed8-4676-a99d-f33117431b24" />
           <attribute id="Version64" type="int64" value="36169583899444704" />
           <children>
             <node id="PublishVersion">
