@@ -72,8 +72,8 @@ local function InitLevelMapValue()
         local resource = Ext.StaticData.Get(id, Ext.Enums.ExtResourceManagerType.LevelMap)
         if resource then
             local value = nil
-            if resource.LevelMaps and #resource.LevelMaps >= 6 then
-                value = resource.LevelMaps[6]
+            if resource.LevelMaps and #resource.LevelMaps >= E6_GetMaxLevel() then
+                value = resource.LevelMaps[E6_GetMaxLevel()]
             end
             if not value then
                 value = resource.FallbackValue
@@ -88,7 +88,7 @@ local function InitLevelMapValue()
     end
 end
 
----Retrieves the level map value for the given key. Note: We are always level 6 for this lookup.
+---Retrieves the level map value for the given key. Note: We are always maximum level for this lookup.
 ---@param key string The key to retrieve the value for.
 ---@return string The value for the key.
 local function GetLevelMapValue(key)
@@ -377,7 +377,7 @@ end
 ---@param keep boolean? Whether to keep the base formula in terms of dice values and consolidate terms, or just the damage range.
 ---@return string The computed formula for human readability.
 local function ComputeFormula(formula, keep)
-    formula = TripleCheck(formula, "Level", "6")
+    formula = TripleCheck(formula, "Level", tostring(E6_GetMaxLevel()))
 
     local low, high = GetFormulaRange(formula)
     if not high or not keep then

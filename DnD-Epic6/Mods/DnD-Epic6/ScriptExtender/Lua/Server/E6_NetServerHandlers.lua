@@ -138,12 +138,12 @@ local function GetAvailableLevel(id)
 end
 
 local function TestLevels(id)
-    SetAvailableLevel("S_Player_Jaheira", 6)
+    SetAvailableLevel("S_Player_Jaheira", E6_GetMaxLevel())
     local available, templateOverride = GetAvailableLevel("S_Player_Jaheira")
-    if available ~= 6 then
+    if available ~= E6_GetMaxLevel() then
         _E6Error("Failed to set the available level for " .. id)
     end
-    if templateOverride ~= 6 then
+    if templateOverride ~= E6_GetMaxLevel() then
         _E6Error("Failed to set the template level override for " .. id)
     end
 end

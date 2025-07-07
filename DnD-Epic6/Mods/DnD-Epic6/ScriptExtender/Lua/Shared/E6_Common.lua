@@ -367,11 +367,35 @@ function NormalizePascalCase(str)
     return ToPascalCase(str)
 end
 
----The amount of experience required to reach level 6.
+local MaxLevelCache = nil
 ---@return number
-function E6_GetLevel6XP()
+function E6_GetMaxLevel()
+    if not MaxLevelCache then
+        MaxLevelCache = Ext.Stats.GetStatsManager().ExtraData.MaxXPLevel - 1
+    end
+    return MaxLevelCache
+end
+
+local MaxLevelXPCache = nil
+---The amount of experience required to reach maximum level.
+---@return number
+function E6_GetMaxLevelXP()
+    if MaxLevelXPCache then
+        return MaxLevelXPCache
+    end
     local extraData = Ext.Stats.GetStatsManager().ExtraData
-    return extraData.Level1 + extraData.Level2 + extraData.Level3 + extraData.Level4 + extraData.Level5
+    MaxLevelXPCache = 0
+    local maxLevel = E6_GetMaxLevel()
+    for i = 1, maxLevel - 1 do
+        local levelXP = extraData["Level" .. tostring(i)]
+        if type(levelXP) == "number" and levelXP > 0 then
+            MaxLevelXPCache = MaxLevelXPCache + levelXP
+        else
+            _E6Error("Invalid Level XP for Level " .. tostring(i) .. ": " .. tostring(levelXP))
+        end
+    end
+
+    return MaxLevelXPCache
 end
 
 ---Retrieves the amount of experience required for the character to earn a feat.
@@ -440,7 +464,7 @@ function GetXPForNextFeatBase(xp, epic6FeatXP, epic6FeatXPIncrease)
 end
 
 ---Determines the number of feats the character should have with the given amount of experience.
----@param xp number The amount of experience (after level 6) the player has.
+---@param xp number The amount of experience (after maximum level) the player has.
 ---@return number The number of feats the character can earn with the given experience.
 function GetFeatCountForXP(xp)
     local epic6FeatXP = GetEpicFeatXP()
@@ -450,7 +474,7 @@ function GetFeatCountForXP(xp)
 end
 
 ---Determines how much experience is required for the next feat point based on the current experience.
----@param xp number The amount of experience (after level 6) the player has.
+---@param xp number The amount of experience (after maximum level) the player has.
 ---@return number The amount of experience required to get the next feat point.
 function GetXPForNextFeat(xp)
     local epic6FeatXP = GetEpicFeatXP()

@@ -442,10 +442,10 @@ local function AddExpInfo(win, windowDimensions, playerInfo)
     local centerCell = CreateCenteredControlCell(win, "ExpInfo", windowDimensions[1] - 30)
 
     local ent = Ext.Entity.Get(playerInfo.UUID)
-    local level6Exp = E6_GetLevel6XP()
+    local level6Exp = E6_GetMaxLevelXP()
     local xpDiff = level6Exp - ent.Experience.TotalExperience
     local progressText = nil
-    if ent.EocLevel.Level >= 6 then
+    if ent.EocLevel.Level >= E6_GetMaxLevel() then
         local xpToNextLevel = ent.Experience.CurrentLevelExperience
         local remainingExp = GetXPForNextFeatBase(xpToNextLevel, playerInfo.XPPerFeat, playerInfo.XPPerFeatIncrease)
         progressText = GetParameterizedLoca("hbd475c8ega2dcg4491ga9a9gabbe7a9c8216", {string.format("%.0f", remainingExp)}) -- Next feat: [1] XP
@@ -453,7 +453,7 @@ local function AddExpInfo(win, windowDimensions, playerInfo)
         if xpDiff < 0 then
             xpDiff = 0
         end
-        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {string.format("%.0f", xpDiff)}) -- Level 6: [1] XP
+        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {E6_GetMaxLevel(), string.format("%.0f", xpDiff)}) -- Level [1]: [2] XP
     end
 
     centerCell:AddText(progressText)

@@ -7,15 +7,15 @@ function E6_NetCloseUI(char)
     _E6P("E6_NetCloseUI result: " .. tostring(result))
 end
 
----Ensure that the character's level limit is constrained to 6.
+---Ensure that the character's level limit is constrained to the maximum level.
 ---@param entity EntityHandle
 local function FixupLevelLimit(entity)
-    if entity.AvailableLevel and entity.AvailableLevel.Level > 6 then
-        _E6P("Setting available level for " .. GetCharacterName(entity) .. " from " .. tostring(entity.AvailableLevel.Level) .. " to 6")
-        entity.AvailableLevel.Level = 6
+    if entity.AvailableLevel and entity.AvailableLevel.Level > E6_GetMaxLevel() then
+        _E6P("Setting available level for " .. GetCharacterName(entity) .. " from " .. tostring(entity.AvailableLevel.Level) .. " to " .. tostring(E6_GetMaxLevel()))
+        entity.AvailableLevel.Level = E6_GetMaxLevel()
     end
-    --if entity.ServerCharacter and entity.ServerCharacter.Template and entity.ServerCharacter.Template.LevelOverride > 6 then
-    --    entity.ServerCharacter.Template.LevelOverride = 6
+    --if entity.ServerCharacter and entity.ServerCharacter.Template and entity.ServerCharacter.Template.LevelOverride > E6_GetMaxLevel() then
+    --    entity.ServerCharacter.Template.LevelOverride = E6_GetMaxLevel()
     --end
 end
 

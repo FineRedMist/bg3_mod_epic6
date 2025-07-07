@@ -235,17 +235,17 @@ local function HasPassiveEpicCharacter(id)
     return true
 end
 
----Grants or removes the passive for the epic character (when they reach level 6).
+---Grants or removes the passive for the epic character (when they reach maximum level).
 ---@param id GUIDSTRING The ID of the character.
 ---@param charName string The name of the character.
 ---@param level integer The level of the character.
 local function UpdateEpicCharacterPassive(id, charName, level)
     local hasPassive = HasPassiveEpicCharacter(id)
     -- Allow the host to have the spell to set the initial XP Per Feat value.
-    if not hasPassive and level >= 6 then
+    if not hasPassive and level >= E6_GetMaxLevel() then
         Osi.AddPassive(id, EpicCharacterPassive)
         SetPendingFeatCount(id)
-    elseif hasPassive and level < 6 then -- Remove the spell if we have no feats to grant.
+    elseif hasPassive and level < E6_GetMaxLevel() then -- Remove the spell if we have no feats to grant.
         Osi.RemovePassive(id, EpicCharacterPassive)
         SetPendingFeatCount(id)
     end
@@ -302,8 +302,8 @@ end
 ---It then checks how many points are pending to be applied and verifies that operation is complete
 ---before applying the feat point adjustments.
 -- Only update if:
---  Their experience is at least level 6
---  They have selected all 6 class levels
+--  Their experience is at least maximum level
+--  They have selected all available class levels
 --  They have enough experience to warrant feats.
 ---@param ent EntityHandle The entity for the character.
 function FeatPointTracker:Update(ent)
@@ -336,13 +336,13 @@ function FeatPointTracker:Update(ent)
         return
     end
 
-    -- CurrentLevelExperience is the experience from 6 to 7 we have accumulated. 
-    -- The XP Data is constructed in such a way that the XP cap is reached before level 7
-    -- xp can be earned, so you never really reach level 7.
+    -- CurrentLevelExperience is the experience from max level to an unreachable level we have accumulated (for example 6 to 7 for epic 6).
+    -- The XP Data is constructed in such a way that the XP cap is reached before the unreachable level.
+    -- xp can be earned, so you never really reach that level.
     local xpToNextLevel = 0
     
     -- If we have enough experience and our level is high enough, compute what our total feat count ought to be.
-    if ent.Experience.TotalExperience >= E6_GetLevel6XP() and ent.EocLevel.Level >= 6 then
+    if ent.Experience.TotalExperience >= E6_GetMaxLevelXP() and ent.EocLevel.Level >= E6_GetMaxLevel() then
         xpToNextLevel = ent.Experience.CurrentLevelExperience
     end
 

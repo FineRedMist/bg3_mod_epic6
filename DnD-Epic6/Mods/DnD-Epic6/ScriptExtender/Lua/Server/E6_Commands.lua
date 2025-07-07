@@ -141,12 +141,12 @@ local function FixParty(_, charId)
         end
         _E6P("    Party member: " .. GetEntityInfo(c))
         local changed = false
-        if c.AvailableLevel.Level > 6 then
-            c.AvailableLevel.Level = 6
+        if c.AvailableLevel.Level > E6_GetMaxLevel() then
+            c.AvailableLevel.Level = E6_GetMaxLevel()
             changed = true
         end
-        if c.EocLevel.Level > 6 then
-            c.EocLevel.Level = 6
+        if c.EocLevel.Level > E6_GetMaxLevel() then
+            c.EocLevel.Level = E6_GetMaxLevel()
             changed = true
         end
         if changed then
@@ -171,8 +171,8 @@ local function GetFeatCount(_, xp, xpPerFeat, xpPerFeatIncrease)
             _E6Error("Failed to get the entity for the id: " .. entityId)
             return
         end
-        if entity.EocLevel.Level < 6 then
-            _E6Error("The character isn't level 6 yet to get epic feats.")
+        if entity.EocLevel.Level < E6_GetMaxLevel() then
+            _E6Error("The character isn't level " .. tostring(E6_GetMaxLevel()) .. " yet to get epic feats.")
             return
         end
         xp = entity.Experience.CurrentLevelExperience
