@@ -45,5 +45,10 @@ if NOT "%ERRCODE%"=="0" (
 
 echo Building %TARGET_NAME% with version %VERSION%...
 
-start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\%TARGET_NAME%.pak" -v %VERSION% -c 2
+SET BG3MODFILE="%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\%TARGET_NAME%.pak"
+
+del /q %BG3MODFILE%
+del /q "%GENERATED_DIR%.zip"
+
+start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
 start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
