@@ -20,9 +20,9 @@ SET TARGET_NAME=DnD-Epic%LEVEL%
 SET GENERATED_DIR=%~dp0..\.Generated\%TARGET_NAME%
 rmdir /s /q "%GENERATED_DIR%"
 
-robocopy /mir /np "%~dp0..\DnD-Epic6" "%GENERATED_DIR%"
+robocopy /mir /np "%~dp0..\DnD-EpicBase" "%GENERATED_DIR%"
 REM Do it twice. If no changes, the exit code is zero.
-robocopy /mir /np "%~dp0..\DnD-Epic6" "%GENERATED_DIR%"
+robocopy /mir /np "%~dp0..\DnD-EpicBase" "%GENERATED_DIR%"
 SET ERRCODE=%ERRORLEVEL%
 if NOT "%ERRCODE%"=="0" (
     echo Failed to copy files to target directory: %ERRCODE%
@@ -43,6 +43,11 @@ if NOT "%ERRCODE%"=="0" (
     exit /b 1
 )
 
+echo Renaming files...
+powershell RenameFiles.ps1 "%GENERATED_DIR%" "DnD-EpicBase" "%TARGET_NAME%"
+
+echo Transforming files...
+
 echo Building %TARGET_NAME% with version %VERSION%...
 
 SET BG3MODFILE="%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\%TARGET_NAME%.pak"
@@ -50,5 +55,5 @@ SET BG3MODFILE="%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\%TARGET_NAME%
 del /q %BG3MODFILE%
 del /q "%GENERATED_DIR%.zip"
 
-start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
-start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
+REM start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
+REM start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
