@@ -36,9 +36,7 @@ key "Level18","40000"
 
 key "Level19","50000"
 
-key "Level20","55000"
-
-key "Level21","4000000"
+key "Level20","40000000"
 
 key "MaxXPLevel","21"
 
