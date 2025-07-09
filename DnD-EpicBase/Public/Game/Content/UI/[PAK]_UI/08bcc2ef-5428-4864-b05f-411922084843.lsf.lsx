@@ -7,9 +7,9 @@
         <node id="Resource">
           <attribute id="ID" type="FixedString" value="08bcc2ef-5428-4864-b05f-411922084843" />
           <attribute id="Localized" type="bool" value="False" />
-          <attribute id="Name" type="LSString" value="DnD_Epic6_Icons" />
+          <attribute id="Name" type="LSString" value="DnD_EpicBase_Icons" />
           <attribute id="SRGB" type="bool" value="True" />
-          <attribute id="SourceFile" type="LSString" value="Public/DnD-EpicBase/Assets/Textures/Icons/DnD_Epic6_Icons.DDS" />
+          <attribute id="SourceFile" type="LSString" value="Public/DnD-EpicBase/Assets/Textures/Icons/DnD_EpicBase_Icons.DDS" />
           <attribute id="Streaming" type="bool" value="True" />
           <attribute id="Template" type="FixedString" value="Icons_Skills" />
           <attribute id="Type" type="int32" value="0" />

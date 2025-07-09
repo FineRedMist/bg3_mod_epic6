@@ -43,10 +43,15 @@ if NOT "%ERRCODE%"=="0" (
     exit /b 1
 )
 
-echo Renaming files...
-powershell RenameFiles.ps1 "%GENERATED_DIR%" "DnD-EpicBase" "%TARGET_NAME%"
+SET MSBUILD="c:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
 
-echo Transforming files...
+echo Building TransformFiles project...
+%MSBUILD% -p:Configuration=Release -verbosity:quiet -nologo "%~dp0..\TransformFiles\TransformFiles.csproj" 
+
+echo Renaming files...
+%~dp0..\TransformFiles\bin\Release\net8.0\TransformFiles.exe "%GENERATED_DIR%" EpicBase Epic%LEVEL%
+
+del /q "%GENERATED_DIR%\Transform.json"
 
 echo Building %TARGET_NAME% with version %VERSION%...
 
@@ -55,5 +60,5 @@ SET BG3MODFILE="%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\%TARGET_NAME%
 del /q %BG3MODFILE%
 del /q "%GENERATED_DIR%.zip"
 
-REM start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
-REM start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
+start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
+start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
