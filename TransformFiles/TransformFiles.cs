@@ -7,6 +7,10 @@ using System.Runtime.CompilerServices;
 static class TransformFiles
 {
     static Dictionary<string, string> transforms = new Dictionary<string, string>();
+    static HashSet<string> contentUpdateExtensions = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+        {
+            ".json", ".lsx", ".lsf.lsx"
+        };
 
     static int Main(string[] args)
     {
@@ -57,6 +61,10 @@ static class TransformFiles
 
     static void UpdateFileContents(string filePath, Dictionary<string, string> transforms)
     {
+        if (!contentUpdateExtensions.Contains(Path.GetExtension(filePath)))
+        {
+            return; // Skip files that do not require content updates
+        }
         try
         {
             string content = File.ReadAllText(filePath);
