@@ -371,7 +371,13 @@ local MaxLevelCache = nil
 ---@return number
 function E6_GetMaxLevel()
     if not MaxLevelCache then
-        MaxLevelCache = Ext.Stats.GetStatsManager().ExtraData.MaxXPLevel - 1
+        -- Attempt to get the E6 version first. If it doesn't exist, fall back to the MaxXPLevel.
+        -- The level 20 version of the mod encounters an issue with MaxXPLevel being set to 21:
+        -- the game may be clamping the value to 20.
+        MaxLevelCache = Ext.Stats.GetStatsManager().ExtraData.E6MaxXPLevel
+        if not MaxLevelCache then
+            MaxLevelCache = Ext.Stats.GetStatsManager().ExtraData.MaxXPLevel - 1
+        end
     end
     return MaxLevelCache
 end

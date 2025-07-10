@@ -40,3 +40,4 @@ key "Level20","40000000"
 
 key "MaxXPLevel","21"
 
+key "E6MaxXPLevel","20"

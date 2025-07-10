@@ -453,7 +453,7 @@ local function AddExpInfo(win, windowDimensions, playerInfo)
         if xpDiff < 0 then
             xpDiff = 0
         end
-        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {E6_GetMaxLevel(), string.format("%.0f", xpDiff)}) -- Level [1]: [2] XP
+        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {string.format("%.0f", E6_GetMaxLevel()), string.format("%.0f", xpDiff)}) -- Level [1]: [2] XP
     end
 
     centerCell:AddText(progressText)
