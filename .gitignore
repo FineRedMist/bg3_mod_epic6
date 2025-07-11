@@ -9,3 +9,11 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Generated build folder
+.Generated/
+
+# Visual Studio Files
+TransformFiles/.vs/
+TransformFiles/bin/
+TransformFiles/obj/

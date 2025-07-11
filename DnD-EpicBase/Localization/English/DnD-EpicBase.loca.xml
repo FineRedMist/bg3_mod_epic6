@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<contentList>
+	<content contentuid="h8696ea66g34feg41f9gb02fg341ebae2b08e" version="1">XP</content>
+	<content contentuid="h70ae1e71ga8edg4563gb8e2g7e6b7d818f51" version="1">Delta</content>
+	<content contentuid="h501f5bc3g191bg4051g8dccgb2e004ae69a6" version="1">How much to increase the XP required to earn a feat (not saved until Save is clicked).</content>
+	<content contentuid="h99435baagca21g46a3g945ag47643bc53c30" version="1">You can add one of your Intelligence, Wisdom, or Charisma &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="he952fcd8ga679g416cg8967g1302c33cac77" version="1">You can add your Wisdom &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="hbce79202g327eg45f4g9e06g3b35cc966b24" version="1">You can add your Intelligence &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="hf50a8899g9260g4c1dg8deag5194542a3336" version="1">You can add your Charisma &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
+	<content contentuid="h05cbc2b5ga5bag459fg91a0g22f6c4dd630b" version="1">[1]
+
+[2]</content>
+	<content contentuid="hddb8e266g3b9dg4d9cgb132gcc4d933e234a" version="1">[3] [4]</content>
+	<content contentuid="hc1014814g1ab8g4a6dg93e9g0e4667bb18b7" version="1">Export Character Epic 6 Data</content>
+	<content contentuid="he6d7a765g378ag4eceg9618ge42bf8c7878d" version="1">Exports the data sent from server to client for showing the feat selector, along with the list of already selected feats. The data is written to toe '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-EpicSix-Export.json.</content>
+	<content contentuid="hb22ba8fege28fg4863ga54eg005886d16a6b" version="1">You already have this proficiency.</content>
+	<content contentuid="h6376efd2gf22cg47d9ga024gd8f39a0541c2" version="1">You already have proficiency for this saving throw.</content>
+	<content contentuid="h45303d74g2579g454ag9662g31dcf74794d7" version="1">This feature boosts an ability that is limited to 20 (Legendary doesn't work for this feature).</content>
+	<content contentuid="h941fb918g8e78g4c41ga66fg1d14cd0f77cf" version="1">This feature boosts an ability that is already at 20 (Legendary doesn't work for this feature).</content>
+	<content contentuid="hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6" version="1">This feature has already been selected.</content>
+	<content contentuid="h27d08b54g94d5g405cga8c6g57231379a05f" version="1">Export Character Game Data</content>
+	<content contentuid="h5cb70d0agc32bg49d6g96f1gdd2daa2ac545" version="1">Exports the character to the server's '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-Character-Export.json. 
+Note: this operation is time consuming and the game may be unresponsive.</content>
+	<content contentuid="h95f979dcg69e9g464fgb943gf2559470bcc1" version="1">Level [1]: [2] XP</content>
+	<content contentuid="hbd475c8ega2dcg4491ga9a9gabbe7a9c8216" version="1">Next feat: [1] XP</content>
+	<content contentuid="ha7eeaa4ag452bg469dg9127gaa4afb1e3abc" version="1">[1] [2] damage</content>
+	<content contentuid="hc3a8865ageffcg4d60gabd8gccd4f828d6e9" version="1">Details:</content>
+	<content contentuid="ha0a03263g1b55g40c2g8a7fg5313663ee3a5" version="1">The feat has already been selected.</content>
+	<content contentuid="hbc9684d8gca58g4210gb373gb55e83cc0081" version="1">Show filtered feats</content>
+	<content contentuid="ha087585cgc6beg407ega903g92b69efc6e9b" version="1">Show feats that were filtered because requirements were not met.</content>
+	<content contentuid="h35115c97g6f5bg4ba5gad35gfdba5e7e1d51" version="1">Requirements met.</content>
+	<content contentuid="hf5f71dc3g2cd6g40ddga2aeg167bdfe6d71e" version="1">Unknown requirement (please report a bug on NexusMods for DnD-Epic6 to have it added): [1]</content>
+	<content contentuid="h5a0ed75fg8a79g4481g90e3g318669d0a6e7" version="1">Feat misconfiguration: [1]</content>
+	<content contentuid="hbc4fc044gb46fg47f2g9ff9g00af57de9fae" version="1">The ability [1] could not be found on the character.</content>
+	<content contentuid="h69b3c062g4965g4fbeg9446g901d37a06d72" version="1">[1] is less than [2]. It is currently [3].</content>
+	<content contentuid="h0772c666g159dg47eag857eg2c8bb25bc440" version="1">Missing proficiency: [1]</content>
+	<content contentuid="hd7005e0bgad9bg43afgabb9gd831f1708f49" version="1">Missing ability: [1]</content>
+	<content contentuid="h1216582dgb25ag4404ga05cg8fa1c1fd8f84" version="1">Missing: [1]</content>
+	<content contentuid="h04fab965g7b1bg47fegad9bg69ae676c8cdf" version="1">Character level must be greater than: [1]</content>
+	<content contentuid="h1d87338fgc5ddg4386gaf1eg83c82d9ca1a3" version="1">Already has proficiency: [1]</content>
+	<content contentuid="h1c81aad6g23b0g4068ga108g3b4b0957050b" version="1">Unknown proficiency: [1]</content>
+	<content contentuid="h3ee30c4bg920fg46fdga857g21d9a21b5bb5" version="1">An error occurred getting the player's ability scores.</content>
+	<content contentuid="h54868782g1a0bg4f36g8e13gc6f4adfccfc4" version="1">An error occurred getting the player's proficiencies.</content>
+	<content contentuid="h2e9bd450g5df3g4075ga81eg29eef9f9f4a4" version="1">The feat grants more points than can be applied to abilities.</content>
+	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough selectable features to choose from.</content>
+	<content contentuid="h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7" version="1">The ability list [2] wasn't found.</content>
+	<content contentuid="h31df0045ge2e3g453bga538ga0a618a38844" version="1">The pasive list [2] wasn't found.</content>
+	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>
+	<content contentuid="hf288edb6g7572g4963gb930ge36925049021" version="1">Maximum: {Maximum}</content>
+	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased by 1.</content>
+	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic: Heroic</content>
+	<content contentuid="h6f4a6e38g074eg4717g949cga847c9fa7cc2" version="1">You have reached maximum level and can select feats as you earn more experience!</content>
+	<content contentuid="h55b3cc22g6c3eg468dg807ag42e9300ff0f7" version="1">Epic Character</content>
+	<content contentuid="hf2b3a061gbf90g48cbg8defg30ec6aef6159" version="1">Saves the amount of XP per feat to the save game.</content>
+	<content contentuid="h21681079gab67g4ea5ga4dfg88f40d38818a" version="1">Save</content>
+	<content contentuid="hcbbf8d49g36fbg496bga9beg275c367f94c0" version="1">The amount of experience required to earn a feat. The change is not committed until Save is clicked.</content>
+	<content contentuid="h7b730e0dgb38bg4527g9762g880c4b778d76" version="1">XP Per Feat</content>
+	<content contentuid="h9945dd99g22e4g4111ga988g05974feeba28" version="1">Settings</content>
+	<content contentuid="h23fb3bb3gd957g433fgbdfag862d70a20649" version="1">New Spells</content>
+	<content contentuid="h00c4820cgf31bg4b3agab92g7058ba3c44e5" version="1">Select Spells: {Count}/{Max}</content>
+	<content contentuid="h522a98b0gd1b0g4bd8ga74dgb33b8cdaa8cb" version="1">{Ability} Modifier: {AbilityMod}
+Proficiency Bonus: {ProficiencyBonus}
+Expertise Bonus: {ProficiencyBonus}</content>
+	<content contentuid="h4aabf6e2gf7d1g4d29ga2a2g0b1703d10f23" version="1">{Ability} Modifier: {AbilityMod}
+Proficiency Bonus: {ProficiencyBonus}</content>
+	<content contentuid="hb0265d8egc78ag416eg810ag2b94aaf0941b" version="1">{Ability} Modifier: {AbilityMod}</content>
+	<content contentuid="h0b1dd211g01a2g41d3g8b3fg0d5b4bda3712" version="1">{Count}/{Max}</content>
+	<content contentuid="h8125b54ag30d6g49b0g87c0g579c827eb7da" version="1">Select Feature: {Count}/{Max}</content>
+	<content contentuid="h447df23cgb2f2g405bgbe3eg1617f0209e39" version="1">Select Features: {Count}/{Max}</content>
+	<content contentuid="h8cb5f019g91b8g4873ga7c4g2c79d5579a78" version="1">Ability Points: {Count}/{Max}</content>
+	<content contentuid="h0e02f114g1575g4fc2g97eeg27d8017fc2ee" version="1">Pending feats to choose.</content>
+	<content contentuid="h1a5184cdgaba1g432fga0d3g51ac15b8a0a8" version="1">Feats</content>
+	<content contentuid="hb09763begcf50g4351gb1f1gd39ec792509b" version="1">Feats: {CharacterName}</content>
+	<content contentuid="h262bbb67gb8abg4d35g9822g854af550a474" version="1">Number of feats chosen.</content>
+	<content contentuid="h2506c629gaf2fg476ega0a2g803373fbf9c8" version="1">Feats Selected</content>
+	<content contentuid="h3b4438fbg6a49g46c0g8346g372def6b2b77" version="1">Reset Feats</content>
+	<content contentuid="h7b3c6823g7bf9g4eaag8078g644e1ba33f33" version="1">Reset the feats and feat points for the current character, allowing reselection.</content>
+	<content contentuid="h5a499cf9gad5cg4888gb48ag32f118c40da6" version="1">Avid Learner</content>
+	<content contentuid="hcd086f4bgb3ccg487eg90a7gfeae870aee03" version="1">Gain &lt;LSTag Tooltip="Expertise"&gt;Expertise&lt;/LSTag&gt; in two &lt;LSTag Tooltip="Skill"&gt;Skills&lt;/LSTag&gt; of your choice.
+	
+Learn to present yourself as another class.</content>
+	<content contentuid="hc2a4fce5gd6aeg4023g8b4dg78205543dbb7" version="1">Epic: Legendary</content>
+	<content contentuid="hefa94be9g1b09g42c7g9f93gaa542216d259" version="1">Increase the ability score limit of one ability by 4, and another ability by 2. This does not increase the score itself.
+	
+Do not select the same ability for both, you will only get the better of the two, not combined.</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_0" version="1">The ability score limit is increased to 24.</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_1" version="1">Major Strength Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_2" version="1">Major Dexterity Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_3" version="1">Major Constitution Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_4" version="1">Major Intelligence Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_5" version="1">Major Wisdom Cap Increase</content>
+	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_6" version="1">Major Charisma Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_0" version="1">The ability score limit is increased to 22.</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_1" version="1">Minor Strength Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_2" version="1">Minor Dexterity Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_3" version="1">Minor Constitution Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_4" version="1">Minor Intelligence Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_5" version="1">Minor Wisdom Cap Increase</content>
+	<content contentuid="h31b8ce6fgc97bg4f6dg823ega078d268e74f_6" version="1">Minor Charisma Cap Increase</content>
+</contentList>
