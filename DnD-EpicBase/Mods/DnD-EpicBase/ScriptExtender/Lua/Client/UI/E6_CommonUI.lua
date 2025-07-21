@@ -320,13 +320,17 @@ function ComputeIconsPerRow(iconCount)
     if iconCount <= maxIconsPerRow then
         return iconCount
     end
+    ---@type number The minimum number of icons per row to use. Counting up from this value to the maximum.
     local minRowCount = minIconsPerRow
+    ---@type number The number of empty icon spots that would be in the last row. This is the value we want to minimize.
     local minLost = minIconsPerRow - math.fmod(iconCount, minIconsPerRow)
     for i = minIconsPerRow, maxIconsPerRow - 1 do
         local modValue = math.fmod(iconCount, i)
+        -- If we don't have any lost icons, then we can just return the current icons per row.
         if modValue == 0 then
             return i
         end
+        -- Otherwise, see if this value is better.
         local lost = i - modValue
         if lost < minLost then
             minLost = lost

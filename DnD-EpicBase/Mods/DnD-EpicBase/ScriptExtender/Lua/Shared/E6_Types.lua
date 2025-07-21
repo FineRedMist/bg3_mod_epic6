@@ -20,7 +20,7 @@
 ---@class SelectPassiveType
 ---@field Count integer The number of passive abilities to select.
 ---@field Unknown any An unknown field
----@field Arg3 any The third argument to pass when selecting a passive.
+---@field Category any The category of the passive, a descriptive name, such as 'WarlockInvocations'.
 ---@field SourceId GUIDSTRING The GUID that maps to the selector list.
 
 ---@class SelectSpellBaseType

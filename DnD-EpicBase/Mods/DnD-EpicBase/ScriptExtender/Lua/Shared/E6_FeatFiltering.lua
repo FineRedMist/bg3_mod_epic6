@@ -99,6 +99,80 @@ function IsPassiveSelectable(playerInfo, passive, passiveStat)
     end
 end
 
+---@type string[] The list of all progression IDs that have been loaded.
+local allProgressionsIds
+
+--- Returns the list of all progression IDs that have been loaded and caches the result.
+function E6_GetCachedProgressionIds()
+    if allProgressionsIds == nil then
+        allProgressionsIds = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
+    end
+    return allProgressionsIds
+end
+
+--- Returns the union of passives from:
+--- The ID of the passive set specified.
+--- If the Category of the passive is specified, then it will return all passive ids in that category
+--- that are found in the progression tables.
+--- All IDs in the PassiveList collection that MergeInto these IDs <-- does not exist: automatically merged?
+---@param featName string The name of the feat to gather passives for.
+---@param passive SelectPassiveType The passive to gather the names for.
+---@return string[] The list of passives that match the selection criteria.
+function E6_GatherAllPassives(featName, passive)
+    if not passive then
+        return {}
+    end
+
+    -- Merge this list of passives together.
+    ---@type table<string, boolean>
+    local uniquePassives = {}
+
+    local function AddPassivesForId(passiveId)
+        local passiveData = Ext.StaticData.Get(passiveId, Ext.Enums.ExtResourceManagerType.PassiveList)
+        if not passiveData then
+            _E6Warn("The feat '" .. featName .. "' references a passive '" .. passiveId .. "' that doesn't exist.")
+            return
+        end
+        for _,passiveName in ipairs(passiveData.Passives) do
+            if Ext.Stats.Get(passiveName, -1, true, true) then
+                uniquePassives[passiveName] = true
+            else
+                _E6Warn("Skipping passive '" .. passiveName .. "': it does not exist.")
+            end
+            _E6P("Adding passive: " .. passiveName)
+        end
+    end
+
+    AddPassivesForId(passive.SourceId) -- Add the passives from the source ID of the passive list.
+
+    if string.len(passive.Category) > 0 then
+        _E6P("Gathering passives for feat: " .. featName .. ", with cateogry: " .. passive.Category)
+    
+        ---@type number, string
+        for _,progressionId in ipairs(E6_GetCachedProgressionIds()) do
+            ---@type ResourceProgression
+            local progression = Ext.StaticData.Get(progressionId, Ext.Enums.ExtResourceManagerType.Progression)
+            ---@type number, ResourceProgressionPassive (UUID, Amount, Arg3, Amount2)
+            if progression.SelectPassives ~= nil and (progression.Level == nil or progression.Level <= E6_GetMaxLevel()) then
+                for _,progPassive in ipairs(progression.SelectPassives) do
+                    if progPassive.Arg3 == passive.Category and progPassive.UUID ~= passive.SourceId then
+                        AddPassivesForId(progPassive.UUID)
+                    end
+                end
+            end
+        end
+    end
+
+    ---@type string[] The list of passives that are unique to return.
+    local passiveResult = {}
+    for passiveName, _ in pairs(uniquePassives) do
+        table.insert(passiveResult, passiveName)
+    end
+
+    _E6P("Gathered passives for feat '" .. featName .. "': " .. table.concat(passiveResult, ", "))
+
+    return passiveResult
+end
 
 ---Returns the loca for a missing ability.
 ---@param abilityName string The name of the ability that was missing.
@@ -178,15 +252,11 @@ local function E6_ApplySelectPassiveRequirement(feat)
     end
     for _, passive in ipairs(feat.SelectPassives) do
         ---@type ResourcePassiveList
-        local passiveList = Ext.StaticData.Get(passive.SourceId, Ext.Enums.ExtResourceManagerType.PassiveList)
-        if not passiveList then
+        ---@type string[] The list of passives in the passive list.
+        local passiveNames = E6_GatherAllPassives(feat.ShortName, passive)
+        if #passiveNames == 0 then
             E6_AddFeatRequirement(feat, E6_MatchFailure(feat, "h5a0ed75fg8a79g4481g90e3g318669d0a6e7", {"h31df0045ge2e3g453bga538ga0a618a38844", passive.SourceId})) -- Feat misconfiguration: [1], The passive list [2] wasn't found.
             return
-        end
-        ---@type string[] The list of passives in the passive list.
-        local passiveNames = {}
-        for _,passiveName in ipairs(passiveList.Passives) do
-            table.insert(passiveNames, passiveName)
         end
 
         -- Number of passives to choose from the selection.
@@ -195,9 +265,6 @@ local function E6_ApplySelectPassiveRequirement(feat)
         local isSelectable = function(playerInfo, passiveName)
             ---@type PassiveData Data for the passive
             local stat = Ext.Stats.Get(passiveName, -1, true, true)
-            if not stat then
-                return false
-            end
             return IsPassiveSelectable(playerInfo, passiveName, stat)
         end
 
@@ -206,7 +273,7 @@ local function E6_ApplySelectPassiveRequirement(feat)
         ---@return boolean Whether the feat has enough passives remaining to select.
         ---@return FeatMessageType The message to display to the player about why the requirement failed.
         local passiveRequirement = function(entity, playerInfo)
-            local missingPassives = 0
+            local missingPassives = 0 -- The number of passives that the player doesn't have yet.
             for _,passiveName in ipairs(passiveNames) do
                 if isSelectable(playerInfo, passiveName) then
                     missingPassives = missingPassives + 1
