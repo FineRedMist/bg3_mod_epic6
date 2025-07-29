@@ -124,8 +124,8 @@ function E6_GatherAllPassives(featName, passive)
     end
 
     -- Merge this list of passives together.
-    ---@type table<string, boolean>
-    local uniquePassives = {}
+    ---@type UniqueList<string> A list of unique passives to return.
+    local uniquePassives = UniqueList:new()
 
     local function AddPassivesForId(passiveId)
         local passiveData = Ext.StaticData.Get(passiveId, Ext.Enums.ExtResourceManagerType.PassiveList)
@@ -135,7 +135,7 @@ function E6_GatherAllPassives(featName, passive)
         end
         for _,passiveName in ipairs(passiveData.Passives) do
             if Ext.Stats.Get(passiveName, -1, true, true) then
-                uniquePassives[passiveName] = true
+                uniquePassives:add(passiveName)
             else
                 _E6Warn("Skipping passive '" .. passiveName .. "': it does not exist.")
             end
@@ -163,15 +163,9 @@ function E6_GatherAllPassives(featName, passive)
         end
     end
 
-    ---@type string[] The list of passives that are unique to return.
-    local passiveResult = {}
-    for passiveName, _ in pairs(uniquePassives) do
-        table.insert(passiveResult, passiveName)
-    end
+    _E6P("Gathered passives for feat '" .. featName .. "': " .. table.concat(uniquePassives.items, ", "))
 
-    _E6P("Gathered passives for feat '" .. featName .. "': " .. table.concat(passiveResult, ", "))
-
-    return passiveResult
+    return uniquePassives.items
 end
 
 ---Returns the loca for a missing ability.
