@@ -91,7 +91,6 @@ end
 local function ProcessPassives(sourceList)
     return ProcessProperty(sourceList, function(source)
         return {
-            _E6P("Found passive: " .. tostring(source.UUID) .. ", " .. tostring(source.Amount) .. ", " .. tostring(source.Arg3) .. ", " .. tostring(source.Amount2)),
             Count = source.Amount,
             Unknown = source.Amount2,
             Category = source.Arg3,

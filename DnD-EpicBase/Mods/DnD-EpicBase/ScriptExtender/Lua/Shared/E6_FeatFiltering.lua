@@ -139,15 +139,12 @@ function E6_GatherAllPassives(featName, passive)
             else
                 _E6Warn("Skipping passive '" .. passiveName .. "': it does not exist.")
             end
-            _E6P("Adding passive: " .. passiveName)
         end
     end
 
     AddPassivesForId(passive.SourceId) -- Add the passives from the source ID of the passive list.
 
     if string.len(passive.Category) > 0 then
-        _E6P("Gathering passives for feat: " .. featName .. ", with cateogry: " .. passive.Category)
-    
         ---@type number, string
         for _,progressionId in ipairs(E6_GetCachedProgressionIds()) do
             ---@type ResourceProgression
@@ -162,8 +159,6 @@ function E6_GatherAllPassives(featName, passive)
             end
         end
     end
-
-    _E6P("Gathered passives for feat '" .. featName .. "': " .. table.concat(uniquePassives.items, ", "))
 
     return uniquePassives.items
 end
