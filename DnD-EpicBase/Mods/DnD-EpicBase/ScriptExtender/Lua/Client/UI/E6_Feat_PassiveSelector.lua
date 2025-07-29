@@ -18,11 +18,11 @@
 ---@param uniquingName string The unique name to use for the control names to avoid collisions.
 ---@param passiveIndex integer The index of the passive in the feat (as there could be multiple sets of passives to select from).
 ---@param passive InternalPassiveSelectorType The passive to render.
----@param passiveList ResourcePassiveList The list of passives to select from.
+---@param passiveNames string[] The list of passive names to select from.
 ---@param sharedResource SharedResource The shared resource to bind the control to.
 ---@param renderState RenderStateType The state of the rendering.
 ---@param selectedPassives table<string, boolean> The collection of selected passives.
-local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
+local function AddPassiveByCheckbox(parent, playerInfo, uniquingName, passiveIndex, passive, passiveNames, sharedResource, renderState, selectedPassives)
     if not renderState.CenterCell then
         renderState.CenterCell = CreateCenteredControlCell(parent, uniquingName .. "_Passives_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
     end
@@ -66,11 +66,11 @@ end
 ---@param uniquingName string The unique name to use for the control names to avoid collisions.
 ---@param passiveIndex integer The index of the passive in the feat (as there could be multiple sets of passives to select from).
 ---@param passive InternalPassiveSelectorType The passive to render.
----@param passiveList ResourcePassiveList The list of passives to select from.
+---@param passiveNames string[] The list of passives names to select from.
 ---@param sharedResource SharedResource The shared resource to bind the control to.
 ---@param renderState RenderStateType The state of the rendering.
 ---@param selectedPassives table<string, boolean> The collection of selected passives.
-local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
+local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, passive, passiveNames, sharedResource, renderState, selectedPassives)
     local function AddRow()
         renderState.IconRowCount = 0
         renderState.Row = renderState.Row + 1
@@ -78,7 +78,7 @@ local function AddPassiveByIcon(parent, playerInfo, uniquingName, passiveIndex, 
     end
 
     if not renderState.Row then
-        renderState.IconsPerRow = ComputeIconsPerRow(#passiveList.Passives)
+        renderState.IconsPerRow = ComputeIconsPerRow(#passiveNames)
         renderState.IconRowCount = 0
         renderState.Row = 0
         renderState.CenterCell = AddRow()
@@ -162,8 +162,8 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         local sharedResource = SharedResource:new(featPassiveInfo.Count)
         table.insert(sharedResources, sharedResource)
 
-        ---@type ResourcePassiveList
-        local passiveList = Ext.StaticData.Get(featPassiveInfo.SourceId, Ext.Enums.ExtResourceManagerType.PassiveList)
+        ---@type string[] The list of passive names to select from.
+        local passiveNames = E6_GatherAllPassives(feat.ShortName, featPassiveInfo)
 
         local titleCell = CreateCenteredControlCell(parent, uniquingName .. "_Title_" .. tostring(passiveIndex), GetWidthFromViewport(parent) - 60)
         local title = titleCell:AddText("")
@@ -185,7 +185,7 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         ---@type InternalPassiveSelectorType[]
         local sortedPassives = {}
         local isMissingIcons = false
-        for _,passive in ipairs(passiveList.Passives) do
+        for _,passive in ipairs(passiveNames) do
             ---@type PassiveData Data for the passive
             local stat = Ext.Stats.Get(passive, -1, true, true)
             local iconId = stat.Icon
@@ -208,7 +208,7 @@ function AddPassiveSelectorToFeatDetailsUI(parent, feat, playerInfo, selectedPas
         end
 
         for _,passive in ipairs(sortedPassives) do
-            addPassiveFunction(parent, playerInfo, uniquingName, passiveIndex, passive, passiveList, sharedResource, renderState, selectedPassives)
+            addPassiveFunction(parent, playerInfo, uniquingName, passiveIndex, passive, passiveNames, sharedResource, renderState, selectedPassives)
         end
     end
 

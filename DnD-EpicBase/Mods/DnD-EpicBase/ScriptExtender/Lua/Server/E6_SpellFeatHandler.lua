@@ -613,15 +613,14 @@ local function GatherSpells(entity)
 
     -- Gather progression data to compare against the classes
     -- Group by TableUUID
-    local progressions = Ext.StaticData.GetAll(Ext.Enums.ExtResourceManagerType.Progression)
-
+    
     ---@class ProgressionSpellInfoType
     ---@field Level integer The progression level
     ---@field Added table<GUIDSTRING, SpellGrantInformationType> The spells added at this level
 
     ---@type table<GUIDSTRING, ProgressionSpellInfoType[]>
     local progressionTables = {}
-    for _,progressionId in ipairs(progressions) do
+    for _,progressionId in ipairs(E6_GetCachedProgressionIds()) do
         ---@type ResourceProgression
         local progression = Ext.StaticData.Get(progressionId, Ext.Enums.ExtResourceManagerType.Progression)
         local pTable = progressionTables[progression.TableUUID]

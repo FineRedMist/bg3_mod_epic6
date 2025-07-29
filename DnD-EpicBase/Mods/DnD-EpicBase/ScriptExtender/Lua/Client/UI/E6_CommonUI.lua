@@ -2,6 +2,19 @@
 ---@type integer The width of the tooltip to use in 3840x2160 units.
 local tooltipWidth = 900
 
+---Converts a value to an integral string, truncating any decimal places.
+---@param value any Will convert a number to an integral string, other values are converted to a string.
+---@return string The integral string representation of the value.
+function toIntegralString(value)
+    if value == nil then
+        return "nil"
+    end
+    if type(value) == "number" then
+        return string.format("%.0f", value)
+    end
+    return tostring(value)
+end
+
 ---Removes all children from the parent.
 ---@param parent ExtuiTreeParent
 function ClearChildren(parent)
@@ -320,13 +333,17 @@ function ComputeIconsPerRow(iconCount)
     if iconCount <= maxIconsPerRow then
         return iconCount
     end
+    ---@type number The minimum number of icons per row to use. Counting up from this value to the maximum.
     local minRowCount = minIconsPerRow
+    ---@type number The number of empty icon spots that would be in the last row. This is the value we want to minimize.
     local minLost = minIconsPerRow - math.fmod(iconCount, minIconsPerRow)
     for i = minIconsPerRow, maxIconsPerRow - 1 do
         local modValue = math.fmod(iconCount, i)
+        -- If we don't have any lost icons, then we can just return the current icons per row.
         if modValue == 0 then
             return i
         end
+        -- Otherwise, see if this value is better.
         local lost = i - modValue
         if lost < minLost then
             minLost = lost

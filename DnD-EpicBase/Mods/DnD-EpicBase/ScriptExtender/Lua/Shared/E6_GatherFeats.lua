@@ -93,7 +93,7 @@ local function ProcessPassives(sourceList)
         return {
             Count = source.Amount,
             Unknown = source.Amount2,
-            Arg3 = source.Arg3,
+            Category = source.Arg3,
             SourceId = source.UUID
         }
     end)
