@@ -2,6 +2,19 @@
 ---@type integer The width of the tooltip to use in 3840x2160 units.
 local tooltipWidth = 900
 
+---Converts a value to an integral string, truncating any decimal places.
+---@param value any Will convert a number to an integral string, other values are converted to a string.
+---@return string The integral string representation of the value.
+function toIntegralString(value)
+    if value == nil then
+        return "nil"
+    end
+    if type(value) == "number" then
+        return string.format("%.0f", value)
+    end
+    return tostring(value)
+end
+
 ---Removes all children from the parent.
 ---@param parent ExtuiTreeParent
 function ClearChildren(parent)

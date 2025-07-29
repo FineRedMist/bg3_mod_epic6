@@ -448,12 +448,12 @@ local function AddExpInfo(win, windowDimensions, playerInfo)
     if ent.EocLevel.Level >= E6_GetMaxLevel() then
         local xpToNextLevel = ent.Experience.CurrentLevelExperience
         local remainingExp = GetXPForNextFeatBase(xpToNextLevel, playerInfo.XPPerFeat, playerInfo.XPPerFeatIncrease)
-        progressText = GetParameterizedLoca("hbd475c8ega2dcg4491ga9a9gabbe7a9c8216", {string.format("%.0f", remainingExp)}) -- Next feat: [1] XP
+        progressText = GetParameterizedLoca("hbd475c8ega2dcg4491ga9a9gabbe7a9c8216", {toIntegralString(remainingExp)}) -- Next feat: [1] XP
     else
         if xpDiff < 0 then
             xpDiff = 0
         end
-        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {string.format("%.0f", E6_GetMaxLevel()), string.format("%.0f", xpDiff)}) -- Level [1]: [2] XP
+        progressText = GetParameterizedLoca("h95f979dcg69e9g464fgb943gf2559470bcc1", {toIntegralString(E6_GetMaxLevel()), toIntegralString(xpDiff)}) -- Level [1]: [2] XP
     end
 
     centerCell:AddText(progressText)
