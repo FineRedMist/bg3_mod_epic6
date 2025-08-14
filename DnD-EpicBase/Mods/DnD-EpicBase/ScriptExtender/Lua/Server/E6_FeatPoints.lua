@@ -32,10 +32,9 @@ local function E6_UpdateEpic6FeatCountForAllByEntity(chars)
             if char.Vars.E6_InDialog ~= inDialog then
                 char.Vars.E6_InDialog = inDialog
             end
-            if not inCombat then
-                FixupLevelLimit(char)
-                FeatPointTracker:Update(char)
-            end
+
+            FixupLevelLimit(char)
+            FeatPointTracker:Update(char)
         end
     end
 end

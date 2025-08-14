@@ -62,9 +62,7 @@ local function InitiateCharacter(id)
     if not CharacterInitiated[id] then
         --RemoveAllFeatPoints(id)
         local entity = Ext.Entity.Get(id)
-        if entity.Vars.E6_Feats then
-            E6_VerifyFeats(id, entity.Vars.E6_Feats)
-        end
+        E6_VerifyFeats(id, entity.Vars.E6_Feats)
         CharacterInitiated[id] = true
         return true
     end
@@ -123,9 +121,7 @@ function FeatPointTracker:OnRespecBegin(entity)
     end
     IsRespecing[characterGuid] = true
 
-    if entity.Vars.E6_Feats then
-        E6_RemoveFeats(characterGuid, entity.Vars.E6_Feats)
-    end
+    E6_RemoveFeats(characterGuid, entity.Vars.E6_Feats)
 end
 
 ---Restores feats for a character that cancelled a respec.
@@ -333,6 +329,12 @@ function FeatPointTracker:Update(ent)
     -- Do a one time refresh of the points, as the method to track has changed between versions.
     if InitiateCharacter(id) then
         SetPendingFeatCount(id)
+        return
+    end
+
+    -- If we load from a save game, then we have to apply boosts to the character before we skip any
+    -- further processing related to combat.
+    if ent.Vars.E6_InCombat then
         return
     end
 

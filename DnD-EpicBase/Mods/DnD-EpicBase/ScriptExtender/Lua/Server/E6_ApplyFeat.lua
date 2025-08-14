@@ -63,6 +63,9 @@ end
 ---@param entityId string The UUID identity of the character.
 ---@param feats SelectedFeatType[] A list of feat blocks as stored in Vars.E6_Feats.
 function E6_RemoveFeats(entityId, feats)
+    if feats == nil then
+        return
+    end
     for _,feat in ipairs(feats) do
         E6_RemoveFeat(entityId, feat)
     end
@@ -72,6 +75,9 @@ end
 ---@param entityId string The UUID identity of the character.
 ---@param feats SelectedFeatType[] A list of feat blocks as stored in Vars.E6_Feats.
 function E6_VerifyFeats(entityId, feats)
+    if feats == nil then
+        return
+    end
     for _, feat in ipairs(feats) do
         E6_ApplyBoosts(entityId, feat.Boosts)
         E6_ApplySpells(entityId, feat)
