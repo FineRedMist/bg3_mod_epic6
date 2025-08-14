@@ -201,13 +201,43 @@ local function GatherPlayerPassives(entity, proficiencies)
     return passives
 end
 
+---Whether the current entity is a mind flayer player
+---@param entity EntityHandle The character entity
+---@return boolean True if the entity is a mind flayer player, false otherwise.
+local function IsMindFlayerPlayer(entity)
+    if entity == nil then
+        return false
+    end
+    local shapeshiftStates = entity.ServerShapeshiftStates
+    if shapeshiftStates == nil then
+        _E6P("IsMindFlayerPlayer: " .. GetCharacterName(entity) .. " has no server shapeshift component.")
+        return false
+    end
+    local states = shapeshiftStates.States
+    if states == nil or #states == 0 then
+        _E6P("IsMindFlayerPlayer: " .. GetCharacterName(entity) .. " has no shapeshift states.")
+        return false
+    end
+    for _, s in ipairs(states) do
+        if s.RootTemplate ~= nil and s.RootTemplate.RootTemplate == "ba20ee39-92ed-4aad-830d-4871103f48c2" then
+            _E6P("IsMindFlayerPlayer: " .. GetCharacterName(entity) .. " is a mind flayer player.")
+            return true
+        elseif s.RootTemplate ~= nil and s.RootTemplate.RootTemplate == "ba20ee39-92ed-4aad-830d-4871103f48c2" then
+            _E6P("IsMindFlayerPlayer: " .. GetCharacterName(entity) .. " has server shapeshift root template: " .. tostring(s.RootTemplate.RootTemplate))
+        end
+    end
+    _E6P("IsMindFlayerPlayer: " .. GetCharacterName(entity) .. " didn't have the mind flayer player root template.")
+    return false
+end
+
 ---Determines if the boost should be included for the character.
 ---@param entity EntityHandle The character entity
 ---@param boost EntityHandle The boost instance
 ---@param boostInfo BoostInfoComponent? The boost info component
+---@param isAbility boolean? True if this is an ability score boost, false or nil otherwise.
 ---@return boolean True if the boost should be included, false otherwise.
-local function IsValidCause(entity, boost, boostInfo)
-    if not boostInfo then
+local function IsValidCause(entity, boost, boostInfo, isAbility)
+    if not boostInfo then 
         return false
     end
     if not boostInfo.Cause then
@@ -215,7 +245,12 @@ local function IsValidCause(entity, boost, boostInfo)
     end
     local causeInfo = boostInfo.Cause
     local cause = causeInfo.Type.Label
-    if cause == "CharacterCreation" or cause == "Progression" or causeInfo.Cause == "E6_Feat" then
+    if causeInfo.Cause == "E6_Feat" then
+        return true
+    end
+    -- If this is not an ability score boost, and it is from character creation or progression, we include it.
+    -- If this is an ability score boost, only include it if the entity is not a mind flayer player and it is from character creation or progression.
+    if (not isAbility or not IsMindFlayerPlayer(entity)) and (cause == "CharacterCreation" or cause == "Progression") then
         return true
     end
     if cause ~= "Passive" then
@@ -283,7 +318,7 @@ end
 ---@return string? The cause of the boost
 ---@return AbilityScoreType? The value of the boost
 local function IncludeAbilityScoreBoost(entity, boost, boostInfo)
-    if not IsValidCause(entity, boost, boostInfo) then
+    if not IsValidCause(entity, boost, boostInfo, true) then
         return nil
     end
 
@@ -312,13 +347,33 @@ local function GatherAbilityScoresFromBoosts(entity, boosts)
         return {}
     end
 
-    ---@type table<string, AbilityScoreType>
     local scores = {}
+
+    ---If we are the mind flayer player, add its base ability scores instead of the character creation ones.
+    ---We retrieve the mind flayer data in case it is overridden by another mod.
+    if IsMindFlayerPlayer(entity) then
+        ---@type Character
+        local mindFlayer = Ext.Stats.Get("MindFlayer_Player", -1, true, true)
+        if mindFlayer then
+            scores["Strength"] = {Current =  tonumber(mindFlayer.Strength), Maximum = 20}
+            scores["Dexterity"] = {Current =  tonumber(mindFlayer.Dexterity), Maximum = 20}
+            scores["Constitution"] = {Current =  tonumber(mindFlayer.Constitution), Maximum = 20}
+            scores["Intelligence"] = {Current =  tonumber(mindFlayer.Intelligence), Maximum = 20}
+            scores["Wisdom"] = {Current =  tonumber(mindFlayer.Wisdom), Maximum = 20}
+            scores["Charisma"] = {Current =  tonumber(mindFlayer.Charisma), Maximum = 20}
+            _E6P("Mind Flayer stats: Str=" .. mindFlayer.Strength .. " Dex=" .. mindFlayer.Dexterity .. " Con=" .. mindFlayer.Constitution .. " Int=" .. mindFlayer.Intelligence .. " Wis=" .. mindFlayer.Wisdom .. " Cha=" .. mindFlayer.Charisma)
+        else
+            _E6P("Failed to retrieve the mind flayer player data, using the default values.")
+        end
+    end
+
+    ---@type table<string, AbilityScoreType>
     for _,boost in ipairs(boosts) do
         ---@type BoostInfoComponent?
         local boostInfo = boost.BoostInfo
         local abilityLabel, cause, score = IncludeAbilityScoreBoost(entity, boost, boostInfo)
         if abilityLabel and score then
+            _E6P("Adding ability score from " .. cause .. ": " .. abilityLabel .. " Current=" .. tostring(score.Current) .. ", Maximum=" .. tostring(score.Maximum))
             if not scores[abilityLabel] then
                 scores[abilityLabel] = {Current = 0, Maximum = 20}
             end
