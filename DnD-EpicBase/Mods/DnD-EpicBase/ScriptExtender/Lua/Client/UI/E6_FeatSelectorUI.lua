@@ -123,14 +123,16 @@ local function ShowFeatDetailSelectUI(feat, playerInfo)
         for _, passive in ipairs(extraPassives) do
             if passive.Boosts then
                 for _, boost in ipairs(passive.Boosts) do
-                    table.insert(boosts, boost)
+                    selectedPassives[boost] = true
                 end
             end
         end
         for _, abilitySelector in ipairs(abilityInfo) do
             for _, ability in ipairs(abilitySelector.State) do
                 if ability.Current > ability.Initial then
-                    table.insert(boosts, GetAbilityBoostPassive(ability.Name, ability.Current - ability.Initial))
+                    for _, abilityPassive in ipairs(GetAbilityBoostPassives(ability.Name, ability.Initial, ability.Current - ability.Initial, ability.Maximum)) do
+                        selectedPassives[abilityPassive] = true
+                    end
                 end
             end
         end

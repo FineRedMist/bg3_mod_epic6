@@ -49,7 +49,7 @@ function GatherAbilitySelectorDetails(feat, playerInfo, extraPassives)
                         AbilityPassives[abilityName].DisplayName
                     },
                     Icon = AbilityPassives[abilityName].Icon,
-                    Boosts = { GetAbilityBoostPassive(abilityName, pointCount) },
+                    Boosts = GetAbilityBoostPassives(abilityName, ability.Initial, pointCount, ability.Maximum),
                 })
                 table.remove(results, #results) -- Remove the entry so it doesn't show up in the selector
             end

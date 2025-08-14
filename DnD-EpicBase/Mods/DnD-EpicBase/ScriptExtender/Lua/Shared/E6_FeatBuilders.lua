@@ -116,13 +116,22 @@ end
 
 ---Generates the passive to add for a given ability.
 ---@param ability AbilityId The ability to boost
----@return string? The passive to add.
-function GetAbilityBoostPassive(ability, count)
+---@param current integer The current value of the ability.
+---@param count integer The amount to boost the ability by.
+---@param cap integer? The maximum value to boost the ability by, defaults to 20.
+---@return string[] The passives to add.
+function GetAbilityBoostPassives(ability, current, count, cap)
     if not AbilitySkillMap[ability] then
-        _E6Error("Invalid ability passed to GetAbilityBoostPassive: " .. ability)
+        _E6Error("Invalid ability passed to GetAbilityBoostPassives: " .. ability)
         return nil
     end
-    return "Ability(" .. ability .. "," .. tostring(count) .. ")"
+    passives = {}
+    for i = 1, count do
+        -- We can't select the same passive multiple times, so we have one passive for each possible value.
+        -- So we select the passive for the next value from the current value.
+        table.insert(passives, "E6_" .. ability .. "_" .. tostring(current + i) .. "_Passive")
+    end
+    return passives
 end
 
 ---Generates the passive to grant proficiency for a skill.
