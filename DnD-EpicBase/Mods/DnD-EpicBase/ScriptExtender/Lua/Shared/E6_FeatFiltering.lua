@@ -70,10 +70,11 @@ function IsPassiveSelectable(playerInfo, passive, passiveStat)
         local ability, score = ParseAbilityBoost(boost)
         if ability and score and score.Current > 0 then
             local playerAbility = playerInfo.Abilities[ability]
+            local scoreLimit = score.Maximum or 20 -- If no maximum is specified, assume 20.
             if not CanApplyAbilityBoost(playerAbility, score) then
-                AddResultMessage(false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf")) -- This feature boosts an ability that is already at 20 (Legendary doesn't work for this feature).
+                AddResultMessage(false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf", {scoreLimit})) -- This feature boosts an ability that is already at [1] (Legendary doesn't work for this feature).
             else
-                AddResultMessage(true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7")) -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for this feature).
+                AddResultMessage(true, ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7", {scoreLimit})) -- This feature boosts an ability that is limited to [1] (Legendary doesn't work for this feature).
             end
         end
     
@@ -496,9 +497,8 @@ local function GatherPassiveAbilityModifiers(feat, passiveName)
 end
 
 ---Determines if the new ability score modifier can be applied to the current one for the player.
----Unfortunately, the game's passives can't be used to incrase the ability score beyond the maximum
----they specify in their boosts. So this function helps find and filter them so you don't waste a
----selection.
+---Unfortunately, the game's passives can't be used to increase the ability score beyond the maximum they
+---specify in their boosts. So this function helps find and filter them so you don't waste a selection.
 ---@param player AbilityScoreType The current ability score
 ---@param delta AbilityScoreType The new ability score modifier to apply
 ---@return boolean Whether the new abiity score modifier can be applied.
@@ -550,6 +550,7 @@ local function E6_ApplyFeatAbilityConstraints(feat)
         local function validateAbilityBoosts(entity, playerInfo)
             local abilityScores = playerInfo.Abilities
             local totalBoosts = 0
+            local scoreLimit = 20 -- Default score limit if not specified.
             for ability,delta in pairs(abilityBoosts) do
                 if not abilityScores then
                     return false, ToMessageLoca("h3ee30c4bg920fg46fdga857g21d9a21b5bb5") -- An error occurred getting the player's ability scores.
@@ -558,12 +559,16 @@ local function E6_ApplyFeatAbilityConstraints(feat)
                 if not abilityScore then
                     return false, MissingAbilityLoca(ability)
                 end
+                local scoreLimit = delta.Maximum or scoreLimit -- If no maximum is specified, fall back to the current score limit.
                 if not CanApplyAbilityBoost(abilityScore, delta) then
-                    return false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf") -- This feature boosts an ability that is already at 20 (Legendary doesn't work for this feature).
+                    return false, ToMessageLoca("h941fb918g8e78g4c41ga66fg1d14cd0f77cf", {scoreLimit}) -- This feature boosts an ability that is already at [1] (Legendary doesn't work for this feature).
                 end
-                totalBoosts = totalBoosts + delta.Current
+                -- Only include this boost as a limiting one if it specifies a maximum.
+                if delta.Maximum ~= nil then
+                    totalBoosts = totalBoosts + delta.Current
+                end
             end
-            local successMessage = ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7") -- This feature boosts an ability that is limited to 20 (Legendary doesn't work for this feature).
+            local successMessage = ToMessageLoca("h45303d74g2579g454ag9662g31dcf74794d7", {scoreLimit}) -- This feature boosts an ability that is limited to [1] (Legendary doesn't work for this feature).
             if totalBoosts == 0 then
                 successMessage = RequirementsMet
             end
