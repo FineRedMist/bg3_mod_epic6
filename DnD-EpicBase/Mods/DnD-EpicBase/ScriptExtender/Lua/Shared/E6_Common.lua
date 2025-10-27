@@ -289,6 +289,13 @@ function DeepCopy(o, seen)
 ---@param playerId GUIDSTRING The player id to check if they are the host
 ---@return boolean Whether the current character is the host
 function IsHost(playerId)
+    -- Determine if the player is a host https://discord.com/channels/98922182746329088/771869529528991744/1345184473460899976
+    -- client context
+    -- Ext.Entity.OnCreate("ClientControl", function(entity, ct, c)
+    --     if not entity.UserReservedFor or entity.UserReservedFor.UserID ~= 1 then return end -- not us
+    --     -- our client changed characters, do stuff
+    -- end)
+
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
         if entity.UserReservedFor.UserID == 65537 and GetEntityID(entity) == playerId then
             return true
