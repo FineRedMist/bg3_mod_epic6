@@ -28,7 +28,7 @@ local function ConditionalRegisterEntity(entity)
 
     local entityId = GetEntityID(entity)
     if entityId then
-        _E6P("Registering client controlled character: " .. tostring(entityId) .. " with name: " .. GetCharacterName(entity))
+        --_E6P("Registering client controlled character: " .. tostring(entityId) .. " with name: " .. GetCharacterName(entity))
         clientControlledCharacters[entityId] = true
     end
 end
@@ -51,7 +51,7 @@ local function OnClientControlledEntityDestroyed(entity, ct, c)
     end
     local entityId = GetEntityID(entity)
     if entityId then
-        _E6P("Unregistering client controlled character: " .. tostring(entityId) .. " with name: " .. GetCharacterName(entity))
+        --_E6P("Unregistering client controlled character: " .. tostring(entityId) .. " with name: " .. GetCharacterName(entity))
         clientControlledCharacters[entityId] = nil
     end
 end
