@@ -2,7 +2,7 @@
 setlocal
 
 REM From https://github.com/ShinyHobo/BG3-Modders-Multitool/wiki/Command-Line-Interface
-SET BG3TOOL=D:\GitHub\frm\BG3_E6\bg3-modders-multitool\bg3-modders-multitool.exe
+SET BG3TOOL=D:\GitHub\frm\bg3\BG3_E6\bg3-modders-multitool\bg3-modders-multitool.exe
 SET LEVEL=%1
 if "%1"=="" (
     echo Usage: BuildLevel.cmd [level]
@@ -60,5 +60,8 @@ SET BG3MODFILE="%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Mods\%TARGET_NAME%
 del /q %BG3MODFILE%
 del /q "%GENERATED_DIR%.zip"
 
+echo start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
 start /wait "Building %TARGET_NAME% pak file for installed game..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d %BG3MODFILE% -v %VERSION% -c 2
+
+echo start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
 start /wait "Building %TARGET_NAME% zip file..." "%BG3TOOL%" -s "%GENERATED_DIR%" -d "%GENERATED_DIR%.zip" -v %VERSION% -c 2
