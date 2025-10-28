@@ -285,25 +285,6 @@ function DeepCopy(o, seen)
     return no
   end
 
-  ---Whether the current player id is for the host.
----@param playerId GUIDSTRING The player id to check if they are the host
----@return boolean Whether the current character is the host
-function IsHost(playerId)
-    -- Determine if the player is a host https://discord.com/channels/98922182746329088/771869529528991744/1345184473460899976
-    -- client context
-    -- Ext.Entity.OnCreate("ClientControl", function(entity, ct, c)
-    --     if not entity.UserReservedFor or entity.UserReservedFor.UserID ~= 1 then return end -- not us
-    --     -- our client changed characters, do stuff
-    -- end)
-
-    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor.UserID == 65537 and GetEntityID(entity) == playerId then
-            return true
-        end
-    end
-
-    return false
-end
 
 ---Whether the player is in combat
 ---@param playerId GUIDSTRING ID of the player
@@ -324,30 +305,6 @@ function IsEntityInCombat(entity)
         return false
     end
     return IsInCombat(id)
-end
-
----Gather the entities with client controls. This is for the server to gather all instances of clients playing.
----@return EntityHandle[] The list of entity handles that are clients.
-function GetClientEntities()
-    local entities = {}
-    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor and GetEntityID(entity) then
-            table.insert(entities, entity)
-        end
-    end
-
-    return entities
-end
-
----Gets the locally controlled entity for the client side.
----@return EntityHandle? The entity under client control.
-function GetLocallyControlledCharacter()
-    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor and entity.UserReservedFor.UserID == 1 then
-            return entity
-        end
-    end
-    return nil
 end
 
 ---Converts a string to PascalCase (does no internal checking)
