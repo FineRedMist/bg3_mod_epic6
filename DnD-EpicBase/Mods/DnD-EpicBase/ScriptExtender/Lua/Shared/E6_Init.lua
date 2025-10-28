@@ -23,6 +23,11 @@ local function DnDEpic6Init()
     Ext.Vars.RegisterModVariable(ModuleUUID, "E6_XPPerFeatIncrease", {Server = true, Client = false, SyncToClient = false})
 
     RegisterClientControlHandlers()
+
+    -- Force setting the maximum XP cap on stats load. Setting it in data.txt depends on load order.
+    Ext.Events.StatsLoaded:Subscribe(function()
+        Ext.Stats.GetStatsManager().ExtraData.MaximumXPCap = Ext.Stats.GetStatsManager().ExtraData.Epic6MaximumXPCap
+    end)
 end
 
 DnDEpic6Init()
