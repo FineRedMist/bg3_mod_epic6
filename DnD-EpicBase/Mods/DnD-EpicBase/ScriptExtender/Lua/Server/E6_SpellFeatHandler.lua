@@ -123,9 +123,11 @@ local function GatherPlayerTags(entity, addPassive)
                     _E6Error("Failed to lookup tag resource for tag: " .. tostring(tag))
                 else
                     tagNameCache[tag] = ToPassiveName(NormalizePascalCase(tagResource.Name))
+                    addPassive(tagNameCache[tag])
                 end
+            else
+                addPassive(tagNameCache[tag])
             end
-            addPassive(tagNameCache[tag])
         end
     end
 
