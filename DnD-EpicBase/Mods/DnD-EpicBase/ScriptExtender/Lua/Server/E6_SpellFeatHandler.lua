@@ -119,9 +119,15 @@ local function GatherPlayerTags(entity, addPassive)
                 ---@type ResourceTag
                 local tagResource = Ext.StaticData.Get(tag, Ext.Enums.ExtResourceManagerType.Tag)
 
-                tagNameCache[tag] = ToPassiveName(NormalizePascalCase(tagResource.Name))
+                if tagResource == nil then
+                    _E6Error("Failed to lookup tag resource for tag: " .. tostring(tag))
+                else
+                    tagNameCache[tag] = ToPassiveName(NormalizePascalCase(tagResource.Name))
+                    addPassive(tagNameCache[tag])
+                end
+            else
+                addPassive(tagNameCache[tag])
             end
-            addPassive(tagNameCache[tag])
         end
     end
 
@@ -756,7 +762,7 @@ local function GetAbilityModifierFromAbilities(abilities, abilityId)
         return 0
     end
     if not abilities[ability] then
-        _E6Error("Ability " .. ability .. " not found in abilities.")
+        _E6Error("Ability '" .. ability .. "' not found in abilities.")
         return 0
     end
     local score = abilities[ability].Current
