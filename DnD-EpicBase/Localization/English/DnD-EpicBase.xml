@@ -2,7 +2,7 @@
 <contentList>
 	<content contentuid="h8696ea66g34feg41f9gb02fg341ebae2b08e" version="1">XP</content>
 	<content contentuid="h70ae1e71ga8edg4563gb8e2g7e6b7d818f51" version="1">Delta</content>
-	<content contentuid="h501f5bc3g191bg4051g8dccgb2e004ae69a6" version="1">How much to increase the XP required to earn a feat, per feat(not saved until Save is clicked).</content>
+	<content contentuid="h501f5bc3g191bg4051g8dccgb2e004ae69a6" version="1">How much to increase the XP required to earn a feat (not saved until Save is clicked).</content>
 	<content contentuid="h99435baagca21g46a3g945ag47643bc53c30" version="1">You can add one of your Intelligence, Wisdom, or Charisma &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
 	<content contentuid="he952fcd8ga679g416cg8967g1302c33cac77" version="1">You can add your Wisdom &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
 	<content contentuid="hbce79202g327eg45f4g9e06g3b35cc966b24" version="1">You can add your Intelligence &lt;LSTag Tooltip="AbilityModifier"&gt;Modifier&lt;/LSTag&gt; to the damage you deal with cantrips.</content>
@@ -45,7 +45,7 @@ Note: this operation is time consuming and the game may be unresponsive.</conten
 	<content contentuid="h8b51336eg9283g49acgb856g30ab5c92524c" version="1">There aren't enough selectable features to choose from.</content>
 	<content contentuid="h33fcc5c5g2d0dg45a4ga313gc12dbfbb9ac7" version="1">The ability list [2] wasn't found.</content>
 	<content contentuid="h31df0045ge2e3g453bga538ga0a618a38844" version="1">The pasive list [2] wasn't found.</content>
-	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>	
+	<content contentuid="h9d531312g1e6ag4dd9ga25ag405948ce70af" version="1">The passive [2] wasn't found.</content>
 	<content contentuid="hf288edb6g7572g4963gb930ge36925049021" version="1">Maximum: {Maximum}</content>
 	<content contentuid="h999efc53g8dabg4b1fgba4cgeceb9218c7ae" version="1">Your proficiency bonus is increased by 1.</content>
 	<content contentuid="hfb5da003gd8feg4566g822agc350331b6ebd" version="1">Epic: Heroic</content>
@@ -83,6 +83,8 @@ Learn to present yourself as another class.</content>
 	<content contentuid="hefa94be9g1b09g42c7g9f93gaa542216d259" version="1">Increase the ability score limit of one ability by 4, and another ability by 2. This does not increase the score itself.
 	
 Do not select the same ability for both, you will only get the better of the two, not combined.</content>
+	<content contentuid="h78ad2981gafebg446fgb94ega0d18483a94a" version="1">Past Life Regressions</content>
+	<content contentuid="hf9eac616ga581g478bg92d3g4658774d2c73" version="1">Revisit your pass lives and acquire insights from previous backgrounds and classes.</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_0" version="1">The ability score limit is increased to 24.</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_1" version="1">Major Strength Cap Increase</content>
 	<content contentuid="h08b5c155g07a0g44d6g8736gd679eb661527_2" version="1">Major Dexterity Cap Increase</content>
