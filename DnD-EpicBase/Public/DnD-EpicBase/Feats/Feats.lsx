@@ -22,6 +22,11 @@
           <attribute id="UUID" type="guid" value="0fafb9b3-15f2-45ad-ad22-fd96e7ea8ce5"/>
         </node>
         <node id="Feat">
+          <attribute id="Name" type="FixedString" value="E6_PastLifeRegressions"/>
+          <attribute id="PassivesAdded" type="LSString" value="E6_Tag_Barbarian_Passive;E6_Tag_Bard_Passive;E6_Tag_Cleric_Passive;E6_Tag_Druid_Passive;E6_Tag_Fighter_Passive;E6_Tag_Monk_Passive;E6_Tag_Paladin_Passive;E6_Tag_Ranger_Passive;E6_Tag_Rogue_Passive;E6_Tag_Sorcerer_Passive;E6_Tag_Warlock_Passive;E6_Tag_Wizard_Passive"/>
+          <attribute id="UUID" type="guid" value="fe70bd84-7406-42c7-8c50-115022a37e82"/>
+        </node>
+        <node id="Feat">
           <attribute id="CanBeTakenMultipleTimes" type="bool" value="true"/>
           <attribute id="Name" type="FixedString" value="E6_AvidLearner"/>
           <attribute id="PassivesAdded" type="LSString" value="E6_AvidLearner_Passive"/>
