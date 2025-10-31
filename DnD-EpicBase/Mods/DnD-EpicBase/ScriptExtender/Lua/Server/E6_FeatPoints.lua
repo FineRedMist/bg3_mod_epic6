@@ -1,4 +1,39 @@
 
+local pastLifeRegressionsFeatId = "fe70bd84-7406-42c7-8c50-115022a37e82"
+
+--- @enum QueuedBackgroundGoalStatus
+local QueuedBackgroundGoalStatus = {
+	Added = 0,
+	Committing = 1,
+	[0] = "Added",
+	[1] = "Committing",
+}
+
+---@class QueuedBackgroundGoal
+---@field Character GUIDSTRING The ID of the character.
+---@field Goal GUIDSTRING The ID of the background goal.
+---@field GoalBackgroundId GUIDSTRING The ID of the background to switch to.
+---@field CurrentBackgroundId GUIDSTRING The ID of the player's current background.
+---@field Category string The category for the goal
+---@field Status QueuedBackgroundGoalStatus The status of the queued goal.
+
+---@type QueuedBackgroundGoal[]
+local queuedBackgroundGoals = {}
+
+local function ApplyQueuedBackgroundGoals()
+    for _, goal in ipairs(queuedBackgroundGoals) do
+        if goal.Status ~= QueuedBackgroundGoalStatus.Added then
+            return
+        end
+        _E6P("Applying queued background goal for character " .. tostring(goal.Character) .. " goal " .. tostring(goal.Goal))
+        goal.Status = QueuedBackgroundGoalStatus.Committing
+
+        local player = Ext.Entity.Get(goal.Character)
+        player.Background.Background = goal.GoalBackgroundId
+        Osi.AddBackgroundGoal(goal.Character, goal.Goal, goal.Category)
+        return
+    end
+end
 
 ---Closes the UI for the given character.
 ---@param char string The character ID
@@ -17,6 +52,49 @@ local function FixupLevelLimit(entity)
     --if entity.ServerCharacter and entity.ServerCharacter.Template and entity.ServerCharacter.Template.LevelOverride > E6_GetMaxLevel() then
     --    entity.ServerCharacter.Template.LevelOverride = E6_GetMaxLevel()
     --end
+end
+
+---We need to gather feats that have already been selected for the entity so we can filter if necessary.
+---@param entity EntityHandle The player entity to gather feats for.
+---@return table<string, number> The count of occurrences for each feat. 
+function E6_GatherPlayerFeats(entity)
+    local feats = {}
+    if entity == nil then
+        return feats
+    end
+    local CCLevelUp = entity.CCLevelUp
+    if CCLevelUp == nil then
+        return feats
+    end
+    local function AddFeat(feat)
+        if IsValidGuid(feat) then
+            local curCount = feats[feat]
+            if curCount == nil then
+                curCount = 1
+            else
+                curCount = curCount + 1
+            end
+            feats[feat] = curCount
+        end
+    end
+
+    for _, levelup in ipairs(CCLevelUp.LevelUps) do
+        AddFeat(levelup.Feat)
+        if levelup.Upgrades ~= nil then
+            for _, upgrade in ipairs(levelup.Upgrades.Feats) do
+                AddFeat(upgrade.Feat)
+            end
+        end
+    end
+
+    ---@type SelectedFeatType[]
+    local e6Feats = entity.Vars.E6_Feats
+    if e6Feats ~= nil then
+        for _, feat in ipairs(e6Feats) do
+            AddFeat(feat.FeatId)
+        end
+    end
+    return feats
 end
 
 -- Given an array of character entities, update their feat count
@@ -44,6 +122,8 @@ end
 local E6_CanUpdate = false
 
 function E6_OnTick_UpdateEpic6FeatCount(tickParams)
+    ApplyQueuedBackgroundGoals()
+
     -- Only update when we are in the Running state.
     if not E6_CanUpdate then
         return
@@ -131,6 +211,81 @@ local function E6_OnRespecStart(characterGuid)
     FeatPointTracker:OnRespecBegin(char)
 end
 
+--- Example: E6[Server]: BackgroundGoalFailed called for character Elves_Female_Everic_Player_b094fac2-9324-544d-76b2-e2a300399034 goal 92f75626-3bdd-4bb8-b5a5-2750c5e61c0d
+---@param character CHARACTER
+---@param goal GUIDSTRING
+local function BackgroundGoalFailed(character, goal)
+    _E6P("BackgroundGoalFailed called for character " .. tostring(character) .. " goal " .. tostring(goal))
+
+    -- Check queued background goals to make sure we don't double queue
+    for _, queuedGoal in ipairs(queuedBackgroundGoals) do
+        if queuedGoal.Character == character and queuedGoal.Goal == goal then
+            _E6P("BackgroundGoalFailed: Goal already queued for character " .. tostring(character) .. " goal " .. tostring(goal))
+            return
+        end
+    end
+
+    local player = Ext.Entity.Get(character)
+
+    if not player then
+        _E6Error("BackgroundGoalFailed: Could not find entity for character " .. tostring(character))
+        return
+    end
+
+    if not player.Background or not player.Background.Background then
+        _E6Error("BackgroundGoalFailed: Could not find background component for character " .. tostring(character))
+        return
+    end
+
+    -- Get the corresponding background goal
+    ---@type ResourceBackgroundGoal
+    local goalResource = Ext.StaticData.Get(goal, Ext.Enums.ExtResourceManagerType.BackgroundGoal)
+    if not goalResource then
+        _E6Error("BackgroundGoalFailed: Could not find background goal for GUID " .. tostring(goal))
+        return
+    end
+
+    local feats = E6_GatherPlayerFeats(player)
+    if feats[pastLifeRegressionsFeatId] == nil then
+        return
+    end
+
+    -- Queue applying the background goal
+    ---@type QueuedBackgroundGoal
+    local queuedGoal = {
+        Character = character,
+        Goal = goal,
+        GoalBackgroundId = goalResource.BackgroundUuid,
+        CurrentBackgroundId = player.Background.Background,
+        Category = "Act1",
+        Status = QueuedBackgroundGoalStatus.Added
+    }
+    table.insert(queuedBackgroundGoals, queuedGoal)
+end
+
+--- Example: E6[Server]: BackgroundGoalFailed called for character Elves_Female_Everic_Player_b094fac2-9324-544d-76b2-e2a300399034 goal 92f75626-3bdd-4bb8-b5a5-2750c5e61c0d
+---@param character CHARACTER
+---@param goal GUIDSTRING
+local function BackgroundGoalRewarded(character, goal)
+    _E6P("BackgroundGoalRewarded called for character " .. tostring(character) .. " goal " .. tostring(goal))
+
+    local removeIndex = -1
+    for index, goal in ipairs(queuedBackgroundGoals) do
+        if goal.Status == QueuedBackgroundGoalStatus.Committing then
+            _E6P("Completed queued background goal for character " .. tostring(goal.Character) .. " goal " .. tostring(goal.Goal))
+
+            removeIndex = index
+
+            local player = Ext.Entity.Get(goal.Character)
+            player.Background.Background = goal.CurrentBackgroundId
+        end
+    end
+
+    if removeIndex > 0 then
+        table.remove(queuedBackgroundGoals, removeIndex)
+    end
+end
+
 function E6_FeatPointInit()
     -- Tracks changes in the game state so we are only updating feats when
     -- we are in the Running state.
@@ -144,4 +299,6 @@ function E6_FeatPointInit()
     Ext.Osiris.RegisterListener("RespecCompleted", 1, "after", E6_OnRespecComplete)
     Ext.Osiris.RegisterListener("RespecCancelled", 1, "after", E6_OnRespecCancelled)
     Ext.Osiris.RegisterListener("StartRespec", 1, "before", E6_OnRespecStart)
+    Ext.Osiris.RegisterListener("BackgroundGoalFailed", 2, "after", BackgroundGoalFailed)
+    Ext.Osiris.RegisterListener("BackgroundGoalRewarded", 2, "after", BackgroundGoalRewarded)
 end
