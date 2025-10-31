@@ -20,12 +20,13 @@ local QueuedBackgroundGoalStatus = {
 ---@type QueuedBackgroundGoal[]
 local queuedBackgroundGoals = {}
 
+---Takes the first pending goal in the queued goals to apply if it isn't already in progress.
 local function ApplyQueuedBackgroundGoals()
     for _, goal in ipairs(queuedBackgroundGoals) do
         if goal.Status ~= QueuedBackgroundGoalStatus.Added then
             return
         end
-        _E6P("Applying queued background goal for character " .. tostring(goal.Character) .. " goal " .. tostring(goal.Goal))
+        -- _E6P("Applying queued background goal for character " .. tostring(goal.Character) .. " goal " .. tostring(goal.Goal))
         goal.Status = QueuedBackgroundGoalStatus.Committing
 
         local player = Ext.Entity.Get(goal.Character)
@@ -34,6 +35,30 @@ local function ApplyQueuedBackgroundGoals()
         return
     end
 end
+
+---Finishes the application of any queued background goals by restoring the player's background id.
+---@param status string Whether the goal was "Completed" or "Failed".
+---@return boolean True if a queued goal was finished, false otherwise.
+local function FinishBackgroundGoalApplication(status)
+    local removeIndex = -1
+    for index, goal in ipairs(queuedBackgroundGoals) do
+        if goal.Status == QueuedBackgroundGoalStatus.Committing then
+            --_E6P(status .. " queued background goal for character " .. tostring(goal.Character) .. " goal " .. tostring(goal.Goal))
+
+            removeIndex = index
+
+            local player = Ext.Entity.Get(goal.Character)
+            player.Background.Background = goal.CurrentBackgroundId
+        end
+    end
+
+    if removeIndex > 0 then
+        table.remove(queuedBackgroundGoals, removeIndex)
+        return true
+    end
+    return false
+end
+
 
 ---Closes the UI for the given character.
 ---@param char string The character ID
@@ -212,17 +237,14 @@ local function E6_OnRespecStart(characterGuid)
 end
 
 --- Example: E6[Server]: BackgroundGoalFailed called for character Elves_Female_Everic_Player_b094fac2-9324-544d-76b2-e2a300399034 goal 92f75626-3bdd-4bb8-b5a5-2750c5e61c0d
----@param character CHARACTER
----@param goal GUIDSTRING
+---@param character CHARACTER The character the goal was being applied to.
+---@param goal GUIDSTRING The id of the goal being rewarded.
 local function BackgroundGoalFailed(character, goal)
-    _E6P("BackgroundGoalFailed called for character " .. tostring(character) .. " goal " .. tostring(goal))
+    --_E6P("BackgroundGoalFailed called for character " .. tostring(character) .. " goal " .. tostring(goal))
 
     -- Check queued background goals to make sure we don't double queue
-    for _, queuedGoal in ipairs(queuedBackgroundGoals) do
-        if queuedGoal.Character == character and queuedGoal.Goal == goal then
-            _E6P("BackgroundGoalFailed: Goal already queued for character " .. tostring(character) .. " goal " .. tostring(goal))
-            return
-        end
+    if FinishBackgroundGoalApplication("Failed") then
+        return
     end
 
     local player = Ext.Entity.Get(character)
@@ -264,26 +286,11 @@ local function BackgroundGoalFailed(character, goal)
 end
 
 --- Example: E6[Server]: BackgroundGoalFailed called for character Elves_Female_Everic_Player_b094fac2-9324-544d-76b2-e2a300399034 goal 92f75626-3bdd-4bb8-b5a5-2750c5e61c0d
----@param character CHARACTER
----@param goal GUIDSTRING
+---@param character CHARACTER The character the goal was being applied to.
+---@param goal GUIDSTRING The id of the goal being rewarded.
 local function BackgroundGoalRewarded(character, goal)
-    _E6P("BackgroundGoalRewarded called for character " .. tostring(character) .. " goal " .. tostring(goal))
-
-    local removeIndex = -1
-    for index, goal in ipairs(queuedBackgroundGoals) do
-        if goal.Status == QueuedBackgroundGoalStatus.Committing then
-            _E6P("Completed queued background goal for character " .. tostring(goal.Character) .. " goal " .. tostring(goal.Goal))
-
-            removeIndex = index
-
-            local player = Ext.Entity.Get(goal.Character)
-            player.Background.Background = goal.CurrentBackgroundId
-        end
-    end
-
-    if removeIndex > 0 then
-        table.remove(queuedBackgroundGoals, removeIndex)
-    end
+    --_E6P("BackgroundGoalRewarded called for character " .. tostring(character) .. " goal " .. tostring(goal))
+    FinishBackgroundGoalApplication("Completed")
 end
 
 function E6_FeatPointInit()
