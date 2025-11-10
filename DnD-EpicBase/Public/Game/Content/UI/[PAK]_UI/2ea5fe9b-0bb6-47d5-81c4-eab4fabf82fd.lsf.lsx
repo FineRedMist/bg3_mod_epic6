@@ -5,11 +5,11 @@
     <node id="TextureBank">
       <children>
         <node id="Resource">
-          <attribute id="ID" type="FixedString" value="86f61879-9c6d-49b0-b0ea-c86452d2f41e" />
+          <attribute id="ID" type="FixedString" value="2ea5fe9b-0bb6-47d5-81c4-eab4fabf82fd" />
           <attribute id="Localized" type="bool" value="False" />
-          <attribute id="Name" type="LSString" value="DnD_Epic6_Icons" />
+          <attribute id="Name" type="LSString" value="DnD_EpicBase_Icons" />
           <attribute id="SRGB" type="bool" value="True" />
-          <attribute id="SourceFile" type="LSString" value="Public/DnD-Epic6/Assets/Textures/Icons/DnD_Epic6_Icons.DDS" />
+          <attribute id="SourceFile" type="LSString" value="Public/DnD-EpicBase/Assets/Textures/Icons/DnD_EpicBase_Icons.DDS" />
           <attribute id="Streaming" type="bool" value="True" />
           <attribute id="Template" type="FixedString" value="Icons_Skills" />
           <attribute id="Type" type="int32" value="0" />
