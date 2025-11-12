@@ -1,6 +1,3 @@
-new entry "FEATS"
-type "PassiveData"
-
 new entry "E6_Tag_Acolyte_Passive"
 type "PassiveData"
 data "DisplayName" "he7961c5fgc6f1g40a6ga5b8g31df36840863;3"
