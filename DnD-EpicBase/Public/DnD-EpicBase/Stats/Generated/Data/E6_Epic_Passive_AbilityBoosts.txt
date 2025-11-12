@@ -1,6 +1,3 @@
-new entry "FEATS"
-type "PassiveData"
-
 new entry "E6_Ability_Cap_Major_Strength_Passive"
 type "PassiveData"
 data "DisplayName" "h08b5c155g07a0g44d6g8736gd679eb661527_1;1"

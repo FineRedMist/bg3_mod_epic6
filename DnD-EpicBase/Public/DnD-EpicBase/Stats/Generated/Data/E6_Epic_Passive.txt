@@ -1,6 +1,3 @@
-new entry "FEATS"
-type "PassiveData"
-
 new entry "E6_Epic_EpicCharacter_Passive"
 type "PassiveData"
 data "DisplayName" "h55b3cc22g6c3eg468dg807ag42e9300ff0f7;1"

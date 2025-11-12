@@ -1,6 +1,3 @@
-new entry "FEATS"
-type "PassiveData"
-
 new entry "E6_Tag_Barbarian_Passive"
 type "PassiveData"
 data "DisplayName" "h60fa88ecg49b2g402bg9c75g273cbaafd414;1"
