@@ -56,7 +56,7 @@ New Feats:
  * **Fast Hands**: An additional bonus action and the rogue class tag.
  * **Potent Cantrip**: Cantrip saving throws still deal 1/2 damage, plus a spellcaster class tag.
  * **Potent Spellcasting**: Cantrip damage can be increased by one of your intelligence, wisdom, or charisma modifier. Select a spellcaster class tag.
- * **Past Life Regression**: Gain all class tags (providing all the class based dialog options) and receive background inspirations for all backgrounds. The latter required some code to identify when getting an inspiration failed, switching the character's background to the right one, reattempting the grant of the inspiration, then reverting the background change.
+ * **Past Life Regression**: Gain all class tags (providing all the class based dialog options) and receive background inspirations for all backgrounds. The latter requires some code to identify when getting an inspiration failed, switching the character's background to the right one, reattempting the grant of the inspiration, then reverting the background change.
 ## Commands
 
 I moved the buttons for exporting the character (either in general or Epic 6 data) to commands. I have also added a few others:
