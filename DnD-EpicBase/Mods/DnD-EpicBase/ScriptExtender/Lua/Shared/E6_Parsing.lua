@@ -20,6 +20,17 @@ function ParseAbilityBoost(boost)
     return parts[1], { Current = tonumber(parts[2]), Maximum = capIncrease }
 end
 
+---Parses a tag boost into the component tag, or returns nil if not a match.
+---@param boost string The boost string from a passive or feat.
+---@return string? The name of the tag being boosted if present, nil otherwise.
+function ParseTagBoost(boost)
+    local parts = GetFullMatch(boost, "%s*Tag%s*%(%s*([a-zA-Z0-9_]+)%s*%)%s*")
+    if not parts then
+        return nil
+    end
+    return parts[1]
+end
+
 ---Parses a proficieny bonus boost into its kind (Skill or SavingThrow) and the skill/ability.
 ---@param boost string The boost string from a passive or feat.
 ---@return string? Whether the proficiency is for a Skill or SavingThrow, or nil if not a match.
