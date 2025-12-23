@@ -18,6 +18,7 @@
 	<content contentuid="h45303d74g2579g454ag9662g31dcf74794d7" version="1">This feature boosts an ability that is limited to [1] (Legendary doesn't work for this feature).</content>
 	<content contentuid="h941fb918g8e78g4c41ga66fg1d14cd0f77cf" version="1">This feature boosts an ability that is already at [1] (Legendary doesn't work for this feature).</content>
 	<content contentuid="hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6" version="1">This feature has already been selected.</content>
+	<content contentuid="h0953fc54gc2cbg480bg82d0gd38834effff4" version="1">The character already has all choosable tags.</content>
 	<content contentuid="h27d08b54g94d5g405cga8c6g57231379a05f" version="1">Export Character Game Data</content>
 	<content contentuid="h5cb70d0agc32bg49d6g96f1gdd2daa2ac545" version="1">Exports the character to the server's '%LOCALAPPDATA%\Larian Studios\Baldur's Gate 3\Script Extender' folder as [Character Name]-Character-Export.json. 
 Note: this operation is time consuming and the game may be unresponsive.</content>

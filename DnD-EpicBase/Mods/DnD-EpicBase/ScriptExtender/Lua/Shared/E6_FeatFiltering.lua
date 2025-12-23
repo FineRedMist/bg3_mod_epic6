@@ -60,12 +60,15 @@ function IsPassiveSelectable(playerInfo, passive, passiveStat)
     end
 
     -- If we already have the passive, return false
-    if playerInfo.PlayerPassives[passive] then
-        AddResultMessage(false, ToMessageLoca("hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6")) -- This feature has already been selected.
-    end
     local boostEntry = passiveStat.Boosts
     local boosts = SplitString(boostEntry, ";")
+    local passiveOnlyHasTags = true
     for _,boost in ipairs(boosts) do
+        -- If it isn't a tag, then if we have the passive already, exclude the feat from selection.
+        if ParseTagBoost(boost) == nil then
+            passiveOnlyHasTags = false
+        end
+
         -- Check ability scores
         local ability, score = ParseAbilityBoost(boost)
         if ability and score and score.Current > 0 then
@@ -91,6 +94,13 @@ function IsPassiveSelectable(playerInfo, passive, passiveStat)
             if playerInfo.Proficiencies.Equipment[string.lower(equipment)] then
                 AddResultMessage(false, ToMessageLoca("hb22ba8fege28fg4863ga54eg005886d16a6b")) -- You already have this proficiency.
             end
+        end
+    end
+    if playerInfo.PlayerPassives[passive] then
+        if passiveOnlyHasTags then
+            AddResultMessage(true, ToMessageLoca("h0953fc54gc2cbg480bg82d0gd38834effff4")) -- The character already has all choosable tags.
+        else
+            AddResultMessage(false, ToMessageLoca("hfd5c2332g01e0g4bf7ga4ebgd284ea1bb4e6")) -- This feature has already been selected.
         end
     end
     if result then
