@@ -64,9 +64,9 @@ function IsPassiveSelectable(playerInfo, passive, passiveStat)
     local boosts = SplitString(boostEntry, ";")
     local passiveOnlyHasTags = true
     for _,boost in ipairs(boosts) do
+        -- If it isn't a tag, then if we have the passive already, exclude the feat from selection.
         if ParseTagBoost(boost) == nil then
             passiveOnlyHasTags = false
-            break
         end
 
         -- Check ability scores
